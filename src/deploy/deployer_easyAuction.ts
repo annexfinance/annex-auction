@@ -17,7 +17,7 @@ const deployAnnexContract: DeployFunction = async function (
 
   await deploy(annexAuction, {
     from: deployer,
-    gasLimit: 8000000,
+    gasLimit: 12499988,
     args: [],
     log: true,
     deterministicDeployment: false,
@@ -27,7 +27,7 @@ const deployAnnexContract: DeployFunction = async function (
 
   await deploy(depositAndPlaceOrder, {
     from: deployer,
-    gasLimit: 8000000,
+    gasLimit: 12499988,
     args: [annexAuctionDeployed.address, weth9Address],
     log: true,
     deterministicDeployment: true,

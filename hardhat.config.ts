@@ -102,6 +102,15 @@ export default {
           )
         : "auto",
     },
+    kovan: {
+      ...sharedNetworkConfig,
+      url: `https://kovan.infura.io/v3/${INFURA_KEY}`,
+      gasPrice: GAS_PRICE_GWEI
+        ? parseInt(
+            utils.parseUnits(GAS_PRICE_GWEI.toString(), "gwei").toString(),
+          )
+        : "auto",
+    },
     xdai: {
       ...sharedNetworkConfig,
       url: "https://xdai.1hive.org",

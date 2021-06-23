@@ -19,6 +19,9 @@ contract AnnexAuction is Ownable {
     using IterableOrderedOrderSet for bytes32;
     using IdToAddressBiMap for IdToAddressBiMap.Data;
 
+    /// @dev Explain to a developer any extra details
+    /// @param Documents a parameter just like in doxygen (must be followed by parameter name)
+    /// @return Documents the return variables of a contract’s function state variable
     modifier atStageOrderPlacement(uint256 auctionId) {
         require(
             block.timestamp < auctionData[auctionId].auctionEndDate,
@@ -97,6 +100,9 @@ contract AnnexAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
 
+    /**
+    @param {auctioningToken}
+    **/
     struct AuctionData {
         IERC20 auctioningToken;
         IERC20 biddingToken;

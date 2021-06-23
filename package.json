@@ -7,7 +7,9 @@
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
-    "deploy": "hardhat deploy",
+    "deploy": "hardhat deploy --network kovan",
+    "flatten":"hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
+    "verify": "hardhat etherscan-verify --license None --network kovan",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "eslint --max-warnings 0 .",
