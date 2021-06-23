@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { getWETH9Address } from "../tasks/utils";
 import { contractNames } from "../ts/deploy";
 
-const deployannexContract: DeployFunction = async function (
+const deployAnnexContract: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment,
 ) {
   const { deployments, getNamedAccounts } = hre;
