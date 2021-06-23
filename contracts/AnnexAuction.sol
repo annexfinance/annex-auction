@@ -19,9 +19,6 @@ contract AnnexAuction is Ownable {
     using IterableOrderedOrderSet for bytes32;
     using IdToAddressBiMap for IdToAddressBiMap.Data;
 
-    /// @dev Explain to a developer any extra details
-    /// @param Documents a parameter just like in doxygen (must be followed by parameter name)
-    /// @return Documents the return variables of a contract’s function state variable
     modifier atStageOrderPlacement(uint256 auctionId) {
         require(
             block.timestamp < auctionData[auctionId].auctionEndDate,
@@ -119,14 +116,14 @@ contract AnnexAuction is Ownable {
         uint256 feeNumerator;
         uint256 minFundingThreshold;
     }
-    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders;
-    mapping(uint256 => AuctionData) public auctionData;
+    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
+    mapping(uint256 => AuctionData) public auctionData;    // Store auctions details
     mapping(uint256 => address) public auctionAccessManager;
     mapping(uint256 => bytes) public auctionAccessData;
 
     IdToAddressBiMap.Data private registeredUsers;
-    uint64 public numUsers;
-    uint256 public auctionCounter;
+    uint64 public numUsers; // counter of users
+    uint256 public auctionCounter;  // counter for auctions
 
     constructor() public Ownable() {}
 
@@ -168,7 +165,13 @@ contract AnnexAuction is Ownable {
         address accessManagerContract,
         bytes memory accessManagerContractData
     ) public returns (uint256) {
+        /* 
+        ( _auctionedSellAmount * ( 1000 + feeNumerator ) ) / 1000
         // withdraws sellAmount + fees
+        // i.e: autionTokens = 1000
+        // fees = 1%
+        then 1010 will be added to the contract
+        */
         _auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -381,6 +384,8 @@ contract AnnexAuction is Ownable {
         ); //[2]
     }
 
+    // By calling this function you can pre calculate(before auction ending) sum of total
+    // total token sold.This function will calculate sum by taking offsent of orders linked list.
     function precalculateSellAmountSum(
         uint256 auctionId,
         uint256 iterationSteps
