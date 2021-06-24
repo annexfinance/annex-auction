@@ -9,12 +9,12 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 import "./libraries/IterableOrderedOrderSet.sol";
 import "./interfaces/AllowListVerifier.sol";
-import "./Access/AnnexAccessControls.sol";
+// import "./Access/AnnexAccessControls.sol";
 import "./libraries/IdToAddressBiMap.sol";
 import "./libraries/SafeCast.sol";
-import "./Utils/Documents.sol";
+// import "./Utils/Documents.sol";
 
-contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
+contract AnnexBatchAuction is Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint64;
     using SafeMath for uint96;
@@ -131,7 +131,7 @@ contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
     uint256 public auctionCounter; // counter for auctions
 
     constructor() public Ownable() {
-        initAccessControls(_msgSender());
+        // initAccessControls(_msgSender());
     }
 
     uint256 public feeNumerator = 0;
@@ -787,12 +787,12 @@ contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
     // Documents
     //--------------------------------------------------------
 
-    function setDocument(string calldata _name, string calldata _data)
-        external
-    {
-        require(hasAdminRole(msg.sender));
-        _setDocument(_name, _data);
-    }
+    // function setDocument(string calldata _name, string calldata _data)
+    //     external
+    // {
+    //     require(hasAdminRole(msg.sender));
+    //     _setDocument(_name, _data);
+    // }
 
     // function setDocuments(string[] calldata _name, string[] calldata _data) external {
     //     require(hasAdminRole(msg.sender) );
@@ -801,8 +801,8 @@ contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
     //     }
     // }
 
-    function removeDocument(string calldata _name) external {
-        require(hasAdminRole(msg.sender));
-        _removeDocument(_name);
-    }
+    // function removeDocument(string calldata _name) external {
+    //     require(hasAdminRole(msg.sender));
+    //     _removeDocument(_name);
+    // }
 }

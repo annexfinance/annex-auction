@@ -18,7 +18,7 @@ describe("DepositAndPlaceOrder - integration tests", async () => {
   let depositAndPlaceOrder: Contract;
   let weth9: Contract;
   beforeEach(async () => {
-    const AnnexAuction = await ethers.getContractFactory("AnnexAuction");
+    const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
 
     annexAuction = await AnnexAuction.deploy();
     const WETH9 = await ethers.getContractFactory("WETH9");

@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./Utils/Governable.sol";
 import "./interfaces/IAnnexStake.sol";
 
-contract BounceFixedSwap is Ownable ,Configurable, ReentrancyGuard {
+contract AnnexFixedSwap is Ownable ,Configurable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
