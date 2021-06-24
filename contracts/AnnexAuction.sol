@@ -152,6 +152,7 @@ contract AnnexAuction is Ownable {
     //
     // Prices between biddingToken and auctioningToken are expressed by a
     // fraction whose components are stored as uint96.
+    // Amount transfered out is no larger than amount transfered in
     function initiateAuction(
         IERC20 _auctioningToken,
         IERC20 _biddingToken,
@@ -576,6 +577,10 @@ contract AnnexAuction is Ownable {
         auctionData[auctionId].minimumBiddingAmountPerOrder = uint256(0);
     }
 
+    /**
+
+    First we will remove the given orders from contract sell orders list.
+    **/
     function claimFromParticipantOrder(
         uint256 auctionId,
         bytes32[] memory orders
@@ -598,6 +603,7 @@ contract AnnexAuction is Ownable {
         AuctionData memory auction = auctionData[auctionId];
         (, uint96 priceNumerator, uint96 priceDenominator) =
             auction.clearingPriceOrder.decodeOrder();
+
         (uint64 userId, , ) = orders[0].decodeOrder();
         bool minFundingThresholdNotReached =
             auctionData[auctionId].minFundingThresholdNotReached;
@@ -669,14 +675,17 @@ contract AnnexAuction is Ownable {
             //[11]
             (, uint96 priceNumerator, uint96 priceDenominator) =
                 auctionData[auctionId].clearingPriceOrder.decodeOrder();
+            // unsettledAuctionTokens = fullAuctionedAmount - fillVolumeOfAuctioneerOrder
             uint256 unsettledAuctionTokens =
                 fullAuctionedAmount.sub(fillVolumeOfAuctioneerOrder);
+            // auctioningTokenAmount = unsettledAuctionTokens + ( ( feeAmount * unsettledAuctionTokens ) / fullAuctionedAmount)
             uint256 auctioningTokenAmount =
                 unsettledAuctionTokens.add(
                     feeAmount.mul(unsettledAuctionTokens).div(
                         fullAuctionedAmount
                     )
                 );
+            // biddingTokenAmount = (fillVolumeOfAuctioneerOrder * priceDenominator) / priceNumerator
             uint256 biddingTokenAmount =
                 fillVolumeOfAuctioneerOrder.mul(priceDenominator).div(
                     priceNumerator
@@ -689,6 +698,7 @@ contract AnnexAuction is Ownable {
             ); //[5]
             sendOutTokens(
                 auctionId,
+                // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
                 feeAmount.mul(fillVolumeOfAuctioneerOrder).div(
                     fullAuctionedAmount
                 ),
@@ -698,6 +708,14 @@ contract AnnexAuction is Ownable {
         }
     }
 
+    /* send back either auctioning or bidding tokens to the given user.
+    Transfers out occur on:
+    1- order cancellation,giving back the amount bid by the user in an order.
+    2- users claiming funds after the auction is concluded 
+    3- auction closing and sending
+        1-funds to the auctioneer
+        2-fees to the dedicated address
+    */
     function sendOutTokens(
         uint256 auctionId,
         uint256 auctioningTokenAmount,
