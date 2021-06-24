@@ -5,11 +5,11 @@
     "test": "test"
   },
   "scripts": {
-    "build": "hardhat compile",
+    "build": "hardhat compile --show-stack-traces",
     "test": "hardhat test",
-    "deploy": "hardhat deploy --network kovan",
+    "deploy": "hardhat deploy --network bsctestnet",
     "flatten":"hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
-    "verify": "hardhat etherscan-verify --license None --network kovan",
+    "verify": "hardhat etherscan-verify --license None --network bsctestnet",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "eslint --max-warnings 0 .",

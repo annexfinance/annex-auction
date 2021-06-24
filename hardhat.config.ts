@@ -68,13 +68,19 @@ export default {
         version: "0.5.5",
       },
       {
+        version: "0.6.0",
+      },
+      {
         version: "0.6.12",
+      },
+      {
+        version: "0.7.5",
       },
     ],
     settings: {
       optimizer: {
         enabled: true,
-        runs: 10000,
+        runs: 200,
       },
     },
   },
@@ -132,6 +138,16 @@ export default {
     binancesmartchain: {
       ...sharedNetworkConfig,
       url: "https://bsc-dataseed1.binance.org/",
+      gasPrice: GAS_PRICE_GWEI
+        ? parseInt(
+            utils.parseUnits(GAS_PRICE_GWEI.toString(), "gwei").toString(),
+          )
+        : "auto",
+    },
+    bsctestnet: {
+      ...sharedNetworkConfig,
+      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      chainId: 97,
       gasPrice: GAS_PRICE_GWEI
         ? parseInt(
             utils.parseUnits(GAS_PRICE_GWEI.toString(), "gwei").toString(),

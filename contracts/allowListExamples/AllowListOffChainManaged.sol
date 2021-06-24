@@ -1,6 +1,7 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.8;
 import "../interfaces/AllowListVerifier.sol";
-import "../AnnexAuction.sol";
+import "../AnnexBatchAuction.sol";
 
 // Idea was first mentioned in the blog:
 // https://medium.com/@PhABC/off-chain-whitelist-with-on-chain-verification-for-ethereum-smart-contracts-1563ca4b8f11
@@ -75,7 +76,7 @@ contract AllowListOffChainManaged {
                 s
             );
         bytes memory allowListData =
-            AnnexAuction(allower).auctionAccessData(auctionId);
+            AnnexBatchAuction(allower).auctionAccessData(auctionId);
         if (abi.decode(allowListData, (address)) == signer) {
             return AllowListVerifierHelper.MAGICVALUE;
         } else {
