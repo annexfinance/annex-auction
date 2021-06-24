@@ -236,7 +236,7 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         // Get ETH able to be committed
         uint256 ethToTransfer = calculateCommitment(msg.value);
 
-        /// @dev Accept ETH Payments.
+        // Accept ETH Payments.
         uint256 ethToRefund = msg.value.sub(ethToTransfer);
         if (ethToTransfer > 0) {
             _addCommitment(_beneficiary, ethToTransfer);
@@ -454,7 +454,7 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
     function withdrawTokens(address payable beneficiary) public   nonReentrant  {
         if (auctionSuccessful()) {
             require(marketStatus.finalized, "AnnexDutchAuction: not finalized");
-            /// @dev Successful auction! Transfer claimed tokens.
+            // Successful auction! Transfer claimed tokens.
             uint256 tokensToClaim = tokensClaimable(beneficiary);
             require(tokensToClaim > 0, "AnnexDutchAuction: No tokens to claim"); 
             claimed[beneficiary] = claimed[beneficiary].add(tokensToClaim);
@@ -479,13 +479,13 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         _setDocument( _name, _data);
     }
 
-    function setDocuments(string[] calldata _name, string[] calldata _data) external {
-        require(hasAdminRole(msg.sender) );
-        uint256 numDocs = _name.length;
-        for (uint256 i = 0; i < numDocs; i++) {
-            _setDocument( _name[i], _data[i]);
-        }
-    }
+    // function setDocuments(string[] calldata _name, string[] calldata _data) external {
+    //     require(hasAdminRole(msg.sender) );
+    //     uint256 numDocs = _name.length;
+    //     for (uint256 i = 0; i < numDocs; i++) {
+    //         _setDocument( _name[i], _data[i]);
+    //     }
+    // }
 
     function removeDocument(string calldata _name) external {
         require(hasAdminRole(msg.sender));

@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.6.12;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.6.8;
+// pragma experimental ABIEncoderV2;
+
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./libraries/IterableOrderedOrderSet.sol";
 import "@openzeppelin/contracts/math/Math.sol";
+import "./libraries/IterableOrderedOrderSet.sol";
 import "./interfaces/AllowListVerifier.sol";
 import "./Access/AnnexAccessControls.sol";
 import "./libraries/IdToAddressBiMap.sol";
 import "./libraries/SafeCast.sol";
 import "./Utils/Documents.sol";
 
-contract AnnexBatchAuction is Ownable, Documents, ANNEXAccessControls {
+contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
     using SafeERC20 for IERC20;
     using SafeMath for uint64;
     using SafeMath for uint96;
@@ -786,10 +787,12 @@ contract AnnexBatchAuction is Ownable, Documents, ANNEXAccessControls {
     // Documents
     //--------------------------------------------------------
 
-    // function setDocument(string calldata _name, string calldata _data) external {
-    //     require(hasAdminRole(msg.sender) );
-    //     _setDocument( _name, _data);
-    // }
+    function setDocument(string calldata _name, string calldata _data)
+        external
+    {
+        require(hasAdminRole(msg.sender));
+        _setDocument(_name, _data);
+    }
 
     // function setDocuments(string[] calldata _name, string[] calldata _data) external {
     //     require(hasAdminRole(msg.sender) );
@@ -798,8 +801,8 @@ contract AnnexBatchAuction is Ownable, Documents, ANNEXAccessControls {
     //     }
     // }
 
-    // function removeDocument(string calldata _name) external {
-    //     require(hasAdminRole(msg.sender));
-    //     _removeDocument(_name);
-    // }
+    function removeDocument(string calldata _name) external {
+        require(hasAdminRole(msg.sender));
+        _removeDocument(_name);
+    }
 }
