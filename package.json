@@ -5,7 +5,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "hardhat compile --show-stack-traces",
+    "build": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat deploy --network bsctestnet",
     "flatten":"hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
