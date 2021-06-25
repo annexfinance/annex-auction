@@ -1,5 +1,5 @@
 {
-  "name": "@gnosis.pm/ido-contracts",
+  "name": "annex-auction",
   "version": "0.5.0",
   "directories": {
     "test": "test"
@@ -8,7 +8,7 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat deploy --network bsctestnet",
-    "flatten":"hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
+    "flatten": "hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
     "verify": "hardhat etherscan-verify --license None --network bsctestnet",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
@@ -53,7 +53,7 @@
     "eslint-plugin-no-only-tests": "^2.4.0",
     "eslint-plugin-prettier": "^3.1.4",
     "ethereum-waffle": "^3.2.0",
-    "hardhat": "^2.0.3",
+    "hardhat": "^2.4.1",
     "hardhat-deploy": "^0.7.0-beta.30",
     "prettier": "^2.1.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.60",
