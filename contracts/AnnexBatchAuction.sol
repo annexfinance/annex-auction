@@ -160,9 +160,11 @@ contract AnnexBatchAuction is Ownable, Documents {
     // Prices between biddingToken and auctioningToken are expressed by a
     // fraction whose components are stored as uint96.
     // Amount transfered out is no larger than amount transfered in
+    // This Function will be common for 3 types all for auction
+
     function initiateAuction(
-        IERC20 _auctioningToken,
-        IERC20 _biddingToken,
+        IERC20 _auctioningToken, // token 0
+        IERC20 _biddingToken,    // token 1
         uint256 orderCancellationEndDate,
         uint256 auctionEndDate,
         uint96 _auctionedSellAmount,

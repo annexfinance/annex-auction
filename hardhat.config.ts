@@ -144,7 +144,7 @@ export default {
           )
         : "auto",
     },
-    bsctestnet: {
+    testnet: {
       ...sharedNetworkConfig,
       url: "https://data-seed-prebsc-2-s3.binance.org:8545/",
       chainId: 97,
