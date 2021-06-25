@@ -3,7 +3,9 @@ import { ethers } from "hardhat";
 import { DeployResult, DeploymentsExtension } from "hardhat-deploy/types";
 
 export const contractNames = {
-  annexAuction: "AnnexAuction",
+  annexAuction: "AnnexBatchAuction",
+  dutchAuction: "AnnexDutchAuction",
+  fixedSwap: "AnnexFixedSwap",
   multiCall: "MultiCall",
   allowListOffChainManaged: "AllowListOffChainManaged",
   depositAndPlaceOrder: "DepositAndPlaceOrder",

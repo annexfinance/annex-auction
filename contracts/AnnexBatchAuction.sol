@@ -1,15 +1,20 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.8;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+// pragma experimental ABIEncoderV2;
+
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "./libraries/IterableOrderedOrderSet.sol";
-import "@openzeppelin/contracts/math/Math.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/Math.sol";
+import "./libraries/IterableOrderedOrderSet.sol";
+import "./interfaces/AllowListVerifier.sol";
+// import "./Access/AnnexAccessControls.sol";
 import "./libraries/IdToAddressBiMap.sol";
 import "./libraries/SafeCast.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./interfaces/AllowListVerifier.sol";
+import "./Utils/Documents.sol";
 
-contract AnnexAuction is Ownable {
+contract AnnexBatchAuction is Ownable, Documents {
     using SafeERC20 for IERC20;
     using SafeMath for uint64;
     using SafeMath for uint96;
@@ -97,6 +102,9 @@ contract AnnexAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
 
+    /**
+    @param {auctioningToken}
+    **/
     struct AuctionData {
         IERC20 auctioningToken;
         IERC20 biddingToken;
@@ -113,16 +121,18 @@ contract AnnexAuction is Ownable {
         uint256 feeNumerator;
         uint256 minFundingThreshold;
     }
-    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders;
-    mapping(uint256 => AuctionData) public auctionData;
+    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
+    mapping(uint256 => AuctionData) public auctionData; // Store auctions details
     mapping(uint256 => address) public auctionAccessManager;
     mapping(uint256 => bytes) public auctionAccessData;
 
     IdToAddressBiMap.Data private registeredUsers;
-    uint64 public numUsers;
-    uint256 public auctionCounter;
+    uint64 public numUsers; // counter of users
+    uint256 public auctionCounter; // counter for auctions
 
-    constructor() public Ownable() {}
+    constructor() public Ownable() {
+        // initAccessControls(_msgSender());
+    }
 
     uint256 public feeNumerator = 0;
     uint256 public constant FEE_DENOMINATOR = 1000;
@@ -149,6 +159,7 @@ contract AnnexAuction is Ownable {
     //
     // Prices between biddingToken and auctioningToken are expressed by a
     // fraction whose components are stored as uint96.
+    // Amount transfered out is no larger than amount transfered in
     function initiateAuction(
         IERC20 _auctioningToken,
         IERC20 _biddingToken,
@@ -162,7 +173,13 @@ contract AnnexAuction is Ownable {
         address accessManagerContract,
         bytes memory accessManagerContractData
     ) public returns (uint256) {
+        /* 
+        ( _auctionedSellAmount * ( 1000 + feeNumerator ) ) / 1000
         // withdraws sellAmount + fees
+        // i.e: autionTokens = 1000
+        // fees = 1%
+        then 1010 will be added to the contract
+        */
         _auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -300,8 +317,8 @@ contract AnnexAuction is Ownable {
         }
         uint256 sumOfSellAmounts = 0;
         userId = getUserId(orderSubmitter);
-        uint256 minimumBiddingAmountPerOrder =
-            auctionData[auctionId].minimumBiddingAmountPerOrder;
+        uint256 minimumBiddingAmountPerOrder = auctionData[auctionId]
+        .minimumBiddingAmountPerOrder;
         for (uint256 i = 0; i < _minBuyAmounts.length; i++) {
             require(
                 _minBuyAmounts[i] > 0,
@@ -348,8 +365,9 @@ contract AnnexAuction is Ownable {
         for (uint256 i = 0; i < _sellOrders.length; i++) {
             // Note: we keep the back pointer of the deleted element so that
             // it can be used as a reference point to insert a new node.
-            bool success =
-                sellOrders[auctionId].removeKeepHistory(_sellOrders[i]);
+            bool success = sellOrders[auctionId].removeKeepHistory(
+                _sellOrders[i]
+            );
             if (success) {
                 (
                     uint64 userIdOfIter,
@@ -375,12 +393,15 @@ contract AnnexAuction is Ownable {
         ); //[2]
     }
 
+    // By calling this function you can pre calculate(before auction ending) sum of total
+    // total token sold.This function will calculate sum by taking offsent of orders linked list.
     function precalculateSellAmountSum(
         uint256 auctionId,
         uint256 iterationSteps
     ) public atStageSolutionSubmission(auctionId) {
-        (, , uint96 auctioneerSellAmount) =
-            auctionData[auctionId].initialAuctionOrder.decodeOrder();
+        (, , uint96 auctioneerSellAmount) = auctionData[auctionId]
+        .initialAuctionOrder
+        .decodeOrder();
         uint256 sumBidAmount = auctionData[auctionId].interimSumBidAmount;
         bytes32 iterOrder = auctionData[auctionId].interimOrder;
 
@@ -398,8 +419,8 @@ contract AnnexAuction is Ownable {
         // it is checked that not too many iteration steps were taken:
         // require that the sum of SellAmounts times the price of the last order
         // is not more than initially sold amount
-        (, uint96 buyAmountOfIter, uint96 sellAmountOfIter) =
-            iterOrder.decodeOrder();
+        (, uint96 buyAmountOfIter, uint96 sellAmountOfIter) = iterOrder
+        .decodeOrder();
         require(
             sumBidAmount.mul(buyAmountOfIter) <
                 auctioneerSellAmount.mul(sellAmountOfIter),
@@ -485,21 +506,18 @@ contract AnnexAuction is Ownable {
         ) {
             // All considered/summed orders are sufficient to close the auction fully
             // at price between current and previous orders.
-            uint256 uncoveredBids =
-                currentBidSum.sub(
-                    fullAuctionedAmount.mul(sellAmountOfIter).div(
-                        buyAmountOfIter
-                    )
-                );
+            uint256 uncoveredBids = currentBidSum.sub(
+                fullAuctionedAmount.mul(sellAmountOfIter).div(buyAmountOfIter)
+            );
 
             if (sellAmountOfIter >= uncoveredBids) {
                 //[13]
                 // Auction fully filled via partial match of currentOrder
-                uint256 sellAmountClearingOrder =
-                    sellAmountOfIter.sub(uncoveredBids);
+                uint256 sellAmountClearingOrder = sellAmountOfIter.sub(
+                    uncoveredBids
+                );
                 auctionData[auctionId]
-                    .volumeClearingPriceOrder = sellAmountClearingOrder
-                    .toUint96();
+                .volumeClearingPriceOrder = sellAmountClearingOrder.toUint96();
                 currentBidSum = currentBidSum.sub(uncoveredBids);
                 clearingOrder = currentOrder;
             } else {
@@ -534,9 +552,9 @@ contract AnnexAuction is Ownable {
                     minAuctionedBuyAmount
                 );
                 fillVolumeOfAuctioneerOrder = currentBidSum
-                    .mul(fullAuctionedAmount)
-                    .div(minAuctionedBuyAmount)
-                    .toUint96();
+                .mul(fullAuctionedAmount)
+                .div(minAuctionedBuyAmount)
+                .toUint96();
             }
         }
         auctionData[auctionId].clearingPriceOrder = clearingOrder;
@@ -565,6 +583,10 @@ contract AnnexAuction is Ownable {
         auctionData[auctionId].minimumBiddingAmountPerOrder = uint256(0);
     }
 
+    /**
+
+    First we will remove the given orders from contract sell orders list.
+    **/
     function claimFromParticipantOrder(
         uint256 auctionId,
         bytes32[] memory orders
@@ -585,14 +607,18 @@ contract AnnexAuction is Ownable {
             );
         }
         AuctionData memory auction = auctionData[auctionId];
-        (, uint96 priceNumerator, uint96 priceDenominator) =
-            auction.clearingPriceOrder.decodeOrder();
+        (, uint96 priceNumerator, uint96 priceDenominator) = auction
+        .clearingPriceOrder
+        .decodeOrder();
+
         (uint64 userId, , ) = orders[0].decodeOrder();
-        bool minFundingThresholdNotReached =
-            auctionData[auctionId].minFundingThresholdNotReached;
+        bool minFundingThresholdNotReached = auctionData[auctionId]
+        .minFundingThresholdNotReached;
         for (uint256 i = 0; i < orders.length; i++) {
-            (uint64 userIdOrder, uint96 buyAmount, uint96 sellAmount) =
-                orders[i].decodeOrder();
+            (uint64 userIdOrder, uint96 buyAmount, uint96 sellAmount) = orders[
+                i
+            ]
+            .decodeOrder();
             require(
                 userIdOrder == userId,
                 "only allowed to claim for same user"
@@ -606,9 +632,9 @@ contract AnnexAuction is Ownable {
                     //[25]
                     sumAuctioningTokenAmount = sumAuctioningTokenAmount.add(
                         auction
-                            .volumeClearingPriceOrder
-                            .mul(priceNumerator)
-                            .div(priceDenominator)
+                        .volumeClearingPriceOrder
+                        .mul(priceNumerator)
+                        .div(priceDenominator)
                     );
                     sumBiddingTokenAmount = sumBiddingTokenAmount.add(
                         sellAmount.sub(auction.volumeClearingPriceOrder)
@@ -643,10 +669,9 @@ contract AnnexAuction is Ownable {
         uint64 auctioneerId,
         uint96 fullAuctionedAmount
     ) internal {
-        uint256 feeAmount =
-            fullAuctionedAmount.mul(auctionData[auctionId].feeNumerator).div(
-                FEE_DENOMINATOR
-            ); //[20]
+        uint256 feeAmount = fullAuctionedAmount
+        .mul(auctionData[auctionId].feeNumerator)
+        .div(FEE_DENOMINATOR); //[20]
         if (auctionData[auctionId].minFundingThresholdNotReached) {
             sendOutTokens(
                 auctionId,
@@ -656,20 +681,23 @@ contract AnnexAuction is Ownable {
             ); //[4]
         } else {
             //[11]
-            (, uint96 priceNumerator, uint96 priceDenominator) =
-                auctionData[auctionId].clearingPriceOrder.decodeOrder();
-            uint256 unsettledAuctionTokens =
-                fullAuctionedAmount.sub(fillVolumeOfAuctioneerOrder);
-            uint256 auctioningTokenAmount =
-                unsettledAuctionTokens.add(
-                    feeAmount.mul(unsettledAuctionTokens).div(
-                        fullAuctionedAmount
-                    )
-                );
-            uint256 biddingTokenAmount =
-                fillVolumeOfAuctioneerOrder.mul(priceDenominator).div(
-                    priceNumerator
-                );
+            (, uint96 priceNumerator, uint96 priceDenominator) = auctionData[
+                auctionId
+            ]
+            .clearingPriceOrder
+            .decodeOrder();
+            // unsettledAuctionTokens = fullAuctionedAmount - fillVolumeOfAuctioneerOrder
+            uint256 unsettledAuctionTokens = fullAuctionedAmount.sub(
+                fillVolumeOfAuctioneerOrder
+            );
+            // auctioningTokenAmount = unsettledAuctionTokens + ( ( feeAmount * unsettledAuctionTokens ) / fullAuctionedAmount)
+            uint256 auctioningTokenAmount = unsettledAuctionTokens.add(
+                feeAmount.mul(unsettledAuctionTokens).div(fullAuctionedAmount)
+            );
+            // biddingTokenAmount = (fillVolumeOfAuctioneerOrder * priceDenominator) / priceNumerator
+            uint256 biddingTokenAmount = fillVolumeOfAuctioneerOrder
+            .mul(priceDenominator)
+            .div(priceNumerator);
             sendOutTokens(
                 auctionId,
                 auctioningTokenAmount,
@@ -678,6 +706,7 @@ contract AnnexAuction is Ownable {
             ); //[5]
             sendOutTokens(
                 auctionId,
+                // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
                 feeAmount.mul(fillVolumeOfAuctioneerOrder).div(
                     fullAuctionedAmount
                 ),
@@ -687,6 +716,14 @@ contract AnnexAuction is Ownable {
         }
     }
 
+    /* send back either auctioning or bidding tokens to the given user.
+    Transfers out occur on:
+    1- order cancellation,giving back the amount bid by the user in an order.
+    2- users claiming funds after the auction is concluded 
+    3- auction closing and sending
+        1-funds to the auctioneer
+        2-fees to the dedicated address
+    */
     function sendOutTokens(
         uint256 auctionId,
         uint256 auctioningTokenAmount,
@@ -744,5 +781,26 @@ contract AnnexAuction is Ownable {
         returns (bool)
     {
         return sellOrders[auctionId].contains(order);
+    }
+
+    //--------------------------------------------------------
+    // Documents
+    //--------------------------------------------------------
+
+    function setDocument(string calldata _name, string calldata _data)
+        external onlyOwner()
+    {
+        _setDocument(_name, _data);
+    }
+
+    // function setDocuments(string[] calldata _name, string[] calldata _data) external {
+    //     require(hasAdminRole(msg.sender) );
+    //     for (uint256 i = 0; i < _name.length; i++) {
+    //         _setDocument( _name[i], _data[i]);
+    //     }
+    // }
+
+    function removeDocument(string calldata _name) external onlyOwner() {
+        _removeDocument(_name);
     }
 }

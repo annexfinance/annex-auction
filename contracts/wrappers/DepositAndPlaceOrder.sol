@@ -1,17 +1,18 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.8;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../AnnexAuction.sol";
+import "../AnnexBatchAuction.sol";
 import "../interfaces/IWETH.sol";
 
 contract DepositAndPlaceOrder {
-    AnnexAuction public immutable annexAuction;
+    AnnexBatchAuction public immutable annexAuction;
     IWETH public immutable nativeTokenWrapper;
 
     constructor(address annexAuctionAddress, address _nativeTokenWrapper)
         public
     {
         nativeTokenWrapper = IWETH(_nativeTokenWrapper);
-        annexAuction = AnnexAuction(annexAuctionAddress);
+        annexAuction = AnnexBatchAuction(annexAuctionAddress);
         IERC20(_nativeTokenWrapper).approve(annexAuctionAddress, uint256(-1));
     }
 

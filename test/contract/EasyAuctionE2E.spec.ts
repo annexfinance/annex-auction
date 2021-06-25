@@ -13,7 +13,7 @@ describe("AnnexAuction", async () => {
   const [user_1, user_2] = waffle.provider.getWallets();
   let annexAuction: Contract;
   beforeEach(async () => {
-    const AnnexAuction = await ethers.getContractFactory("AnnexAuction");
+    const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
 
     annexAuction = await AnnexAuction.deploy();
   });

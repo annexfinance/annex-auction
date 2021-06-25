@@ -14,7 +14,7 @@ const deployVerifierContract: DeployFunction = async function (
 
   await deploy(allowListOffChainManaged, {
     from: deployer,
-    gasLimit: 8000000,
+    gasLimit: 60000000,
     args: [],
     log: true,
     deterministicDeployment: true,

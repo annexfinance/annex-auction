@@ -14,23 +14,45 @@ const deployAnnexContract: DeployFunction = async function (
   const { depositAndPlaceOrder } = contractNames;
 
   const { annexAuction } = contractNames;
+  
+  const { dutchAuction } = contractNames;
+
+  const { fixedSwap } = contractNames;
 
   await deploy(annexAuction, {
     from: deployer,
-    gasLimit: 8000000,
+    gasLimit: 30000000,
     args: [],
     log: true,
     deterministicDeployment: false,
   });
   const annexAuctionDeployed = await get(annexAuction);
+
+  await deploy(dutchAuction, {
+    from: deployer,
+    gasLimit: 30000000,
+    args: [],
+    log: true,
+    deterministicDeployment: false,
+  });
+
   const weth9Address = await getWETH9Address(hre);
 
   await deploy(depositAndPlaceOrder, {
     from: deployer,
-    gasLimit: 8000000,
+    gasLimit: 30000000,
     args: [annexAuctionDeployed.address, weth9Address],
     log: true,
     deterministicDeployment: true,
+  });
+
+
+  await deploy(fixedSwap, {
+    from: deployer,
+    gasLimit: 30000000,
+    args: [],
+    log: true,
+    deterministicDeployment: false,
   });
 };
 
