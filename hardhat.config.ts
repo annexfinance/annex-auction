@@ -1,5 +1,6 @@
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
+import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import dotenv from "dotenv";
 import { utils } from "ethers";
@@ -63,6 +64,9 @@ export default {
   },
   solidity: {
     compilers: [
+      {
+        version: "0.5.0",
+      },
       {
         // used to compile WETH9.sol
         version: "0.5.5",
@@ -164,4 +168,9 @@ export default {
   etherscan: {
     apiKey: MY_ETHERSCAN_API_KEY,
   },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
+  }
 };

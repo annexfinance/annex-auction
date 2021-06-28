@@ -7,8 +7,9 @@
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
+    "size":"hardhat size-contracts",
     "deploy": "hardhat deploy --network bsctestnet",
-    "flatten":"hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
+    "flatten": "hardhat flatten ./contracts/AnnexAuction.sol > ./flatten/AnnexAuction.sol && hardhat flatten ./contracts/wrappers/DepositAndPlaceOrder.sol > ./flatten/DepositAndPlaceOrder.sol && hardhat flatten ./contracts/allowListExamples/AllowListOffChainManaged.sol > ./flatten/AllowListOffChainManaged.sol",
     "verify": "hardhat etherscan-verify --license None --network bsctestnet",
     "lint": "yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
@@ -27,6 +28,7 @@
     "bn.js": "^5.1.1",
     "dotenv": "^8.2.0",
     "ethers": "^5.0.22",
+    "hardhat-contract-sizer": "^2.0.3",
     "solc": "0.6.8",
     "yargs": "^16.1.1"
   },

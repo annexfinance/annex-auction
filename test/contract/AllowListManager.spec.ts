@@ -20,7 +20,7 @@ describe("AccessManager - integration tests", async () => {
   let allowListManager: Contract;
   let testDomain: any;
   beforeEach(async () => {
-    const AnnexAuction = await ethers.getContractFactory("AnnexAuction");
+    const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
 
     annexAuction = await AnnexAuction.deploy();
     const AllowListManger = await ethers.getContractFactory(
@@ -186,7 +186,7 @@ describe("AccessManager - unit tests", async () => {
   describe("AccessManager", () => {
     it("should return 0, if auctionId is incorrect", async () => {
       const signer = user_1;
-      const annexAuction = await artifacts.readArtifact("AnnexAuction");
+      const annexAuction = await artifacts.readArtifact("AnnexBatchAuction");
       const mockContract = await deployMockContract(user_1, annexAuction.abi);
       await mockContract.mock.auctionAccessData.returns(
         ethers.utils.defaultAbiCoder.encode(["address"], [signer.address]),
@@ -221,7 +221,7 @@ describe("AccessManager - unit tests", async () => {
       ).to.equal("0x00000000");
     });
     it("should return 0, if allowListSigner is incorrect", async () => {
-      const annexAuction = await artifacts.readArtifact("AnnexAuction");
+      const annexAuction = await artifacts.readArtifact("AnnexBatchAuction");
       const signer = user_2;
       const mockContract = await deployMockContract(user_1, annexAuction.abi);
       await mockContract.mock.auctionAccessData.returns(
@@ -258,7 +258,7 @@ describe("AccessManager - unit tests", async () => {
     });
     it("should return 0, if domain separator is incorrect", async () => {
       const signer = user_2;
-      const annexAuction = await artifacts.readArtifact("AnnexAuction");
+      const annexAuction = await artifacts.readArtifact("AnnexBatchAuction");
       const mockContract = await deployMockContract(user_1, annexAuction.abi);
       await mockContract.mock.auctionAccessData.returns(
         ethers.utils.defaultAbiCoder.encode(["address"], [signer.address]),
@@ -296,7 +296,7 @@ describe("AccessManager - unit tests", async () => {
     });
     it("should return 0, if signature is incorrect", async () => {
       const signer = user_2;
-      const annexAuction = await artifacts.readArtifact("AnnexAuction");
+      const annexAuction = await artifacts.readArtifact("AnnexBatchAuction");
       const mockContract = await deployMockContract(user_1, annexAuction.abi);
       await mockContract.mock.auctionAccessData.returns(
         ethers.utils.defaultAbiCoder.encode(["address"], [signer.address]),
@@ -331,7 +331,7 @@ describe("AccessManager - unit tests", async () => {
     });
     it("should return magic value, if everything is valid", async () => {
       const signer = user_2;
-      const annexAuction = await artifacts.readArtifact("AnnexAuction");
+      const annexAuction = await artifacts.readArtifact("AnnexBatchAuction");
       const mockContract = await deployMockContract(user_1, annexAuction.abi);
       await mockContract.mock.auctionAccessData.returns(
         ethers.utils.defaultAbiCoder.encode(["address"], [signer.address]),

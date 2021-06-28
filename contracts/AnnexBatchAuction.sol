@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.8;
-// pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -9,12 +8,12 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 import "./libraries/IterableOrderedOrderSet.sol";
 import "./interfaces/AllowListVerifier.sol";
-import "./Access/AnnexAccessControls.sol";
+// import "./Access/AnnexAccessControls.sol";
 import "./libraries/IdToAddressBiMap.sol";
+import "./Utils/BatchDocuments.sol";
 import "./libraries/SafeCast.sol";
-import "./Utils/Documents.sol";
 
-contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
+contract AnnexBatchAuction is Ownable, BatchDocuments {
     using SafeERC20 for IERC20;
     using SafeMath for uint64;
     using SafeMath for uint96;
@@ -130,9 +129,7 @@ contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
     uint64 public numUsers; // counter of users
     uint256 public auctionCounter; // counter for auctions
 
-    constructor() public Ownable() {
-        initAccessControls(_msgSender());
-    }
+    constructor() public Ownable() {}
 
     uint256 public feeNumerator = 0;
     uint256 public constant FEE_DENOMINATOR = 1000;
@@ -787,22 +784,20 @@ contract AnnexBatchAuction is Ownable, ANNEXAccessControls, Documents {
     // Documents
     //--------------------------------------------------------
 
-    function setDocument(string calldata _name, string calldata _data)
-        external
-    {
-        require(hasAdminRole(msg.sender));
+    function setDocument(string calldata _name, string calldata _data) external onlyOwner {
         _setDocument(_name, _data);
     }
 
-    // function setDocuments(string[] calldata _name, string[] calldata _data) external {
-    //     require(hasAdminRole(msg.sender) );
+    // function setDocuments(string[] calldata _name, string[] calldata _data)
+    //     external
+    //     onlyOwner
+    // {
     //     for (uint256 i = 0; i < _name.length; i++) {
-    //         _setDocument( _name[i], _data[i]);
+    //         _setDocument(_name[i], _data[i]);
     //     }
     // }
 
-    function removeDocument(string calldata _name) external {
-        require(hasAdminRole(msg.sender));
+    function removeDocument(string calldata _name) external onlyOwner {
         _removeDocument(_name);
     }
 }

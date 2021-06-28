@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity >=0.6.12;
 pragma experimental ABIEncoderV2;
 
+import "../seriality/Seriality.sol";
 
 /**
  * @title Standard implementation of ERC1643 Document management
  */
-contract Documents {
+contract BatchDocuments is Seriality {
 
     struct Document {
         uint32 docIndex;    // Store the document name indexes
@@ -39,7 +40,7 @@ contract Documents {
             _docNames.push(_name);
             _documents[_name].docIndex = uint32(_docNames.length);
         }
-        _documents[_name] = Document(_documents[_name].docIndex, uint64(now), _data);
+        _documents[_name] = Document(_documents[_name].docIndex, uint64(block.timestamp), _data);
         emit DocumentUpdated(_name, _data);
     }
 
@@ -78,8 +79,28 @@ contract Documents {
      * @notice Used to retrieve a full list of documents attached to the smart contract.
      * @return string List of all documents names present in the contract.
      */
-    function getAllDocuments() external view returns (string[] memory) {
-        return _docNames;
+    function getAllDocuments() external view returns (bytes memory) {
+        uint startindex = 0;
+        uint endindex = _docNames.length;
+        require(endindex >= startindex);
+
+        if(endindex > (_docNames.length - 1)){
+            endindex = _docNames.length - 1;
+        }
+
+        uint offset = 64*((endindex - startindex) + 1);
+        
+        bytes memory buffer = new  bytes(offset);
+        string memory out1  = new string(32);
+        
+        
+        for(uint i = startindex; i <= endindex; i++){
+            out1 = _docNames[i];
+            
+            stringToBytes(offset, bytes(out1), buffer);
+            offset -= sizeOfString(out1);
+        }
+        return buffer;
     }
 
     /**

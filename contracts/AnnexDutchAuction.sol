@@ -479,13 +479,13 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         _setDocument( _name, _data);
     }
 
-    // function setDocuments(string[] calldata _name, string[] calldata _data) external {
-    //     require(hasAdminRole(msg.sender) );
-    //     uint256 numDocs = _name.length;
-    //     for (uint256 i = 0; i < numDocs; i++) {
-    //         _setDocument( _name[i], _data[i]);
-    //     }
-    // }
+    function setDocuments(string[] calldata _name, string[] calldata _data) external {
+        require(hasAdminRole(msg.sender) );
+        uint256 numDocs = _name.length;
+        for (uint256 i = 0; i < numDocs; i++) {
+            _setDocument( _name[i], _data[i]);
+        }
+    }
 
     function removeDocument(string calldata _name) external {
         require(hasAdminRole(msg.sender));

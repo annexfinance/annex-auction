@@ -32,11 +32,11 @@ import {
 // https://jamboard.google.com/d/1DMgMYCQQzsSLKPq_hlK3l32JNBbRdIhsOrLB1oHaEYY/edit?usp=sharing
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-describe("AnnexAuction", async () => {
+describe("AnnexBatchAuction", async () => {
   const [user_1, user_2, user_3] = waffle.provider.getWallets();
   let annexAuction: Contract;
   beforeEach(async () => {
-    const AnnexAuction = await ethers.getContractFactory("AnnexAuction");
+    const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
 
     annexAuction = await AnnexAuction.deploy();
   });
