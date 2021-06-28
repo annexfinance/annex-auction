@@ -23,13 +23,8 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const {
-  GAS_PRICE_GWEI,
-  INFURA_KEY,
-  MNEMONIC,
-  MY_ETHERSCAN_API_KEY,
-  PK,
-} = process.env;
+const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY, PK } =
+  process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -65,6 +60,9 @@ export default {
   solidity: {
     compilers: [
       {
+        version: "0.4.18",
+      },
+      {
         version: "0.5.0",
       },
       {
@@ -84,7 +82,7 @@ export default {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 2,
       },
     },
   },
@@ -148,7 +146,7 @@ export default {
           )
         : "auto",
     },
-    bsctestnet: {
+    bsc: {
       ...sharedNetworkConfig,
       url: "https://data-seed-prebsc-2-s3.binance.org:8545/",
       chainId: 97,
@@ -172,5 +170,5 @@ export default {
     alphaSort: true,
     runOnCompile: true,
     disambiguatePaths: false,
-  }
+  },
 };

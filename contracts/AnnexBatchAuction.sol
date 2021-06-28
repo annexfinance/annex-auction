@@ -8,12 +8,43 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/math/Math.sol";
 import "./libraries/IterableOrderedOrderSet.sol";
 import "./interfaces/AllowListVerifier.sol";
-// import "./Access/AnnexAccessControls.sol";
 import "./libraries/IdToAddressBiMap.sol";
-import "./Utils/BatchDocuments.sol";
 import "./libraries/SafeCast.sol";
+import "./interfaces/IDocuments.sol";
+import "./interfaces/IPancakeswapV2Pair.sol";
+import "./interfaces/IPancakeswapV2Factory.sol";
+import "./interfaces/IPancakeswapV2Router02.sol";
 
-contract AnnexBatchAuction is Ownable, BatchDocuments {
+/**
+Errors details
+    ERROR_ORDER_PLACEMENT = no longer in order placement phase
+    ERROR_ORDER_CANCELATION = no longer in order placement and cancelation phase
+    ERROR_SOL_SUB = Auction not in solution submission phase
+    ERROR_NOT_FINSIHED = Auction not yet finished
+    ERROR_INVALID_FEE = Fee is not allowed to be set higher than 1.5%
+    ERROR_MUST_GT_ZERO = _minBuyAmounts must be greater than 0
+    NOT_ENOUGH_ANN = Auctioner does not have enough Ann
+    TOO_SMALL = order too small
+    INVALID_AUCTION_TOKENS = cannot auction zero tokens and must be less than threshold
+    TOKENS_CANT_AUCTIONED_FREE = tokens cannot be auctioned for free
+    MUST_NOT_ZERO = minimumBiddingAmountPerOrder is not allowed to be zero
+    ERROR_TIME_PERIOD = time periods are not configured correctly
+    INVALID_AUTION_END = auction end date must be in the future
+    ONLY_USER_CAN_CANCEL = Only the user can cancel his orders
+    REACHED_END = reached end of order list
+    TOO_MANY_ORDERS = too many orders summed up
+    NOT_SETTLED = not allowed to settle auction atomically 
+    ERROR_PALCE_AUTOMATICALLY = Only one order can be placed atomically
+    TOO_ADVANCED = precalculateSellAmountSum is already too advanced
+    REGISTERED = User already registered
+    NOT_ALLOWED= user not allowed to place order
+    INVALID_LIMIT_PRICE = limit price not better than mimimal offer
+    NOT_CLAIMABLE = order is no longer claimable
+    SAME_USER_CAN_CLAIM= only allowed to claim for same user
+
+**/
+
+contract AnnexBatchAuction is Ownable {
     using SafeERC20 for IERC20;
     using SafeMath for uint64;
     using SafeMath for uint96;
@@ -23,10 +54,49 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     using IterableOrderedOrderSet for bytes32;
     using IdToAddressBiMap for IdToAddressBiMap.Data;
 
+    /**
+    @param {auctioningToken}
+    **/
+    struct AuctionData {
+        IERC20 auctioningToken;
+        IERC20 biddingToken;
+        IPancakeswapV2Pair pancakeswapV2Pair;
+        uint256 orderCancellationEndDate;
+        uint256 auctionEndDate;
+        bytes32 initialAuctionOrder;
+        uint256 minimumBiddingAmountPerOrder;
+        uint256 interimSumBidAmount;
+        bytes32 interimOrder;
+        bytes32 clearingPriceOrder;
+        uint96 volumeClearingPriceOrder;
+        bool minFundingThresholdNotReached;
+        bool isAtomicClosureAllowed;
+        uint256 feeNumerator;
+        uint256 minFundingThreshold;
+    }
+    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
+    mapping(uint256 => AuctionData) public auctionData; // Store auctions details
+    mapping(uint256 => address) public auctionAccessManager;
+    mapping(uint256 => bytes) public auctionAccessData;
+
+    IDocuments public immutable documents; // for storing documents
+    // IERC20 public annexToken;
+    IPancakeswapV2Router02 public immutable pancakeswapV2Router;
+
+    IdToAddressBiMap.Data private registeredUsers;
+    uint256 public auctionCounter; // counter for auctions
+    uint256 public feeNumerator = 0;
+    uint256 public constant FEE_DENOMINATOR = 1000;
+    uint256 public threshold = 100 ether; // 100 ANN
+
+    uint64 public feeReceiverUserId = 1;
+    uint64 public numUsers; // counter of users
+    bool public inSwapAndLiquify;
+
     modifier atStageOrderPlacement(uint256 auctionId) {
         require(
             block.timestamp < auctionData[auctionId].auctionEndDate,
-            "no longer in order placement phase"
+            "ERROR_ORDER_PLACEMENT" // no longer in order placement phase
         );
         _;
     }
@@ -34,7 +104,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     modifier atStageOrderPlacementAndCancelation(uint256 auctionId) {
         require(
             block.timestamp < auctionData[auctionId].orderCancellationEndDate,
-            "no longer in order placement and cancelation phase"
+            "ERROR_ORDER_CANCELATION"
         );
         _;
     }
@@ -46,7 +116,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                 auctionEndDate != 0 &&
                     block.timestamp >= auctionEndDate &&
                     auctionData[auctionId].clearingPriceOrder == bytes32(0),
-                "Auction not in solution submission phase"
+                "ERROR_SOL_SUB"
             );
         }
         _;
@@ -55,9 +125,15 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     modifier atStageFinished(uint256 auctionId) {
         require(
             auctionData[auctionId].clearingPriceOrder != bytes32(0),
-            "Auction not yet finished"
+            "ERROR_NOT_FINSIHED"
         );
         _;
+    }
+
+    modifier lockTheSwap {
+        inSwapAndLiquify = true;
+        _;
+        inSwapAndLiquify = false;
     }
 
     event NewSellOrder(
@@ -91,49 +167,29 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         uint256 minimumBiddingAmountPerOrder,
         uint256 minFundingThreshold,
         address allowListContract,
-        bytes allowListData
+        bytes allowListData,
+        address lp
     );
     event AuctionCleared(
         uint256 indexed auctionId,
         uint96 soldAuctioningTokens,
         uint96 soldBiddingTokens,
-        bytes32 clearingPriceOrder
+        bytes32 clearingPriceOrder,
+        uint256 liquidity
     );
     event UserRegistration(address indexed user, uint64 userId);
 
-    /**
-    @param {auctioningToken}
-    **/
-    struct AuctionData {
-        IERC20 auctioningToken;
-        IERC20 biddingToken;
-        uint256 orderCancellationEndDate;
-        uint256 auctionEndDate;
-        bytes32 initialAuctionOrder;
-        uint256 minimumBiddingAmountPerOrder;
-        uint256 interimSumBidAmount;
-        bytes32 interimOrder;
-        bytes32 clearingPriceOrder;
-        uint96 volumeClearingPriceOrder;
-        bool minFundingThresholdNotReached;
-        bool isAtomicClosureAllowed;
-        uint256 feeNumerator;
-        uint256 minFundingThreshold;
+    constructor(
+        address _ann,
+        address _router,
+        address _documents
+    ) public Ownable() {
+        documents = IDocuments(_documents);
+        annexToken = IERC20(_ann);
+        IPancakeswapV2Router02 pancakeswapV2Router = IPancakeswapV2Router02(
+            _router
+        );
     }
-    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
-    mapping(uint256 => AuctionData) public auctionData; // Store auctions details
-    mapping(uint256 => address) public auctionAccessManager;
-    mapping(uint256 => bytes) public auctionAccessData;
-
-    IdToAddressBiMap.Data private registeredUsers;
-    uint64 public numUsers; // counter of users
-    uint256 public auctionCounter; // counter for auctions
-
-    constructor() public Ownable() {}
-
-    uint256 public feeNumerator = 0;
-    uint256 public constant FEE_DENOMINATOR = 1000;
-    uint64 public feeReceiverUserId = 1;
 
     function setFeeParameters(
         uint256 newFeeNumerator,
@@ -141,7 +197,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     ) public onlyOwner() {
         require(
             newFeeNumerator <= 15,
-            "Fee is not allowed to be set higher than 1.5%"
+            "ERROR_INVALID_FEE" // Fee is not allowed to be set higher than 1.5%
         );
         // caution: for currently running auctions, the feeReceiverUserId is changing as well.
         feeReceiverUserId = getUserId(newfeeReceiverAddress);
@@ -157,6 +213,10 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     // Prices between biddingToken and auctioningToken are expressed by a
     // fraction whose components are stored as uint96.
     // Amount transfered out is no larger than amount transfered in
+    // auctioning Token = USDT
+    // bidding Token    = ANN
+    // pair             = USDT-ANN
+
     function initiateAuction(
         IERC20 _auctioningToken,
         IERC20 _biddingToken,
@@ -177,6 +237,8 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         // fees = 1%
         then 1010 will be added to the contract
         */
+        // Auctioner can init an auction if he has 100 Ann
+        require(_biddingToken.balanceOf(msg.sender) >= 100, "NOT_ENOUGH_ANN");
         _auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -184,23 +246,21 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                 FEE_DENOMINATOR
             ) //[0]
         );
-        require(_auctionedSellAmount > 0, "cannot auction zero tokens");
-        require(_minBuyAmount > 0, "tokens cannot be auctioned for free");
-        require(
-            minimumBiddingAmountPerOrder > 0,
-            "minimumBiddingAmountPerOrder is not allowed to be zero"
-        );
+        require(_auctionedSellAmount > 0, "INVALID_AUCTION_TOKENS"); //
+        require(_minBuyAmount > 0, "TOKENS_CANT_AUCTIONED_FREE"); // tokens cannot be auctioned for free
+        require(minimumBiddingAmountPerOrder > 0, "MUST_NOT_ZERO");
         require(
             orderCancellationEndDate <= auctionEndDate,
-            "time periods are not configured correctly"
+            "ERROR_TIME_PERIOD"
         );
-        require(
-            auctionEndDate > block.timestamp,
-            "auction end date must be in the future"
-        );
+        require(auctionEndDate > block.timestamp, "INVALID_AUTION_END");
         auctionCounter = auctionCounter.add(1);
         sellOrders[auctionCounter].initializeEmptyList();
         uint64 userId = getUserId(msg.sender);
+        address pancakeswapV2Pair = IPancakeswapV2Factory(
+            pancakeswapV2Router.factory()
+        ).createPair(_auctioningToken, _biddingToken);
+
         auctionData[auctionCounter] = AuctionData(
             _auctioningToken,
             _biddingToken,
@@ -219,10 +279,12 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
             false,
             isAtomicClosureAllowed,
             feeNumerator,
-            minFundingThreshold
+            minFundingThreshold,
+            IPancakeswapV2Pair(pancakeswapV2Pair)
         );
         auctionAccessManager[auctionCounter] = accessManagerContract;
         auctionAccessData[auctionCounter] = accessManagerContractData;
+
         emit NewAuction(
             auctionCounter,
             _auctioningToken,
@@ -235,7 +297,8 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
             minimumBiddingAmountPerOrder,
             minFundingThreshold,
             accessManagerContract,
-            accessManagerContractData
+            accessManagerContractData,
+            pancakeswapV2Pair
         );
         return auctionCounter;
     }
@@ -294,7 +357,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                         auctionId,
                         allowListCallData
                     ) == AllowListVerifierHelper.MAGICVALUE,
-                    "user not allowed to place order"
+                    "NOT_ALLOWED"
                 );
             }
         }
@@ -308,7 +371,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                 require(
                     _minBuyAmounts[i].mul(buyAmountOfInitialAuctionOrder) <
                         sellAmountOfInitialAuctionOrder.mul(_sellAmounts[i]),
-                    "limit price not better than mimimal offer"
+                    "INVALID_LIMIT_PRICE"
                 );
             }
         }
@@ -319,13 +382,13 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         for (uint256 i = 0; i < _minBuyAmounts.length; i++) {
             require(
                 _minBuyAmounts[i] > 0,
-                "_minBuyAmounts must be greater than 0"
+                "ERROR_MUST_GT_ZERO" //_minBuyAmounts must be greater than 0
             );
             // orders should have a minimum bid size in order to limit the gas
             // required to compute the final price of the auction.
             require(
                 _sellAmounts[i] > minimumBiddingAmountPerOrder,
-                "order too small"
+                "TOO_SMALL" // order too small
             );
             if (
                 sellOrders[auctionId].insert(
@@ -373,7 +436,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                 ) = _sellOrders[i].decodeOrder();
                 require(
                     userIdOfIter == userId,
-                    "Only the user can cancel his orders"
+                    "ONLY_USER_CAN_CANCEL" // Only the user can cancel his orders
                 );
                 claimableAmount = claimableAmount.add(sellAmountOfIter);
                 emit CancellationSellOrder(
@@ -410,7 +473,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
 
         require(
             iterOrder != IterableOrderedOrderSet.QUEUE_END,
-            "reached end of order list"
+            "REACHED_END" //reached end of order list
         );
 
         // it is checked that not too many iteration steps were taken:
@@ -421,7 +484,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         require(
             sumBidAmount.mul(buyAmountOfIter) <
                 auctioneerSellAmount.mul(sellAmountOfIter),
-            "too many orders summed up"
+            "TOO_MANY_ORDERS" // too many orders summed up
         );
 
         auctionData[auctionId].interimSumBidAmount = sumBidAmount;
@@ -437,11 +500,11 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     ) public atStageSolutionSubmission(auctionId) {
         require(
             auctionData[auctionId].isAtomicClosureAllowed,
-            "not allowed to settle auction atomically"
+            "NOT_SETTLED" // not allowed to settle auction atomically
         );
         require(
             _minBuyAmount.length == 1 && _sellAmount.length == 1,
-            "Only one order can be placed atomically"
+            "ERROR_PALCE_AUTOMATICALLY" //Only one order can be placed atomically
         );
         uint64 userId = getUserId(msg.sender);
         require(
@@ -452,7 +515,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                     _sellAmount[0]
                 )
             ),
-            "precalculateSellAmountSum is already too advanced"
+            "TOO_ADVANCED" // precalculateSellAmountSum is already too advanced
         );
         _placeSellOrders(
             auctionId,
@@ -559,6 +622,12 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         if (auctionData[auctionId].minFundingThreshold > currentBidSum) {
             auctionData[auctionId].minFundingThresholdNotReached = true;
         }
+
+        (, , liquidity) = addLiquidity(
+            auctionId,
+            fullAuctionedAmount,
+            fillVolumeOfAuctioneerOrder
+        );
         processFeesAndAuctioneerFunds(
             auctionId,
             fillVolumeOfAuctioneerOrder,
@@ -569,7 +638,8 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
             auctionId,
             fillVolumeOfAuctioneerOrder,
             uint96(currentBidSum),
-            clearingOrder
+            clearingOrder,
+            liquidity
         );
         // Gas refunds
         auctionAccessManager[auctionId] = address(0);
@@ -598,10 +668,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         for (uint256 i = 0; i < orders.length; i++) {
             // Note: we don't need to keep any information about the node since
             // no new elements need to be inserted.
-            require(
-                sellOrders[auctionId].remove(orders[i]),
-                "order is no longer claimable"
-            );
+            require(sellOrders[auctionId].remove(orders[i]), "NOT_CLAIMABLE");
         }
         AuctionData memory auction = auctionData[auctionId];
         (, uint96 priceNumerator, uint96 priceDenominator) = auction
@@ -616,10 +683,7 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                 i
             ]
             .decodeOrder();
-            require(
-                userIdOrder == userId,
-                "only allowed to claim for same user"
-            );
+            require(userIdOrder == userId, "SAME_USER_CAN_CLAIM");
             if (minFundingThresholdNotReached) {
                 //[10]
                 sumBiddingTokenAmount = sumBiddingTokenAmount.add(sellAmount);
@@ -684,10 +748,12 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
             .clearingPriceOrder
             .decodeOrder();
             // unsettledAuctionTokens = fullAuctionedAmount - fillVolumeOfAuctioneerOrder
+            // remaining auctioning tokens which are not sold
             uint256 unsettledAuctionTokens = fullAuctionedAmount.sub(
                 fillVolumeOfAuctioneerOrder
             );
             // auctioningTokenAmount = unsettledAuctionTokens + ( ( feeAmount * unsettledAuctionTokens ) / fullAuctionedAmount)
+            // remaining auctioning tokens which are sold
             uint256 auctioningTokenAmount = unsettledAuctionTokens.add(
                 feeAmount.mul(unsettledAuctionTokens).div(fullAuctionedAmount)
             );
@@ -711,6 +777,60 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
                 feeReceiverUserId
             ); //[7]
         }
+    }
+
+    function calculateLPTokens(
+        uint256 auctionId,
+        uint256 biddingTokenAmount,
+        uint256 totalBiddingTokenAmount
+    ) internal view returns (uint256 lpTokens) {
+        AuctionData storage auction = auctionData[auctionId];
+        (, , uint96 sellAmount) = auction.initialAuctionOrder.decodeOrder();
+        uint256 totalLP = IPancakeswapV2Pair(auction.pancakeswapV2Pair)
+        .balanceOf(address(this));
+        uint256 lpTokens = (biddingTokenAmount / totalBiddingTokenAmount) *
+            (totalLP / 2);
+        return lpTokens;
+    }
+
+    function addLiquidity(
+        uint256 auctionId,
+        uint256 auctionTokenAmount,
+        uint256 biddingTokenAmount
+    )
+        internal
+        view
+        returns (
+            uint256 amountA,
+            uint256 amountB,
+            uint256 liquidity
+        )
+    {
+        // approve token transfer to cover all possible scenarios
+
+        AuctionData storage auction = auctionData[auctionId];
+        auction[auctionId].auctioningToken.approve(
+            address(this),
+            address(pancakeswapV2Router),
+            auctionTokenAmount
+        );
+        auction[auctionId].biddingToken.approve(
+            address(this),
+            address(pancakeswapV2Router),
+            biddingTokenAmount
+        );
+        // add the liquidity
+        return
+            uniswapV2Router.addLiquidity(
+                address(auction.auctioningToken),
+                address(auction.biddingingToken),
+                auctionTokenAmount,
+                biddingTokenAmount,
+                0, // slippage is unavoidable
+                0, // slippage is unavoidable
+                address(this),
+                block.timestamp + 600
+            );
     }
 
     /* send back either auctioning or bidding tokens to the given user.
@@ -746,18 +866,18 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
         numUsers = numUsers.add(1).toUint64();
         require(
             registeredUsers.insert(numUsers, user),
-            "User already registered"
+            "REGISTERED" // User already registered
         );
-        userId = numUsers;
-        emit UserRegistration(user, userId);
+        // userId = numUsers;
+        emit UserRegistration(user, numUsers);
     }
 
     function getUserId(address user) public returns (uint64 userId) {
         if (registeredUsers.hasAddress(user)) {
             userId = registeredUsers.getId(user);
         } else {
-            userId = registerUser(user);
-            emit NewUser(userId, user);
+            // userId = registerUser(user);
+            emit NewUser(registerUser(user), user);
         }
     }
 
@@ -784,20 +904,37 @@ contract AnnexBatchAuction is Ownable, BatchDocuments {
     // Documents
     //--------------------------------------------------------
 
-    function setDocument(string calldata _name, string calldata _data) external onlyOwner {
-        _setDocument(_name, _data);
+    function setDocument(string calldata _name, string calldata _data)
+        external
+    {
+        documents._setDocument(_name, _data);
     }
 
-    // function setDocuments(string[] calldata _name, string[] calldata _data)
-    //     external
-    //     onlyOwner
-    // {
-    //     for (uint256 i = 0; i < _name.length; i++) {
-    //         _setDocument(_name[i], _data[i]);
-    //     }
-    // }
+    function getDocumentCount() external view returns (uint256) {
+        return documents.getDocumentCount();
+    }
 
-    function removeDocument(string calldata _name) external onlyOwner {
-        _removeDocument(_name);
+    function getAllDocuments() external view returns (bytes memory) {
+        return documents.getAllDocuments();
+    }
+
+    function getDocumentName(uint256 _index)
+        external
+        view
+        returns (string memory)
+    {
+        return documents.getDocumentName(_index);
+    }
+
+    function getDocument(string calldata _name)
+        external
+        view
+        returns (string memory, uint256)
+    {
+        return documents.getDocument(_name);
+    }
+
+    function removeDocument(string calldata _name) external {
+        documents._removeDocument(_name);
     }
 }

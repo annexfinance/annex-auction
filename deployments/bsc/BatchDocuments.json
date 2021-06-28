@@ -1,0 +1,427 @@
+{
+  "address": "0xe7915A4cAaa9e63C68173C90735706C4996ce511",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "_data",
+          "type": "string"
+        }
+      ],
+      "name": "DocumentRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "_data",
+          "type": "string"
+        }
+      ],
+      "name": "DocumentUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "_removeDocument",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_data",
+          "type": "string"
+        }
+      ],
+      "name": "_setDocument",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAllDocuments",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "getDocument",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDocumentCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getDocumentName",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x3667944948ba1362b014e5211e64010888bee5da26dcd0530015c0de7d58ed97",
+  "receipt": {
+    "to": null,
+    "from": "0x48F91fbC86679e14f481DD3C3381f0e07F93A711",
+    "contractAddress": "0xe7915A4cAaa9e63C68173C90735706C4996ce511",
+    "transactionIndex": 0,
+    "gasUsed": "1534029",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000020000000000000000000800000000000000000000000000000000400000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000008000000000000000020000800000000000000000000002000000040000000000000000000000000000000",
+    "blockHash": "0xef71f7c62275c32108a74754475c0667844b61fd14fb7c855ac26574109cd6de",
+    "transactionHash": "0x3667944948ba1362b014e5211e64010888bee5da26dcd0530015c0de7d58ed97",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 10119620,
+        "transactionHash": "0x3667944948ba1362b014e5211e64010888bee5da26dcd0530015c0de7d58ed97",
+        "address": "0xe7915A4cAaa9e63C68173C90735706C4996ce511",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x00000000000000000000000048f91fbc86679e14f481dd3c3381f0e07f93a711"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0xef71f7c62275c32108a74754475c0667844b61fd14fb7c855ac26574109cd6de"
+      }
+    ],
+    "blockNumber": 10119620,
+    "cumulativeGasUsed": "1534029",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "0474dfd8f11504e81dcbbcb6a2422c5f",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"DocumentRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"DocumentUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"name\":\"_removeDocument\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_data\",\"type\":\"string\"}],\"name\":\"_setDocument\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllDocuments\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"}],\"name\":\"getDocument\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getDocumentCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"getDocumentName\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"_removeDocument(string)\":{\"details\":\"Can only be executed by the owner of the contract.\",\"params\":{\"_name\":\"Name of the document. It should be unique always\"}},\"_setDocument(string,string)\":{\"details\":\"Can only be executed by the owner of the contract.\",\"params\":{\"_data\":\"Off-chain data of the document from where it is accessible to investors/advisors to read.\",\"_name\":\"Name of the document. It should be unique always\"}},\"getAllDocuments()\":{\"returns\":{\"_0\":\"string List of all documents names present in the contract.\"}},\"getDocument(string)\":{\"params\":{\"_name\":\"Name of the document\"},\"returns\":{\"_0\":\"string The data associated with the document.\",\"_1\":\"uint256 the timestamp at which the document was last modified.\"}},\"getDocumentCount()\":{\"returns\":{\"_0\":\"uint256 Count of the document names present in the contract.\"}},\"getDocumentName(uint256)\":{\"returns\":{\"_0\":\"string Name of the document name.\"}},\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"title\":\"Standard implementation of ERC1643 Document management\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"_removeDocument(string)\":{\"notice\":\"Used to remove an existing document from the contract by giving the name of the document.\"},\"_setDocument(string,string)\":{\"notice\":\"Used to attach a new document to the contract, or update the data or hash of an existing attached document\"},\"getAllDocuments()\":{\"notice\":\"Used to retrieve a full list of documents attached to the smart contract.\"},\"getDocument(string)\":{\"notice\":\"Used to return the details of a document with a known name (`string`).\"},\"getDocumentCount()\":{\"notice\":\"Used to retrieve the total documents in the smart contract.\"},\"getDocumentName(uint256)\":{\"notice\":\"Used to retrieve the document name from index in the smart contract.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/Utils/BatchDocuments.sol\":\"BatchDocuments\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity >=0.6.0 <0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor () internal {\\n        address msgSender = _msgSender();\\n        _owner = msgSender;\\n        emit OwnershipTransferred(address(0), msgSender);\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        emit OwnershipTransferred(_owner, address(0));\\n        _owner = address(0);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        emit OwnershipTransferred(_owner, newOwner);\\n        _owner = newOwner;\\n    }\\n}\\n\",\"keccak256\":\"0x15e2d5bd4c28a88548074c54d220e8086f638a71ed07e6b3ba5a70066fcf458d\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity >=0.6.0 <0.8.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with GSN meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address payable) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes memory) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0x8d3cb350f04ff49cfb10aef08d87f19dcbaecc8027b0bed12f3275cd12f38cf0\",\"license\":\"MIT\"},\"contracts/Utils/BatchDocuments.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity >=0.6.12;\\npragma experimental ABIEncoderV2;\\n\\nimport \\\"@openzeppelin/contracts/access/Ownable.sol\\\";\\nimport \\\"../seriality/Seriality.sol\\\";\\n\\n/**\\n * @title Standard implementation of ERC1643 Document management\\n */\\ncontract BatchDocuments is Ownable , Seriality {\\n\\n    struct Document {\\n        uint32 docIndex;    // Store the document name indexes\\n        uint64 lastModified; // Timestamp at which document details was last modified\\n        string data; // data of the document that exist off-chain\\n    }\\n\\n    // mapping to store the documents details in the document\\n    mapping(string => Document) internal _documents;\\n    // mapping to store the document name indexes\\n    mapping(string => uint32) internal _docIndexes;\\n    // Array use to store all the document name present in the contracts\\n    string[] internal _docNames;\\n\\n    constructor() public Ownable(){\\n    }\\n\\n    // Document Events\\n    event DocumentRemoved(string indexed _name, string _data);\\n    event DocumentUpdated(string indexed _name, string _data);\\n\\n    /**\\n     * @notice Used to attach a new document to the contract, or update the data or hash of an existing attached document\\n     * @dev Can only be executed by the owner of the contract.\\n     * @param _name Name of the document. It should be unique always\\n     * @param _data Off-chain data of the document from where it is accessible to investors/advisors to read.\\n     */\\n    function _setDocument(string calldata _name, string calldata _data) external onlyOwner {\\n        require(bytes(_name).length > 0, \\\"Zero name is not allowed\\\");\\n        require(bytes(_data).length > 0, \\\"Should not be a empty data\\\");\\n        // Document storage document = _documents[_name];\\n        if (_documents[_name].lastModified == uint64(0)) {\\n            _docNames.push(_name);\\n            _documents[_name].docIndex = uint32(_docNames.length);\\n        }\\n        _documents[_name] = Document(_documents[_name].docIndex, uint64(block.timestamp), _data);\\n        emit DocumentUpdated(_name, _data);\\n    }\\n\\n    /**\\n     * @notice Used to remove an existing document from the contract by giving the name of the document.\\n     * @dev Can only be executed by the owner of the contract.\\n     * @param _name Name of the document. It should be unique always\\n     */\\n\\n    function _removeDocument(string calldata _name) external onlyOwner {\\n        require(_documents[_name].lastModified != uint64(0), \\\"Document should exist\\\");\\n        uint32 index = _documents[_name].docIndex - 1;\\n        if (index != _docNames.length - 1) {\\n            _docNames[index] = _docNames[_docNames.length - 1];\\n            _documents[_docNames[index]].docIndex = index + 1; \\n        }\\n        _docNames.pop();\\n        emit DocumentRemoved(_name, _documents[_name].data);\\n        delete _documents[_name];\\n    }\\n\\n    /**\\n     * @notice Used to return the details of a document with a known name (`string`).\\n     * @param _name Name of the document\\n     * @return string The data associated with the document.\\n     * @return uint256 the timestamp at which the document was last modified.\\n     */\\n    function getDocument(string calldata _name) external view returns (string memory, uint256) {\\n        return (\\n            _documents[_name].data,\\n            uint256(_documents[_name].lastModified)\\n        );\\n    }\\n\\n    /**\\n     * @notice Used to retrieve a full list of documents attached to the smart contract.\\n     * @return string List of all documents names present in the contract.\\n     */\\n    function getAllDocuments() external view returns (bytes memory) {\\n        uint startindex = 0;\\n        uint endindex = _docNames.length;\\n        require(endindex >= startindex);\\n\\n        if(endindex > (_docNames.length - 1)){\\n            endindex = _docNames.length - 1;\\n        }\\n\\n        uint offset = 64*((endindex - startindex) + 1);\\n        \\n        bytes memory buffer = new  bytes(offset);\\n        string memory out1  = new string(32);\\n        \\n        \\n        for(uint i = startindex; i <= endindex; i++){\\n            out1 = _docNames[i];\\n            \\n            stringToBytes(offset, bytes(out1), buffer);\\n            offset -= sizeOfString(out1);\\n        }\\n        return buffer;\\n    }\\n\\n    /**\\n     * @notice Used to retrieve the total documents in the smart contract.\\n     * @return uint256 Count of the document names present in the contract.\\n     */\\n    function getDocumentCount() external view returns (uint256) {\\n        return _docNames.length;\\n    }\\n\\n    /**\\n     * @notice Used to retrieve the document name from index in the smart contract.\\n     * @return string Name of the document name.\\n     */\\n    function getDocumentName(uint256 _index) external view returns (string memory) {\\n        require(_index < _docNames.length, \\\"Index out of bounds\\\");\\n        return _docNames[_index];\\n    }\\n\\n}\",\"keccak256\":\"0x963283f1c7ef186887573d39a32f1ab8c076fc0f08999609350a2b07cfb192a7\",\"license\":\"MIT\"},\"contracts/seriality/BytesToTypes.sol\":{\"content\":\"pragma solidity >=0.5.0;\\n\\n/**\\n * @title BytesToTypes\\n * @dev The BytesToTypes contract converts the memory byte arrays to the standard solidity types\\n * @author pouladzade@gmail.com\\n */\\n\\ncontract BytesToTypes {\\n    \\n\\n    function bytesToAddress(uint _offst, bytes memory _input) internal pure returns (address _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n    \\n    function bytesToBool(uint _offst, bytes memory _input) internal pure returns (bool _output) {\\n        \\n        uint8 x;\\n        assembly {\\n            x := mload(add(_input, _offst))\\n        }\\n        x==0 ? _output = false : _output = true;\\n    }   \\n        \\n    function getStringSize(uint _offst, bytes memory _input) internal pure returns(uint size){\\n        \\n        assembly{\\n            \\n            size := mload(add(_input,_offst))\\n            let chunk_count := add(div(size,32),1) // chunk_count = size/32 + 1\\n            \\n            if gt(mod(size,32),0) {// if size%32 > 0\\n                chunk_count := add(chunk_count,1)\\n            } \\n            \\n             size := mul(chunk_count,32)// first 32 bytes reseves for size in strings\\n        }\\n    }\\n\\n    function bytesToString(uint _offst, bytes memory _input, bytes memory _output) internal pure {\\n\\n        uint size = 32;\\n        assembly {\\n            \\n            let chunk_count\\n            \\n            size := mload(add(_input,_offst))\\n            chunk_count := add(div(size,32),1) // chunk_count = size/32 + 1\\n            \\n            if gt(mod(size,32),0) {\\n                chunk_count := add(chunk_count,1)  // chunk_count++\\n            }\\n               \\n            for { let index:= 0 }  lt(index , chunk_count){ index := add(index,1) } {\\n                mstore(add(_output,mul(index,32)),mload(add(_input,_offst)))\\n                _offst := sub(_offst,32)           // _offst -= 32\\n            }\\n        }\\n    }\\n\\n    function bytesToBytes32(uint _offst, bytes memory  _input, bytes32 _output) internal pure {\\n        \\n        assembly {\\n            mstore(_output , add(_input, _offst))\\n            mstore(add(_output,32) , add(add(_input, _offst),32))\\n        }\\n    }\\n    \\n    function bytesToInt8(uint _offst, bytes memory  _input) internal pure returns (int8 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n    \\n    function bytesToInt16(uint _offst, bytes memory _input) internal pure returns (int16 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt24(uint _offst, bytes memory _input) internal pure returns (int24 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt32(uint _offst, bytes memory _input) internal pure returns (int32 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt40(uint _offst, bytes memory _input) internal pure returns (int40 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt48(uint _offst, bytes memory _input) internal pure returns (int48 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt56(uint _offst, bytes memory _input) internal pure returns (int56 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt64(uint _offst, bytes memory _input) internal pure returns (int64 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt72(uint _offst, bytes memory _input) internal pure returns (int72 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt80(uint _offst, bytes memory _input) internal pure returns (int80 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt88(uint _offst, bytes memory _input) internal pure returns (int88 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt96(uint _offst, bytes memory _input) internal pure returns (int96 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\t\\n\\tfunction bytesToInt104(uint _offst, bytes memory _input) internal pure returns (int104 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n    \\n    function bytesToInt112(uint _offst, bytes memory _input) internal pure returns (int112 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt120(uint _offst, bytes memory _input) internal pure returns (int120 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt128(uint _offst, bytes memory _input) internal pure returns (int128 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt136(uint _offst, bytes memory _input) internal pure returns (int136 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt144(uint _offst, bytes memory _input) internal pure returns (int144 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt152(uint _offst, bytes memory _input) internal pure returns (int152 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt160(uint _offst, bytes memory _input) internal pure returns (int160 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt168(uint _offst, bytes memory _input) internal pure returns (int168 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt176(uint _offst, bytes memory _input) internal pure returns (int176 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt184(uint _offst, bytes memory _input) internal pure returns (int184 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt192(uint _offst, bytes memory _input) internal pure returns (int192 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt200(uint _offst, bytes memory _input) internal pure returns (int200 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt208(uint _offst, bytes memory _input) internal pure returns (int208 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt216(uint _offst, bytes memory _input) internal pure returns (int216 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt224(uint _offst, bytes memory _input) internal pure returns (int224 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt232(uint _offst, bytes memory _input) internal pure returns (int232 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt240(uint _offst, bytes memory _input) internal pure returns (int240 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt248(uint _offst, bytes memory _input) internal pure returns (int248 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n    function bytesToInt256(uint _offst, bytes memory _input) internal pure returns (int256 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    }\\n\\n\\tfunction bytesToUint8(uint _offst, bytes memory _input) internal pure returns (uint8 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint16(uint _offst, bytes memory _input) internal pure returns (uint16 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint24(uint _offst, bytes memory _input) internal pure returns (uint24 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint32(uint _offst, bytes memory _input) internal pure returns (uint32 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint40(uint _offst, bytes memory _input) internal pure returns (uint40 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint48(uint _offst, bytes memory _input) internal pure returns (uint48 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint56(uint _offst, bytes memory _input) internal pure returns (uint56 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint64(uint _offst, bytes memory _input) internal pure returns (uint64 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint72(uint _offst, bytes memory _input) internal pure returns (uint72 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint80(uint _offst, bytes memory _input) internal pure returns (uint80 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint88(uint _offst, bytes memory _input) internal pure returns (uint88 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n\\tfunction bytesToUint96(uint _offst, bytes memory _input) internal pure returns (uint96 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\t\\n\\tfunction bytesToUint104(uint _offst, bytes memory _input) internal pure returns (uint104 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint112(uint _offst, bytes memory _input) internal pure returns (uint112 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint120(uint _offst, bytes memory _input) internal pure returns (uint120 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint128(uint _offst, bytes memory _input) internal pure returns (uint128 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint136(uint _offst, bytes memory _input) internal pure returns (uint136 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint144(uint _offst, bytes memory _input) internal pure returns (uint144 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint152(uint _offst, bytes memory _input) internal pure returns (uint152 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint160(uint _offst, bytes memory _input) internal pure returns (uint160 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint168(uint _offst, bytes memory _input) internal pure returns (uint168 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint176(uint _offst, bytes memory _input) internal pure returns (uint176 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint184(uint _offst, bytes memory _input) internal pure returns (uint184 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint192(uint _offst, bytes memory _input) internal pure returns (uint192 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint200(uint _offst, bytes memory _input) internal pure returns (uint200 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint208(uint _offst, bytes memory _input) internal pure returns (uint208 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint216(uint _offst, bytes memory _input) internal pure returns (uint216 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint224(uint _offst, bytes memory _input) internal pure returns (uint224 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint232(uint _offst, bytes memory _input) internal pure returns (uint232 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint240(uint _offst, bytes memory _input) internal pure returns (uint240 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint248(uint _offst, bytes memory _input) internal pure returns (uint248 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n\\n    function bytesToUint256(uint _offst, bytes memory _input) internal pure returns (uint256 _output) {\\n        \\n        assembly {\\n            _output := mload(add(_input, _offst))\\n        }\\n    } \\n    \\n}\\n\",\"keccak256\":\"0x8ebc8c3d46ae1e05eb5e93bfb8d52309cacd26b7582cc02b85c4c14bc18bfb27\"},\"contracts/seriality/Seriality.sol\":{\"content\":\"pragma solidity >=0.5.0;\\n\\n/**\\n * @title Seriality\\n * @dev The Seriality contract is the main interface for serializing data using the TypeToBytes, BytesToType and SizeOf\\n * @author pouladzade@gmail.com\\n */\\n \\nimport \\\"./BytesToTypes.sol\\\";\\nimport \\\"./TypesToBytes.sol\\\";\\nimport \\\"./SizeOf.sol\\\";\\n\\ncontract Seriality is BytesToTypes, TypesToBytes, SizeOf {\\n\\n    constructor() public {\\n\\n    }\\n}\\n\",\"keccak256\":\"0x52e1fce467511e5c259af72655eb26ee9eeab648946bdff014454c9ade06d79f\"},\"contracts/seriality/SizeOf.sol\":{\"content\":\"pragma solidity >=0.5.0;\\n\\n/**\\n * @title SizeOf\\n * @dev The SizeOf return the size of the solidity types in byte\\n * @author pouladzade@gmail.com\\n */\\n\\ncontract  SizeOf {\\n    \\n    function sizeOfString(string memory _in) internal pure  returns(uint _size){\\n        _size = bytes(_in).length / 32;\\n         if(bytes(_in).length % 32 != 0) \\n            _size++;\\n            \\n        _size++; // first 32 bytes is reserved for the size of the string     \\n        _size *= 32;\\n    }\\n\\n    function sizeOfInt(uint16 _postfix) internal pure  returns(uint size){\\n\\n        assembly{\\n            switch _postfix\\n                case 8 { size := 1 }\\n                case 16 { size := 2 }\\n                case 24 { size := 3 }\\n                case 32 { size := 4 }\\n                case 40 { size := 5 }\\n                case 48 { size := 6 }\\n                case 56 { size := 7 }\\n                case 64 { size := 8 }\\n                case 72 { size := 9 }\\n                case 80 { size := 10 }\\n                case 88 { size := 11 }\\n                case 96 { size := 12 }\\n                case 104 { size := 13 }\\n                case 112 { size := 14 }\\n                case 120 { size := 15 }\\n                case 128 { size := 16 }\\n                case 136 { size := 17 }\\n                case 144 { size := 18 }\\n                case 152 { size := 19 }\\n                case 160 { size := 20 }\\n                case 168 { size := 21 }\\n                case 176 { size := 22 }\\n                case 184 { size := 23 }\\n                case 192 { size := 24 }\\n                case 200 { size := 25 }\\n                case 208 { size := 26 }\\n                case 216 { size := 27 }\\n                case 224 { size := 28 }\\n                case 232 { size := 29 }\\n                case 240 { size := 30 }\\n                case 248 { size := 31 }\\n                case 256 { size := 32 }\\n                default  { size := 32 }\\n        }\\n\\n    }\\n    \\n    function sizeOfUint(uint16 _postfix) internal pure  returns(uint size){\\n        return sizeOfInt(_postfix);\\n    }\\n\\n    function sizeOfAddress() internal pure  returns(uint8){\\n        return 20; \\n    }\\n    \\n    function sizeOfBool() internal pure  returns(uint8){\\n        return 1; \\n    }\\n    \\n\\n}\\n\",\"keccak256\":\"0x71901900dae09c6b2e4e907de24fa9d0eaaa758476bc1fc7e3eb5fbc1043abae\"},\"contracts/seriality/TypesToBytes.sol\":{\"content\":\"pragma solidity >=0.5.0;\\n\\n/**\\n * @title TypesToBytes\\n * @dev The TypesToBytes contract converts the standard solidity types to the byte array\\n * @author pouladzade@gmail.com\\n */\\n\\ncontract TypesToBytes {\\n \\n    function addressToBytes(uint _offst, address _input, bytes memory _output) internal pure {\\n\\n        assembly {\\n            mstore(add(_output, _offst), _input)\\n        }\\n    }\\n\\n    function bytes32ToBytes(uint _offst, bytes32 _input, bytes memory _output) internal pure {\\n\\n        assembly {\\n            mstore(add(_output, _offst), _input)\\n            mstore(add(add(_output, _offst),32), add(_input,32))\\n        }\\n    }\\n    \\n    function boolToBytes(uint _offst, bool _input, bytes memory _output) internal pure {\\n        uint8 x = _input == false ? 0 : 1;\\n        assembly {\\n            mstore(add(_output, _offst), x)\\n        }\\n    }\\n    \\n    function stringToBytes(uint _offst, bytes memory _input, bytes memory _output) internal pure {\\n        uint256 stack_size = _input.length / 32;\\n        if(_input.length % 32 > 0) stack_size++;\\n        \\n        assembly {\\n            stack_size := add(stack_size,1)//adding because of 32 first bytes memory as the length\\n            for { let index := 0 } lt(index,stack_size){ index := add(index ,1) } {\\n                mstore(add(_output, _offst), mload(add(_input,mul(index,32))))\\n                _offst := sub(_offst , 32)\\n            }\\n        }\\n    }\\n\\n    function intToBytes(uint _offst, int _input, bytes memory  _output) internal pure {\\n\\n        assembly {\\n            mstore(add(_output, _offst), _input)\\n        }\\n    } \\n    \\n    function uintToBytes(uint _offst, uint _input, bytes memory _output) internal pure {\\n\\n        assembly {\\n            mstore(add(_output, _offst), _input)\\n        }\\n    }   \\n\\n}\\n\",\"keccak256\":\"0x9ab0188f3d8ea7ac7abd3f0883688aa59081253059b281fa287d31543cd6e456\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b5060006100216100c460201b60201c565b9050806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508073ffffffffffffffffffffffffffffffffffffffff16600073ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3506100cc565b600033905090565b611a67806100db6000396000f3fe608060405234801561001057600080fd5b50600436106100935760003560e01c80639fa5f50b116100665780639fa5f50b1461010f578063c6b547e61461012d578063de7afa4b1461015d578063f2fde38b14610179578063f3494ae91461019557610093565b80633d1c227314610098578063715018a6146100b65780637ccb6a64146100c05780638da5cb5b146100f1575b600080fd5b6100a06101b1565b6040516100ad91906118db565b60405180910390f35b6100be6101be565b005b6100da60048036038101906100d59190611374565b61032b565b6040516100e8929190611809565b60405180910390f35b6100f961043b565b6040516101069190611786565b60405180910390f35b610117610464565b60405161012491906117a1565b60405180910390f35b6101476004803603810190610142919061142e565b610636565b60405161015491906117e7565b60405180910390f35b61017760048036038101906101729190611374565b610736565b005b610193600480360381019061018e919061134b565b610a83565b005b6101af60048036038101906101aa91906113b9565b610c75565b005b6000600380549050905090565b6101c6611019565b73ffffffffffffffffffffffffffffffffffffffff166101e461043b565b73ffffffffffffffffffffffffffffffffffffffff161461026d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b6060600060018484604051610341929190611756565b908152602001604051809103902060010160018585604051610364929190611756565b908152602001604051809103902060000160049054906101000a900467ffffffffffffffff1667ffffffffffffffff16818054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156104295780601f106103fe57610100808354040283529160200191610429565b820191906000526020600020905b81548152906001019060200180831161040c57829003601f168201915b50505050509150915091509250929050565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b606060008060038054905090508181101561047e57600080fd5b60016003805490500381111561049a5760016003805490500390505b6000600183830301604002905060008167ffffffffffffffff811180156104c057600080fd5b506040519080825280601f01601f1916602001820160405280156104f35781602001600182028036833780820191505090505b5090506000602067ffffffffffffffff8111801561051057600080fd5b506040519080825280601f01601f1916602001820160405280156105435781602001600182028036833780820191505090505b50905060008590505b84811161062a576003818154811061056057fe5b906000526020600020018054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156105fe5780601f106105d3576101008083540402835291602001916105fe565b820191906000526020600020905b8154815290600101906020018083116105e157829003601f168201915b50505050509150610610848385611021565b61061982611082565b84039350808060010191505061054c565b50819550505050505090565b6060600380549050821061067f576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016106769061189b565b60405180910390fd5b6003828154811061068c57fe5b906000526020600020018054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020018280546001816001161561010002031660029004801561072a5780601f106106ff5761010080835404028352916020019161072a565b820191906000526020600020905b81548152906001019060200180831161070d57829003601f168201915b50505050509050919050565b61073e611019565b73ffffffffffffffffffffffffffffffffffffffff1661075c61043b565b73ffffffffffffffffffffffffffffffffffffffff16146107e5576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600067ffffffffffffffff1660018383604051610803929190611756565b908152602001604051809103902060000160049054906101000a900467ffffffffffffffff1667ffffffffffffffff161415610874576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161086b9061185b565b60405180910390fd5b60006001808484604051610889929190611756565b908152602001604051809103902060000160009054906101000a900463ffffffff160390506001600380549050038163ffffffff161461097f576003600160038054905003815481106108d857fe5b9060005260206000200160038263ffffffff16815481106108f557fe5b90600052602060002001908054600181600116156101000203166002900461091e9291906110c1565b5060018101600160038363ffffffff168154811061093857fe5b9060005260206000200160405161094f919061176f565b908152602001604051809103902060000160006101000a81548163ffffffff021916908363ffffffff1602179055505b600380548061098a57fe5b6001900381819060005260206000200160006109a69190611156565b905582826040516109b8929190611756565b60405180910390207f4b5338540b4d1c0f6dd0308a25f633b7ff60472f894d711cff9dd64e35c613b2600185856040516109f3929190611756565b9081526020016040518091039020600101604051610a119190611839565b60405180910390a260018383604051610a2b929190611756565b9081526020016040518091039020600080820160006101000a81549063ffffffff02191690556000820160046101000a81549067ffffffffffffffff0219169055600182016000610a7c9190611156565b5050505050565b610a8b611019565b73ffffffffffffffffffffffffffffffffffffffff16610aa961043b565b73ffffffffffffffffffffffffffffffffffffffff1614610b32576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610bb8576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526026815260200180611a0c6026913960400191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b610c7d611019565b73ffffffffffffffffffffffffffffffffffffffff16610c9b61043b565b73ffffffffffffffffffffffffffffffffffffffff1614610d24576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b60008484905011610d6a576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610d619061187b565b60405180910390fd5b60008282905011610db0576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610da7906118bb565b60405180910390fd5b600067ffffffffffffffff1660018585604051610dce929190611756565b908152602001604051809103902060000160049054906101000a900467ffffffffffffffff1667ffffffffffffffff161415610e8a576003848490918060018154018082558091505060019003906000526020600020016000909192909192909192909192509190610e4192919061119e565b5060038054905060018585604051610e5a929190611756565b908152602001604051809103902060000160006101000a81548163ffffffff021916908363ffffffff1602179055505b604051806060016040528060018686604051610ea7929190611756565b908152602001604051809103902060000160009054906101000a900463ffffffff1663ffffffff1681526020014267ffffffffffffffff16815260200183838080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505081525060018585604051610f3e929190611756565b908152602001604051809103902060008201518160000160006101000a81548163ffffffff021916908363ffffffff16021790555060208201518160000160046101000a81548167ffffffffffffffff021916908367ffffffffffffffff1602179055506040820151816001019080519060200190610fbe92919061122c565b509050508383604051610fd2929190611756565b60405180910390207fbaa206e5ea800eb88bce099f453fee53295b793b9d5d1cfc4ce4b6db06a34f53838360405161100b9291906117c3565b60405180910390a250505050565b600033905090565b6000602083518161102e57fe5b0490506000602084518161103e57fe5b06111561104e5780806001019150505b60018101905060005b8181101561107b576020810284015185840152602085039450600181019050611057565b5050505050565b6000602082518161108f57fe5b0490506000602083518161109f57fe5b06146110ae5780806001019150505b8080600101915050602081029050919050565b828054600181600116156101000203166002900490600052602060002090601f0160209004810192826110f75760008555611145565b82601f106111085780548555611145565b8280016001018555821561114557600052602060002091601f016020900482015b82811115611144578254825591600101919060010190611129565b5b50905061115291906112ba565b5090565b50805460018160011615610100020316600290046000825580601f1061117c575061119b565b601f01602090049060005260206000209081019061119a91906112ba565b5b50565b828054600181600116156101000203166002900490600052602060002090601f0160209004810192826111d4576000855561121b565b82601f106111ed57803560ff191683800117855561121b565b8280016001018555821561121b579182015b8281111561121a5782358255916020019190600101906111ff565b5b50905061122891906112ba565b5090565b828054600181600116156101000203166002900490600052602060002090601f01602090048101928261126257600085556112a9565b82601f1061127b57805160ff19168380011785556112a9565b828001600101855582156112a9579182015b828111156112a857825182559160200191906001019061128d565b5b5090506112b691906112ba565b5090565b5b808211156112d35760008160009055506001016112bb565b5090565b6000813590506112e6816119dd565b92915050565b60008083601f8401126112fe57600080fd5b8235905067ffffffffffffffff81111561131757600080fd5b60208301915083600182028301111561132f57600080fd5b9250929050565b600081359050611345816119f4565b92915050565b60006020828403121561135d57600080fd5b600061136b848285016112d7565b91505092915050565b6000806020838503121561138757600080fd5b600083013567ffffffffffffffff8111156113a157600080fd5b6113ad858286016112ec565b92509250509250929050565b600080600080604085870312156113cf57600080fd5b600085013567ffffffffffffffff8111156113e957600080fd5b6113f5878288016112ec565b9450945050602085013567ffffffffffffffff81111561141457600080fd5b611420878288016112ec565b925092505092959194509250565b60006020828403121561144057600080fd5b600061144e84828501611336565b91505092915050565b6114608161194e565b82525050565b60006114718261190b565b61147b8185611921565b935061148b818560208601611999565b611494816119cc565b840191505092915050565b60006114ab8385611932565b93506114b883858461198a565b6114c1836119cc565b840190509392505050565b60006114d88385611943565b93506114e583858461198a565b82840190509392505050565b60006114fc82611916565b6115068185611932565b9350611516818560208601611999565b61151f816119cc565b840191505092915050565b600081546001811660008114611547576001811461156d576115b1565b607f60028304166115588187611932565b955060ff1983168652602086019350506115b1565b6002820461157b8187611932565b9550611586856118f6565b60005b828110156115a857815481890152600182019150602081019050611589565b80880195505050505b505092915050565b6000815460018116600081146115d657600181146115fb5761163f565b607f60028304166115e78187611943565b955060ff198316865280860193505061163f565b600282046116098187611943565b9550611614856118f6565b60005b8281101561163657815481890152600182019150602081019050611617565b82880195505050505b505092915050565b6000611654601583611932565b91507f446f63756d656e742073686f756c6420657869737400000000000000000000006000830152602082019050919050565b6000611694601883611932565b91507f5a65726f206e616d65206973206e6f7420616c6c6f77656400000000000000006000830152602082019050919050565b60006116d4601383611932565b91507f496e646578206f7574206f6620626f756e6473000000000000000000000000006000830152602082019050919050565b6000611714601a83611932565b91507f53686f756c64206e6f74206265206120656d70747920646174610000000000006000830152602082019050919050565b61175081611980565b82525050565b60006117638284866114cc565b91508190509392505050565b600061177b82846115b9565b915081905092915050565b600060208201905061179b6000830184611457565b92915050565b600060208201905081810360008301526117bb8184611466565b905092915050565b600060208201905081810360008301526117de81848661149f565b90509392505050565b6000602082019050818103600083015261180181846114f1565b905092915050565b6000604082019050818103600083015261182381856114f1565b90506118326020830184611747565b9392505050565b60006020820190508181036000830152611853818461152a565b905092915050565b6000602082019050818103600083015261187481611647565b9050919050565b6000602082019050818103600083015261189481611687565b9050919050565b600060208201905081810360008301526118b4816116c7565b9050919050565b600060208201905081810360008301526118d481611707565b9050919050565b60006020820190506118f06000830184611747565b92915050565b60008190508160005260206000209050919050565b600081519050919050565b600081519050919050565b600082825260208201905092915050565b600082825260208201905092915050565b600081905092915050565b600061195982611960565b9050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000819050919050565b82818337600083830152505050565b60005b838110156119b757808201518184015260208101905061199c565b838111156119c6576000848401525b50505050565b6000601f19601f8301169050919050565b6119e68161194e565b81146119f157600080fd5b50565b6119fd81611980565b8114611a0857600080fd5b5056fe4f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a26469706673582212202e224470abca64ef80a954543c39081ef26f65fc3ef7b44996a3376adb7a83f564736f6c63430007060033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100935760003560e01c80639fa5f50b116100665780639fa5f50b1461010f578063c6b547e61461012d578063de7afa4b1461015d578063f2fde38b14610179578063f3494ae91461019557610093565b80633d1c227314610098578063715018a6146100b65780637ccb6a64146100c05780638da5cb5b146100f1575b600080fd5b6100a06101b1565b6040516100ad91906118db565b60405180910390f35b6100be6101be565b005b6100da60048036038101906100d59190611374565b61032b565b6040516100e8929190611809565b60405180910390f35b6100f961043b565b6040516101069190611786565b60405180910390f35b610117610464565b60405161012491906117a1565b60405180910390f35b6101476004803603810190610142919061142e565b610636565b60405161015491906117e7565b60405180910390f35b61017760048036038101906101729190611374565b610736565b005b610193600480360381019061018e919061134b565b610a83565b005b6101af60048036038101906101aa91906113b9565b610c75565b005b6000600380549050905090565b6101c6611019565b73ffffffffffffffffffffffffffffffffffffffff166101e461043b565b73ffffffffffffffffffffffffffffffffffffffff161461026d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b6060600060018484604051610341929190611756565b908152602001604051809103902060010160018585604051610364929190611756565b908152602001604051809103902060000160049054906101000a900467ffffffffffffffff1667ffffffffffffffff16818054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156104295780601f106103fe57610100808354040283529160200191610429565b820191906000526020600020905b81548152906001019060200180831161040c57829003601f168201915b50505050509150915091509250929050565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b606060008060038054905090508181101561047e57600080fd5b60016003805490500381111561049a5760016003805490500390505b6000600183830301604002905060008167ffffffffffffffff811180156104c057600080fd5b506040519080825280601f01601f1916602001820160405280156104f35781602001600182028036833780820191505090505b5090506000602067ffffffffffffffff8111801561051057600080fd5b506040519080825280601f01601f1916602001820160405280156105435781602001600182028036833780820191505090505b50905060008590505b84811161062a576003818154811061056057fe5b906000526020600020018054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156105fe5780601f106105d3576101008083540402835291602001916105fe565b820191906000526020600020905b8154815290600101906020018083116105e157829003601f168201915b50505050509150610610848385611021565b61061982611082565b84039350808060010191505061054c565b50819550505050505090565b6060600380549050821061067f576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016106769061189b565b60405180910390fd5b6003828154811061068c57fe5b906000526020600020018054600181600116156101000203166002900480601f01602080910402602001604051908101604052809291908181526020018280546001816001161561010002031660029004801561072a5780601f106106ff5761010080835404028352916020019161072a565b820191906000526020600020905b81548152906001019060200180831161070d57829003601f168201915b50505050509050919050565b61073e611019565b73ffffffffffffffffffffffffffffffffffffffff1661075c61043b565b73ffffffffffffffffffffffffffffffffffffffff16146107e5576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600067ffffffffffffffff1660018383604051610803929190611756565b908152602001604051809103902060000160049054906101000a900467ffffffffffffffff1667ffffffffffffffff161415610874576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161086b9061185b565b60405180910390fd5b60006001808484604051610889929190611756565b908152602001604051809103902060000160009054906101000a900463ffffffff160390506001600380549050038163ffffffff161461097f576003600160038054905003815481106108d857fe5b9060005260206000200160038263ffffffff16815481106108f557fe5b90600052602060002001908054600181600116156101000203166002900461091e9291906110c1565b5060018101600160038363ffffffff168154811061093857fe5b9060005260206000200160405161094f919061176f565b908152602001604051809103902060000160006101000a81548163ffffffff021916908363ffffffff1602179055505b600380548061098a57fe5b6001900381819060005260206000200160006109a69190611156565b905582826040516109b8929190611756565b60405180910390207f4b5338540b4d1c0f6dd0308a25f633b7ff60472f894d711cff9dd64e35c613b2600185856040516109f3929190611756565b9081526020016040518091039020600101604051610a119190611839565b60405180910390a260018383604051610a2b929190611756565b9081526020016040518091039020600080820160006101000a81549063ffffffff02191690556000820160046101000a81549067ffffffffffffffff0219169055600182016000610a7c9190611156565b5050505050565b610a8b611019565b73ffffffffffffffffffffffffffffffffffffffff16610aa961043b565b73ffffffffffffffffffffffffffffffffffffffff1614610b32576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff161415610bb8576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401808060200182810382526026815260200180611a0c6026913960400191505060405180910390fd5b8073ffffffffffffffffffffffffffffffffffffffff1660008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b610c7d611019565b73ffffffffffffffffffffffffffffffffffffffff16610c9b61043b565b73ffffffffffffffffffffffffffffffffffffffff1614610d24576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657281525060200191505060405180910390fd5b60008484905011610d6a576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610d619061187b565b60405180910390fd5b60008282905011610db0576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610da7906118bb565b60405180910390fd5b600067ffffffffffffffff1660018585604051610dce929190611756565b908152602001604051809103902060000160049054906101000a900467ffffffffffffffff1667ffffffffffffffff161415610e8a576003848490918060018154018082558091505060019003906000526020600020016000909192909192909192909192509190610e4192919061119e565b5060038054905060018585604051610e5a929190611756565b908152602001604051809103902060000160006101000a81548163ffffffff021916908363ffffffff1602179055505b604051806060016040528060018686604051610ea7929190611756565b908152602001604051809103902060000160009054906101000a900463ffffffff1663ffffffff1681526020014267ffffffffffffffff16815260200183838080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505081525060018585604051610f3e929190611756565b908152602001604051809103902060008201518160000160006101000a81548163ffffffff021916908363ffffffff16021790555060208201518160000160046101000a81548167ffffffffffffffff021916908367ffffffffffffffff1602179055506040820151816001019080519060200190610fbe92919061122c565b509050508383604051610fd2929190611756565b60405180910390207fbaa206e5ea800eb88bce099f453fee53295b793b9d5d1cfc4ce4b6db06a34f53838360405161100b9291906117c3565b60405180910390a250505050565b600033905090565b6000602083518161102e57fe5b0490506000602084518161103e57fe5b06111561104e5780806001019150505b60018101905060005b8181101561107b576020810284015185840152602085039450600181019050611057565b5050505050565b6000602082518161108f57fe5b0490506000602083518161109f57fe5b06146110ae5780806001019150505b8080600101915050602081029050919050565b828054600181600116156101000203166002900490600052602060002090601f0160209004810192826110f75760008555611145565b82601f106111085780548555611145565b8280016001018555821561114557600052602060002091601f016020900482015b82811115611144578254825591600101919060010190611129565b5b50905061115291906112ba565b5090565b50805460018160011615610100020316600290046000825580601f1061117c575061119b565b601f01602090049060005260206000209081019061119a91906112ba565b5b50565b828054600181600116156101000203166002900490600052602060002090601f0160209004810192826111d4576000855561121b565b82601f106111ed57803560ff191683800117855561121b565b8280016001018555821561121b579182015b8281111561121a5782358255916020019190600101906111ff565b5b50905061122891906112ba565b5090565b828054600181600116156101000203166002900490600052602060002090601f01602090048101928261126257600085556112a9565b82601f1061127b57805160ff19168380011785556112a9565b828001600101855582156112a9579182015b828111156112a857825182559160200191906001019061128d565b5b5090506112b691906112ba565b5090565b5b808211156112d35760008160009055506001016112bb565b5090565b6000813590506112e6816119dd565b92915050565b60008083601f8401126112fe57600080fd5b8235905067ffffffffffffffff81111561131757600080fd5b60208301915083600182028301111561132f57600080fd5b9250929050565b600081359050611345816119f4565b92915050565b60006020828403121561135d57600080fd5b600061136b848285016112d7565b91505092915050565b6000806020838503121561138757600080fd5b600083013567ffffffffffffffff8111156113a157600080fd5b6113ad858286016112ec565b92509250509250929050565b600080600080604085870312156113cf57600080fd5b600085013567ffffffffffffffff8111156113e957600080fd5b6113f5878288016112ec565b9450945050602085013567ffffffffffffffff81111561141457600080fd5b611420878288016112ec565b925092505092959194509250565b60006020828403121561144057600080fd5b600061144e84828501611336565b91505092915050565b6114608161194e565b82525050565b60006114718261190b565b61147b8185611921565b935061148b818560208601611999565b611494816119cc565b840191505092915050565b60006114ab8385611932565b93506114b883858461198a565b6114c1836119cc565b840190509392505050565b60006114d88385611943565b93506114e583858461198a565b82840190509392505050565b60006114fc82611916565b6115068185611932565b9350611516818560208601611999565b61151f816119cc565b840191505092915050565b600081546001811660008114611547576001811461156d576115b1565b607f60028304166115588187611932565b955060ff1983168652602086019350506115b1565b6002820461157b8187611932565b9550611586856118f6565b60005b828110156115a857815481890152600182019150602081019050611589565b80880195505050505b505092915050565b6000815460018116600081146115d657600181146115fb5761163f565b607f60028304166115e78187611943565b955060ff198316865280860193505061163f565b600282046116098187611943565b9550611614856118f6565b60005b8281101561163657815481890152600182019150602081019050611617565b82880195505050505b505092915050565b6000611654601583611932565b91507f446f63756d656e742073686f756c6420657869737400000000000000000000006000830152602082019050919050565b6000611694601883611932565b91507f5a65726f206e616d65206973206e6f7420616c6c6f77656400000000000000006000830152602082019050919050565b60006116d4601383611932565b91507f496e646578206f7574206f6620626f756e6473000000000000000000000000006000830152602082019050919050565b6000611714601a83611932565b91507f53686f756c64206e6f74206265206120656d70747920646174610000000000006000830152602082019050919050565b61175081611980565b82525050565b60006117638284866114cc565b91508190509392505050565b600061177b82846115b9565b915081905092915050565b600060208201905061179b6000830184611457565b92915050565b600060208201905081810360008301526117bb8184611466565b905092915050565b600060208201905081810360008301526117de81848661149f565b90509392505050565b6000602082019050818103600083015261180181846114f1565b905092915050565b6000604082019050818103600083015261182381856114f1565b90506118326020830184611747565b9392505050565b60006020820190508181036000830152611853818461152a565b905092915050565b6000602082019050818103600083015261187481611647565b9050919050565b6000602082019050818103600083015261189481611687565b9050919050565b600060208201905081810360008301526118b4816116c7565b9050919050565b600060208201905081810360008301526118d481611707565b9050919050565b60006020820190506118f06000830184611747565b92915050565b60008190508160005260206000209050919050565b600081519050919050565b600081519050919050565b600082825260208201905092915050565b600082825260208201905092915050565b600081905092915050565b600061195982611960565b9050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000819050919050565b82818337600083830152505050565b60005b838110156119b757808201518184015260208101905061199c565b838111156119c6576000848401525b50505050565b6000601f19601f8301169050919050565b6119e68161194e565b81146119f157600080fd5b50565b6119fd81611980565b8114611a0857600080fd5b5056fe4f776e61626c653a206e6577206f776e657220697320746865207a65726f2061646472657373a26469706673582212202e224470abca64ef80a954543c39081ef26f65fc3ef7b44996a3376adb7a83f564736f6c63430007060033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "_removeDocument(string)": {
+        "details": "Can only be executed by the owner of the contract.",
+        "params": {
+          "_name": "Name of the document. It should be unique always"
+        }
+      },
+      "_setDocument(string,string)": {
+        "details": "Can only be executed by the owner of the contract.",
+        "params": {
+          "_data": "Off-chain data of the document from where it is accessible to investors/advisors to read.",
+          "_name": "Name of the document. It should be unique always"
+        }
+      },
+      "getAllDocuments()": {
+        "returns": {
+          "_0": "string List of all documents names present in the contract."
+        }
+      },
+      "getDocument(string)": {
+        "params": {
+          "_name": "Name of the document"
+        },
+        "returns": {
+          "_0": "string The data associated with the document.",
+          "_1": "uint256 the timestamp at which the document was last modified."
+        }
+      },
+      "getDocumentCount()": {
+        "returns": {
+          "_0": "uint256 Count of the document names present in the contract."
+        }
+      },
+      "getDocumentName(uint256)": {
+        "returns": {
+          "_0": "string Name of the document name."
+        }
+      },
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "title": "Standard implementation of ERC1643 Document management",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "_removeDocument(string)": {
+        "notice": "Used to remove an existing document from the contract by giving the name of the document."
+      },
+      "_setDocument(string,string)": {
+        "notice": "Used to attach a new document to the contract, or update the data or hash of an existing attached document"
+      },
+      "getAllDocuments()": {
+        "notice": "Used to retrieve a full list of documents attached to the smart contract."
+      },
+      "getDocument(string)": {
+        "notice": "Used to return the details of a document with a known name (`string`)."
+      },
+      "getDocumentCount()": {
+        "notice": "Used to retrieve the total documents in the smart contract."
+      },
+      "getDocumentName(uint256)": {
+        "notice": "Used to retrieve the document name from index in the smart contract."
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 7,
+        "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 153,
+        "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+        "label": "_documents",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_string_memory_ptr,t_struct(Document)149_storage)"
+      },
+      {
+        "astId": 157,
+        "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+        "label": "_docIndexes",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_string_memory_ptr,t_uint32)"
+      },
+      {
+        "astId": 160,
+        "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+        "label": "_docNames",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_array(t_string_storage)dyn_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_string_storage)dyn_storage": {
+        "base": "t_string_storage",
+        "encoding": "dynamic_array",
+        "label": "string[]",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_string_memory_ptr,t_struct(Document)149_storage)": {
+        "encoding": "mapping",
+        "key": "t_string_memory_ptr",
+        "label": "mapping(string => struct BatchDocuments.Document)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Document)149_storage"
+      },
+      "t_mapping(t_string_memory_ptr,t_uint32)": {
+        "encoding": "mapping",
+        "key": "t_string_memory_ptr",
+        "label": "mapping(string => uint32)",
+        "numberOfBytes": "32",
+        "value": "t_uint32"
+      },
+      "t_string_memory_ptr": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      },
+      "t_string_storage": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      },
+      "t_struct(Document)149_storage": {
+        "encoding": "inplace",
+        "label": "struct BatchDocuments.Document",
+        "members": [
+          {
+            "astId": 144,
+            "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+            "label": "docIndex",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint32"
+          },
+          {
+            "astId": 146,
+            "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+            "label": "lastModified",
+            "offset": 4,
+            "slot": "0",
+            "type": "t_uint64"
+          },
+          {
+            "astId": 148,
+            "contract": "contracts/Utils/BatchDocuments.sol:BatchDocuments",
+            "label": "data",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_string_storage"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      },
+      "t_uint64": {
+        "encoding": "inplace",
+        "label": "uint64",
+        "numberOfBytes": "8"
+      }
+    }
+  }
+}

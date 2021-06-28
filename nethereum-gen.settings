@@ -1,0 +1,7 @@
+{
+    "projectName": "AnnexAuction",
+    "namespace": "AnnexAuction.Contracts",
+    "lang": 0,
+    "autoCodeGen": true,
+    "projectPath": "../"
+}
