@@ -832,8 +832,8 @@ contract AnnexBatchAuction is Ownable {
                 address(auction.biddingToken),
                 auctionTokenAmount,
                 biddingTokenAmount,
-                0, // slippage is unavoidable
-                0, // slippage is unavoidable
+                0,
+                0,
                 address(this),
                 block.timestamp + 600
             );
