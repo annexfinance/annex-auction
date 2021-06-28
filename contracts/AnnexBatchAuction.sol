@@ -821,13 +821,13 @@ contract AnnexBatchAuction is Ownable {
         );
         // add the liquidity
         return
-            uniswapV2Router.addLiquidity(
+            pancakeswapV2Router.addLiquidity(
                 address(auction.auctioningToken),
                 address(auction.biddingingToken),
                 auctionTokenAmount,
                 biddingTokenAmount,
-                0, // slippage is unavoidable
-                0, // slippage is unavoidable
+                0,
+                0,
                 address(this),
                 block.timestamp + 600
             );
