@@ -4,8 +4,8 @@ import { DeployResult, DeploymentsExtension } from "hardhat-deploy/types";
 
 export const contractNames = {
   annexAuction: "AnnexBatchAuction",
-  // dutchAuction: "AnnexDutchAuction",
-  // fixedSwap: "AnnexFixedSwap",
+  dutchAuction: "AnnexDutchAuction",
+  fixedSwap: "AnnexFixedSwap",
   multiCall: "MultiCall",
   wbnb:"WBNB",
   documents:"BatchDocuments",

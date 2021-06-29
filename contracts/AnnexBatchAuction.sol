@@ -216,8 +216,8 @@ contract AnnexBatchAuction is Ownable {
     // pair             = USDT-ANN
 
     function initiateAuction(
-        IERC20 _auctioningToken,
-        IERC20 _biddingToken,
+        IERC20 _auctioningToken, // token 0
+        IERC20 _biddingToken,    // token 1
         uint256 orderCancellationEndDate,
         uint256 auctionEndDate,
         uint96 _auctionedSellAmount,
@@ -921,7 +921,7 @@ contract AnnexBatchAuction is Ownable {
     //--------------------------------------------------------
 
     function setDocument(string calldata _name, string calldata _data)
-        external
+        external onlyOwner()
     {
         documents._setDocument(_name, _data);
     }
