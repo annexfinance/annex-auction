@@ -222,14 +222,9 @@ contract AnnexBatchAuction is Ownable {
     // pair             = USDT-ANN
 
     function initiateAuction(
-<<<<<<< HEAD
         IERC20 _auctioningToken,
         IERC20 _biddingToken,
         address accessManagerContract,
-=======
-        IERC20 _auctioningToken, // token 0
-        IERC20 _biddingToken, // token 1
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
         uint256 orderCancellationEndDate,
         uint256 auctionEndDate,
         uint256 minimumBiddingAmountPerOrder,
@@ -727,7 +722,6 @@ contract AnnexBatchAuction is Ownable {
             sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
         }
         if (!minFundingThresholdNotReached) {
-<<<<<<< HEAD
             // sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
             uint256 lp = calculateLPTokens(
                 auctionId,
@@ -735,13 +729,6 @@ contract AnnexBatchAuction is Ownable {
             );
 
             IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
-=======
-            sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
-
-            uint256 lp =
-                calculateLPTokens(auctionId, uint96(sumBiddingTokenAmount));
-            auction.pancakeswapV2Pair.transfer(
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
                 registeredUsers.getAddressAt(userId),
                 lp
             );
@@ -755,18 +742,11 @@ contract AnnexBatchAuction is Ownable {
         uint64 auctioneerId,
         uint96 fullAuctionedAmount
     ) internal {
-<<<<<<< HEAD
         uint256 feeAmount = fullAuctionedAmount
         .mul(auctionData[auctionId].feeNumerator)
         .div(FEE_DENOMINATOR); //[20]
         // if minimum funding threshold is not reached we will send back all auctioning tokens
         // to the auctioneer
-=======
-        uint256 feeAmount =
-            fullAuctionedAmount.mul(auctionData[auctionId].feeNumerator).div(
-                FEE_DENOMINATOR
-            ); //[20]
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
         if (auctionData[auctionId].minFundingThresholdNotReached) {
             sendOutTokens(
                 auctionId,
@@ -783,20 +763,10 @@ contract AnnexBatchAuction is Ownable {
             uint256 unsettledAuctionTokens =
                 fullAuctionedAmount.sub(fillVolumeOfAuctioneerOrder);
             // auctioningTokenAmount = unsettledAuctionTokens + ( ( feeAmount * unsettledAuctionTokens ) / fullAuctionedAmount)
-<<<<<<< HEAD
             // auctioning tokens which are sold
             uint256 auctioningTokenAmount = unsettledAuctionTokens.add(
                 feeAmount.mul(unsettledAuctionTokens).div(fullAuctionedAmount)
             );
-=======
-            // remaining auctioning tokens which are sold
-            uint256 auctioningTokenAmount =
-                unsettledAuctionTokens.add(
-                    feeAmount.mul(unsettledAuctionTokens).div(
-                        fullAuctionedAmount
-                    )
-                );
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
             // biddingTokenAmount = (fillVolumeOfAuctioneerOrder * priceDenominator) / priceNumerator
             uint256 biddingTokenAmount =
                 fillVolumeOfAuctioneerOrder.mul(priceDenominator).div(
@@ -805,7 +775,6 @@ contract AnnexBatchAuction is Ownable {
 
             // instead of send bidding tokens to the auctioneer account we will add these bidding tokens
             // to the pool with total auctioned amount of tokens.
-<<<<<<< HEAD
             (, , uint256 liquidity) = addLiquidity(
                 auctionId,
                 fullAuctionedAmount,
@@ -813,21 +782,6 @@ contract AnnexBatchAuction is Ownable {
             );
             emit ClaimedLPFromOrder(auctionId, auctioneerId, liquidity);
             sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
-=======
-            (, , uint256 liquidity) =
-                addLiquidity(
-                    auctionId,
-                    fullAuctionedAmount,
-                    biddingTokenAmount
-                );
-
-            // sendOutTokens(
-            //     auctionId,
-            //     auctioningTokenAmount,
-            //     biddingTokenAmount,
-            //     auctioneerId
-            // ); //[5]
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
             // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
             sendOutTokens(
                 auctionId,
@@ -846,7 +800,6 @@ contract AnnexBatchAuction is Ownable {
         returns (uint256)
     {
         AuctionData storage auction = auctionData[auctionId];
-<<<<<<< HEAD
         (, , uint96 totalBiddingTokenAmount) = auction
         .clearingPriceOrder
         .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
@@ -856,16 +809,6 @@ contract AnnexBatchAuction is Ownable {
                 address(this)
             )
         );
-=======
-        (, , uint96 totalBiddingTokenAmount) =
-            auction.clearingPriceOrder.decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
-        uint96 totalLP =
-            uint96(
-                IPancakeswapV2Pair(auction.pancakeswapV2Pair).balanceOf(
-                    address(this)
-                )
-            );
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
         return (
             biddingTokenAmount.div(totalBiddingTokenAmount).mul(totalLP.div(2))
         );
@@ -978,18 +921,9 @@ contract AnnexBatchAuction is Ownable {
     // Getter & Setters
     //--------------------------------------------------------
 
-<<<<<<< HEAD
     // function setThreshold(uint256 _threshold) external {
     //     threshold = _threshold;
     // }
-=======
-    function setDocument(string calldata _name, string calldata _data)
-        external
-        onlyOwner()
-    {
-        documents._setDocument(_name, _data);
-    }
->>>>>>> 7e0a455096567d6a41d741dd3fecbf7aef7c8598
 
     // function getThreshold() external view returns (uint256) {
     //     return threshold;
