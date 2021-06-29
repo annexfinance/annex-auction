@@ -7,6 +7,7 @@
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
+    "size":"hardhat size-contracts --show-stack-traces",
     "deploy": "hardhat deploy --network bsctestnet",
     "flatten": "hardhat flatten ./contracts/AnnexBatchAuction.sol > ./flatten/AnnexBatchAuction.sol",
     "verify": "hardhat etherscan-verify --license None --network bsctestnet",

@@ -7,6 +7,13 @@ pragma solidity ^0.6.0;
 // The only change is uint16 -> uint64
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/** 
+    INVALID_ID: Must have ID to get Address
+    INVALID_ADDRESS: Must have Address to get ID
+    ERROR_ZERO : Cannot insert zero address
+    ERROR_64 : Cannot insert max uint64
+**/
+
 library IdToAddressBiMap {
     struct Data {
         mapping(uint64 => address) idToAddress;
@@ -30,7 +37,7 @@ library IdToAddressBiMap {
         view
         returns (address)
     {
-        require(hasId(self, id), "Must have ID to get Address");
+        require(hasId(self, id), "INVALID_ID");
         return self.idToAddress[id + 1];
     }
 
@@ -39,7 +46,7 @@ library IdToAddressBiMap {
         view
         returns (uint64)
     {
-        require(hasAddress(self, addr), "Must have Address to get ID");
+        require(hasAddress(self, addr), "INVALID_ADDRESS");
         return self.addressToId[addr] - 1;
     }
 
@@ -48,8 +55,8 @@ library IdToAddressBiMap {
         uint64 id,
         address addr
     ) internal returns (bool) {
-        require(addr != address(0), "Cannot insert zero address");
-        require(id != uint64(-1), "Cannot insert max uint64");
+        require(addr != address(0), "ERROR_ZERO");
+        require(id != uint64(-1), "ERROR_64");
         // Ensure bijectivity of the mappings
         if (
             self.addressToId[addr] != 0 ||

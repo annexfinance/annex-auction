@@ -3,6 +3,18 @@ pragma solidity >=0.6.8;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+
+/**
+    ERROR_ZERO : Inserting zero is not supported
+    INVALID_ELE : Inserting element is not valid
+    ERROR_SAME_ORDER : user is not allowed to place same order twice
+    EMPTY_SET : Trying to get first from empty set
+    ERROR_NEXT : Trying to get next of last element
+    NON_EXISTENT : Trying to get next of non-existent element
+
+    
+**/
+
 library IterableOrderedOrderSet {
     using SafeMath for uint96;
     using IterableOrderedOrderSet for bytes32;
@@ -51,10 +63,10 @@ library IterableOrderedOrderSet {
         bytes32 elementBeforeNewOne
     ) internal returns (bool) {
         (, , uint96 denominator) = decodeOrder(elementToInsert);
-        require(denominator != uint96(0), "Inserting zero is not supported");
+        require(denominator != uint96(0), "ERROR_ZERO");
         require(
             elementToInsert != QUEUE_START && elementToInsert != QUEUE_END,
-            "Inserting element is not valid"
+            "INVALID_ELE"
         );
         if (contains(self, elementToInsert)) {
             return false;
@@ -176,7 +188,7 @@ library IterableOrderedOrderSet {
         if (priceNumeratorLeft > priceNumeratorRight) return false;
         require(
             userIdLeft != userIdRight,
-            "user is not allowed to place same order twice"
+            "ERROR_SAME_ORDER"
         );
         if (userIdLeft < userIdRight) {
             return true;
@@ -185,7 +197,7 @@ library IterableOrderedOrderSet {
     }
 
     function first(Data storage self) internal view returns (bytes32) {
-        require(!isEmpty(self), "Trying to get first from empty set");
+        require(!isEmpty(self), "EMPTY_SET");
         return self.nextMap[QUEUE_START];
     }
 
@@ -194,11 +206,11 @@ library IterableOrderedOrderSet {
         view
         returns (bytes32)
     {
-        require(value != QUEUE_END, "Trying to get next of last element");
+        require(value != QUEUE_END, "ERROR_NEXT");
         bytes32 nextElement = self.nextMap[value];
         require(
             nextElement != bytes32(0),
-            "Trying to get next of non-existent element"
+            "NON_EXISTENT"
         );
         return nextElement;
     }

@@ -10,7 +10,7 @@ import "./libraries/IterableOrderedOrderSet.sol";
 import "./interfaces/AllowListVerifier.sol";
 import "./libraries/IdToAddressBiMap.sol";
 import "./libraries/SafeCast.sol";
-import "./interfaces/IDocuments.sol";
+// import "./interfaces/IDocuments.sol";
 import "./interfaces/IPancakeswapV2Pair.sol";
 import "./interfaces/IPancakeswapV2Factory.sol";
 import "./interfaces/IPancakeswapV2Router02.sol";
@@ -41,7 +41,6 @@ Errors details
     INVALID_LIMIT_PRICE = limit price not better than mimimal offer
     NOT_CLAIMABLE = order is no longer claimable
     SAME_USER_CAN_CLAIM= only allowed to claim for same user
-
 **/
 
 contract AnnexBatchAuction is Ownable {
@@ -57,31 +56,50 @@ contract AnnexBatchAuction is Ownable {
     /**
     @param {auctioningToken}
     **/
+
     struct AuctionData {
+        // address of bidding token
         IERC20 auctioningToken;
+        // address of auctioning token
         IERC20 biddingToken;
-        IPancakeswapV2Pair pancakeswapV2Pair;
+        // This will be the date after which the bidder cannot cancel his orders.
         uint256 orderCancellationEndDate;
+        // auction end date at which auction will end
         uint256 auctionEndDate;
-        bytes32 initialAuctionOrder;
+        // This will be the minimum amount of bidding tokens a bidder can bid
         uint256 minimumBiddingAmountPerOrder;
+        // this will be the sum of bid amount during precalculateSellAmountSum()
         uint256 interimSumBidAmount;
+        // auction fee for auctioneer
+        uint256 feeNumerator;
+        // this will be the minimum funding threshold of bidding tokens that auctioneer
+        // wants in return of auctioning tokens.
+        uint256 minFundingThreshold;
+        // This will be the initial order during auction creation which will be consist of
+        // minimum buy amount against all auctioned tokens and total auctioned tokens by auctioneer
+        bytes32 initialAuctionOrder;
+        // The last viewed order during precalculateSellAmountSum function.
         bytes32 interimOrder;
+        // The last order at which auction will be concluded will be the clearingPriceOrder
         bytes32 clearingPriceOrder;
         uint96 volumeClearingPriceOrder;
+        // flag to check either auction get reached minimum funding threshold or not
         bool minFundingThresholdNotReached;
+        // flag for automatically auction settlement
         bool isAtomicClosureAllowed;
-        uint256 feeNumerator;
-        uint256 minFundingThreshold;
     }
+
     mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
     mapping(uint256 => AuctionData) public auctionData; // Store auctions details
     mapping(uint256 => address) public auctionAccessManager;
     mapping(uint256 => bytes) public auctionAccessData;
+    // auctionId => liquidity pool
+    //address of pancakeswap liquidity pools of pairs auctioningToken-biddingToken
+    mapping(uint256 => address) public liquidityPools;
 
-    IDocuments public immutable documents; // for storing documents
-    // IERC20 public annexToken;
+    // IDocuments public immutable documents; // for storing documents
     IPancakeswapV2Router02 public immutable pancakeswapV2Router;
+    IERC20 public annexToken;
 
     IdToAddressBiMap.Data private registeredUsers;
     uint256 public auctionCounter; // counter for auctions
@@ -91,7 +109,6 @@ contract AnnexBatchAuction is Ownable {
 
     uint64 public feeReceiverUserId = 1;
     uint64 public numUsers; // counter of users
-    bool public inSwapAndLiquify;
 
     modifier atStageOrderPlacement(uint256 auctionId) {
         require(
@@ -130,12 +147,6 @@ contract AnnexBatchAuction is Ownable {
         _;
     }
 
-    modifier lockTheSwap {
-        inSwapAndLiquify = true;
-        _;
-        inSwapAndLiquify = false;
-    }
-
     event NewSellOrder(
         uint256 indexed auctionId,
         uint64 indexed userId,
@@ -156,7 +167,7 @@ contract AnnexBatchAuction is Ownable {
     );
     event ClaimedLPFromOrder(
         uint256 indexed auctionId,
-        uint64 indexed userId,
+        uint64 userId,
         uint256 lp
     );
 
@@ -169,12 +180,7 @@ contract AnnexBatchAuction is Ownable {
         uint256 auctionEndDate,
         uint64 userId,
         uint96 _auctionedSellAmount,
-        uint96 _minBuyAmount,
-        uint256 minimumBiddingAmountPerOrder,
-        uint256 minFundingThreshold,
-        address allowListContract,
-        bytes allowListData,
-        address lp
+        uint96 _minBuyAmount
     );
     event AuctionCleared(
         uint256 indexed auctionId,
@@ -184,8 +190,8 @@ contract AnnexBatchAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
 
-    constructor(address _router, address _documents) public Ownable() {
-        documents = IDocuments(_documents);
+    constructor(address _router) public {
+        // documents = IDocuments(_documents);
         pancakeswapV2Router = IPancakeswapV2Router02(_router);
     }
 
@@ -216,16 +222,16 @@ contract AnnexBatchAuction is Ownable {
     // pair             = USDT-ANN
 
     function initiateAuction(
-        IERC20 _auctioningToken, // token 0
-        IERC20 _biddingToken,    // token 1
+        IERC20 _auctioningToken,
+        IERC20 _biddingToken,
+        address accessManagerContract,
         uint256 orderCancellationEndDate,
         uint256 auctionEndDate,
-        uint96 _auctionedSellAmount,
-        uint96 _minBuyAmount,
         uint256 minimumBiddingAmountPerOrder,
         uint256 minFundingThreshold,
+        uint96 _auctionedSellAmount,
+        uint96 _minBuyAmount,
         bool isAtomicClosureAllowed,
-        address accessManagerContract,
         bytes memory accessManagerContractData
     ) public returns (uint256) {
         /* 
@@ -236,7 +242,10 @@ contract AnnexBatchAuction is Ownable {
         then 1010 will be added to the contract
         */
         // Auctioner can init an auction if he has 100 Ann
-        require(_biddingToken.balanceOf(msg.sender) >= 100, "NOT_ENOUGH_ANN");
+        require(
+            annexToken.balanceOf(msg.sender) >= threshold,
+            "NOT_ENOUGH_ANN"
+        );
         _auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -259,27 +268,30 @@ contract AnnexBatchAuction is Ownable {
             pancakeswapV2Router.factory()
         ).createPair(address(_auctioningToken), address(_biddingToken));
 
-        auctionData[auctionCounter] = AuctionData(
-            _auctioningToken,
-            _biddingToken,
-            IPancakeswapV2Pair(pancakeswapV2Pair),
-            orderCancellationEndDate,
-            auctionEndDate,
-            IterableOrderedOrderSet.encodeOrder(
-                userId,
-                _minBuyAmount,
-                _auctionedSellAmount
-            ),
-            minimumBiddingAmountPerOrder,
-            0,
-            IterableOrderedOrderSet.QUEUE_START,
-            bytes32(0),
-            0,
-            false,
-            isAtomicClosureAllowed,
-            feeNumerator,
-            minFundingThreshold
-        );
+        {
+            auctionData[auctionCounter] = AuctionData(
+                _auctioningToken,
+                _biddingToken,
+                orderCancellationEndDate,
+                auctionEndDate,
+                minimumBiddingAmountPerOrder,
+                0,
+                feeNumerator,
+                minFundingThreshold,
+                IterableOrderedOrderSet.encodeOrder(
+                    userId,
+                    _minBuyAmount,
+                    _auctionedSellAmount
+                ),
+                IterableOrderedOrderSet.QUEUE_START,
+                bytes32(0),
+                0,
+                false,
+                isAtomicClosureAllowed
+            );
+            liquidityPools[auctionCounter] = pancakeswapV2Pair;
+        }
+
         auctionAccessManager[auctionCounter] = accessManagerContract;
         auctionAccessData[auctionCounter] = accessManagerContractData;
 
@@ -291,12 +303,7 @@ contract AnnexBatchAuction is Ownable {
             auctionEndDate,
             userId,
             _auctionedSellAmount,
-            _minBuyAmount,
-            minimumBiddingAmountPerOrder,
-            minFundingThreshold,
-            accessManagerContract,
-            accessManagerContractData,
-            pancakeswapV2Pair
+            _minBuyAmount
         );
         return auctionCounter;
     }
@@ -526,7 +533,7 @@ contract AnnexBatchAuction is Ownable {
         settleAuction(auctionId);
     }
 
-    // @dev function settling the auction and calculating the price
+    // // @dev function settling the auction and calculating the price
     function settleAuction(uint256 auctionId)
         public
         atStageSolutionSubmission(auctionId)
@@ -715,19 +722,18 @@ contract AnnexBatchAuction is Ownable {
             sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
         }
         if (!minFundingThresholdNotReached) {
-            sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
-
+            // sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
             uint256 lp = calculateLPTokens(
                 auctionId,
                 uint96(sumBiddingTokenAmount)
             );
-            auction.pancakeswapV2Pair.transfer(
+
+            IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
                 registeredUsers.getAddressAt(userId),
                 lp
             );
+            emit ClaimedLPFromOrder(auctionId, userId, lp);
         }
-
-        emit ClaimedLPFromOrder(auctionId, userId, lp);
     }
 
     function processFeesAndAuctioneerFunds(
@@ -739,6 +745,8 @@ contract AnnexBatchAuction is Ownable {
         uint256 feeAmount = fullAuctionedAmount
         .mul(auctionData[auctionId].feeNumerator)
         .div(FEE_DENOMINATOR); //[20]
+        // if minimum funding threshold is not reached we will send back all auctioning tokens
+        // to the auctioneer
         if (auctionData[auctionId].minFundingThresholdNotReached) {
             sendOutTokens(
                 auctionId,
@@ -759,7 +767,7 @@ contract AnnexBatchAuction is Ownable {
                 fillVolumeOfAuctioneerOrder
             );
             // auctioningTokenAmount = unsettledAuctionTokens + ( ( feeAmount * unsettledAuctionTokens ) / fullAuctionedAmount)
-            // remaining auctioning tokens which are sold
+            // auctioning tokens which are sold
             uint256 auctioningTokenAmount = unsettledAuctionTokens.add(
                 feeAmount.mul(unsettledAuctionTokens).div(fullAuctionedAmount)
             );
@@ -775,13 +783,8 @@ contract AnnexBatchAuction is Ownable {
                 fullAuctionedAmount,
                 biddingTokenAmount
             );
-
-            // sendOutTokens(
-            //     auctionId,
-            //     auctioningTokenAmount,
-            //     biddingTokenAmount,
-            //     auctioneerId
-            // ); //[5]
+            emit ClaimedLPFromOrder(auctionId, auctioneerId, liquidity);
+            sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
             // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
             sendOutTokens(
                 auctionId,
@@ -803,8 +806,9 @@ contract AnnexBatchAuction is Ownable {
         (, , uint96 totalBiddingTokenAmount) = auction
         .clearingPriceOrder
         .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
+
         uint96 totalLP = uint96(
-            IPancakeswapV2Pair(auction.pancakeswapV2Pair).balanceOf(
+            IPancakeswapV2Pair(liquidityPools[auctionId]).balanceOf(
                 address(this)
             )
         );
@@ -878,22 +882,22 @@ contract AnnexBatchAuction is Ownable {
         }
     }
 
-    function registerUser(address user) public returns (uint64 userId) {
+    function registerUser(address user) public returns (uint64) {
         numUsers = numUsers.add(1).toUint64();
         require(
             registeredUsers.insert(numUsers, user),
             "REGISTERED" // User already registered
         );
-        // userId = numUsers;
         emit UserRegistration(user, numUsers);
+        return numUsers;
     }
 
-    function getUserId(address user) public returns (uint64 userId) {
+    function getUserId(address user) public returns (uint64) {
         if (registeredUsers.hasAddress(user)) {
-            userId = registeredUsers.getId(user);
+            return registeredUsers.getId(user);
         } else {
-            // userId = registerUser(user);
             emit NewUser(registerUser(user), user);
+            return registerUser(user);
         }
     }
 
@@ -917,40 +921,61 @@ contract AnnexBatchAuction is Ownable {
     }
 
     //--------------------------------------------------------
+    // Getter & Setters
+    //--------------------------------------------------------
+
+    // function setThreshold(uint256 _threshold) external {
+    //     threshold = _threshold;
+    // }
+
+    // function getThreshold() external view returns (uint256) {
+    //     return threshold;
+    // }
+
+    // function setAnnexAddress(address _annexToken) external {
+    //     annexToken = IERC20(_annexToken);
+    // }
+
+    // function getAnnexAddress() external view returns (address) {
+    //     return address(annexToken);
+    // }
+
+    //--------------------------------------------------------
     // Documents
     //--------------------------------------------------------
 
-    function setDocument(string calldata _name, string calldata _data)
-        external onlyOwner()
-    {
-        documents._setDocument(_name, _data);
-    }
+    // function setDocument(string calldata _name, string calldata _data)
+    //     external
+    //     onlyOwner()
+    // {
+    //     documents._setDocument(_name, _data);
+    // }
 
-    function getDocumentCount() external view returns (uint256) {
-        return documents.getDocumentCount();
-    }
+    // function getDocumentCount() external view returns (uint256) {
+    //     return documents.getDocumentCount();
+    // }
 
-    function getAllDocuments() external view returns (bytes memory) {
-        return documents.getAllDocuments();
-    }
+    // function getAllDocuments() external view returns (bytes memory) {
+    //     return documents.getAllDocuments();
+    // }
 
-    function getDocumentName(uint256 _index)
-        external
-        view
-        returns (string memory)
-    {
-        return documents.getDocumentName(_index);
-    }
+    // function getDocumentName(uint256 _index)
+    //     external
+    //     view
+    //     returns (string memory)
+    // {
+    //     return documents.getDocumentName(_index);
+    // }
 
-    function getDocument(string calldata _name)
-        external
-        view
-        returns (string memory, uint256)
-    {
-        return documents.getDocument(_name);
-    }
+    // function getDocument(string calldata _name)
+    //     external
+    //     view
+    //     returns (string memory, uint256)
+    // {
+    //     return documents.getDocument(_name);
+    // }
 
-    function removeDocument(string calldata _name) external {
-        documents._removeDocument(_name);
-    }
+    // function removeDocument(string calldata _name) external {
+    //     documents._removeDocument(_name);
+    // }
 }
