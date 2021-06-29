@@ -3,6 +3,7 @@ build
 env/*
 coverage/*
 coverage.json
+package-lock.json
 your_address_inputs.txt
 signatures/*
 

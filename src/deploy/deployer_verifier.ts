@@ -1,6 +1,5 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-
 import { contractNames } from "../ts/deploy";
 
 const deployVerifierContract: DeployFunction = async function (
@@ -9,16 +8,15 @@ const deployVerifierContract: DeployFunction = async function (
   const { deployments, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
   const { deploy } = deployments;
-
   const { allowListOffChainManaged } = contractNames;
 
-  await deploy(allowListOffChainManaged, {
-    from: deployer,
-    gasLimit: 12500000,
-    args: [],
-    log: true,
-    deterministicDeployment: true,
-  });
+  // await deploy(allowListOffChainManaged, {
+  //   from: deployer,
+  //   gasLimit: 60000000,
+  //   args: [],
+  //   log: true,
+  //   deterministicDeployment: true,
+  // });
 };
 
 export default deployVerifierContract;

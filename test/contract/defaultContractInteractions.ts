@@ -1,8 +1,6 @@
 import { Contract, BigNumber } from "ethers";
 import { ethers } from "hardhat";
-
 import { InitiateAuctionInput } from "../../src/ts/types";
-
 import { sendTxAndGetReturnValue } from "./utilities";
 
 type PartialAuctionInput = Partial<InitiateAuctionInput> &

@@ -1,229 +1,57 @@
-// Sources flattened with hardhat v2.4.0 https://hardhat.org
-
-// File contracts/interfaces/AllowListVerifier.sol
-
-// SPDX-License-Identifier: LGPL-3.0-or-later
-pragma solidity >=0.6.8;
-
-library AllowListVerifierHelper {
-    /// @dev Value returned by a call to `isAllowed` if the check
-    /// was successful. The value is defined as:
-    /// bytes4(keccak256("isAllowed(address,uint256,bytes)"))
-    bytes4 internal constant MAGICVALUE = 0x19a05a7e;
-}
-
-///
-/// @dev Standardized interface for an allowList manager for annexAuction
-/// The interface was inspired by EIP-1271
-interface AllowListVerifier {
-    /// @dev Should return whether the a specific user has access to an auction
-    /// by returning the magic value from AllowListVerifierHelper
-    function isAllowed(
-        address user,
-        uint256 auctionId,
-        bytes calldata callData
-    ) external view returns (bytes4);
-}
-
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v3.4.1
-
 // SPDX-License-Identifier: MIT
-
 pragma solidity >=0.6.0 <0.8.0;
 
-/**
- * @dev Interface of the ERC20 standard as defined in the EIP.
- */
 interface IERC20 {
-    /**
-     * @dev Returns the amount of tokens in existence.
-     */
     function totalSupply() external view returns (uint256);
-
-    /**
-     * @dev Returns the amount of tokens owned by `account`.
-     */
     function balanceOf(address account) external view returns (uint256);
-
-    /**
-     * @dev Moves `amount` tokens from the caller's account to `recipient`.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
-     */
     function transfer(address recipient, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Returns the remaining number of tokens that `spender` will be
-     * allowed to spend on behalf of `owner` through {transferFrom}. This is
-     * zero by default.
-     *
-     * This value changes when {approve} or {transferFrom} are called.
-     */
     function allowance(address owner, address spender) external view returns (uint256);
-
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * IMPORTANT: Beware that changing an allowance with this method brings the risk
-     * that someone may use both the old and the new allowance by unfortunate
-     * transaction ordering. One possible solution to mitigate this race
-     * condition is to first reduce the spender's allowance to 0 and set the
-     * desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     *
-     * Emits an {Approval} event.
-     */
     function approve(address spender, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Moves `amount` tokens from `sender` to `recipient` using the
-     * allowance mechanism. `amount` is then deducted from the caller's
-     * allowance.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
-     */
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Emitted when `value` tokens are moved from one account (`from`) to
-     * another (`to`).
-     *
-     * Note that `value` may be zero.
-     */
     event Transfer(address indexed from, address indexed to, uint256 value);
-
-    /**
-     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
-     * a call to {approve}. `value` is the new allowance.
-     */
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
-// File @openzeppelin/contracts/math/SafeMath.sol@v3.4.1
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
 library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
     function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
         uint256 c = a + b;
         if (c < a) return (false, 0);
         return (true, c);
     }
 
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
     function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
         if (b > a) return (false, 0);
         return (true, a - b);
     }
 
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
     function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
         if (a == 0) return (true, 0);
         uint256 c = a * b;
         if (c / a != b) return (false, 0);
         return (true, c);
     }
 
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
     function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
         if (b == 0) return (false, 0);
         return (true, a / b);
     }
 
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
     function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
         if (b == 0) return (false, 0);
         return (true, a % b);
     }
 
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
         return c;
     }
 
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b <= a, "SafeMath: subtraction overflow");
         return a - b;
     }
 
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) return 0;
         uint256 c = a * b;
@@ -231,268 +59,81 @@ library SafeMath {
         return c;
     }
 
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function div(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b > 0, "SafeMath: division by zero");
         return a / b;
     }
 
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function mod(uint256 a, uint256 b) internal pure returns (uint256) {
         require(b > 0, "SafeMath: modulo by zero");
         return a % b;
     }
 
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
     function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         return a - b;
     }
 
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryDiv}.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b > 0, errorMessage);
         return a / b;
     }
 
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
     function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b > 0, errorMessage);
         return a % b;
     }
 }
 
-
-// File @openzeppelin/contracts/utils/Address.sol@v3.4.1
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.2 <0.8.0;
-
-/**
- * @dev Collection of functions related to the address type
- */
 library Address {
-    /**
-     * @dev Returns true if `account` is a contract.
-     *
-     * [IMPORTANT]
-     * ====
-     * It is unsafe to assume that an address for which this function returns
-     * false is an externally-owned account (EOA) and not a contract.
-     *
-     * Among others, `isContract` will return false for the following
-     * types of addresses:
-     *
-     *  - an externally-owned account
-     *  - a contract in construction
-     *  - an address where a contract will be created
-     *  - an address where a contract lived, but was destroyed
-     * ====
-     */
-    function isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
 
+    function isContract(address account) internal view returns (bool) {
         uint256 size;
-        // solhint-disable-next-line no-inline-assembly
         assembly { size := extcodesize(account) }
         return size > 0;
     }
 
-    /**
-     * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
-     * `recipient`, forwarding all available gas and reverting on errors.
-     *
-     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
-     * of certain opcodes, possibly making contracts go over the 2300 gas limit
-     * imposed by `transfer`, making them unable to receive funds via
-     * `transfer`. {sendValue} removes this limitation.
-     *
-     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
-     *
-     * IMPORTANT: because control is transferred to `recipient`, care must be
-     * taken to not create reentrancy vulnerabilities. Consider using
-     * {ReentrancyGuard} or the
-     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
-     */
     function sendValue(address payable recipient, uint256 amount) internal {
         require(address(this).balance >= amount, "Address: insufficient balance");
-
-        // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
         (bool success, ) = recipient.call{ value: amount }("");
         require(success, "Address: unable to send value, recipient may have reverted");
     }
 
-    /**
-     * @dev Performs a Solidity function call using a low level `call`. A
-     * plain`call` is an unsafe replacement for a function call: use this
-     * function instead.
-     *
-     * If `target` reverts with a revert reason, it is bubbled up by this
-     * function (like regular Solidity function calls).
-     *
-     * Returns the raw returned data. To convert to the expected return value,
-     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
-     *
-     * Requirements:
-     *
-     * - `target` must be a contract.
-     * - calling `target` with `data` must not revert.
-     *
-     * _Available since v3.1._
-     */
     function functionCall(address target, bytes memory data) internal returns (bytes memory) {
       return functionCall(target, data, "Address: low-level call failed");
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
-     * `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
     function functionCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
         return functionCallWithValue(target, data, 0, errorMessage);
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but also transferring `value` wei to `target`.
-     *
-     * Requirements:
-     *
-     * - the calling contract must have an ETH balance of at least `value`.
-     * - the called Solidity function must be `payable`.
-     *
-     * _Available since v3.1._
-     */
     function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
         return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
-     * with `errorMessage` as a fallback revert reason when `target` reverts.
-     *
-     * _Available since v3.1._
-     */
     function functionCallWithValue(address target, bytes memory data, uint256 value, string memory errorMessage) internal returns (bytes memory) {
         require(address(this).balance >= value, "Address: insufficient balance for call");
         require(isContract(target), "Address: call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = target.call{ value: value }(data);
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
     function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
         return functionStaticCall(target, data, "Address: low-level static call failed");
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
     function functionStaticCall(address target, bytes memory data, string memory errorMessage) internal view returns (bytes memory) {
         require(isContract(target), "Address: static call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = target.staticcall(data);
         return _verifyCallResult(success, returndata, errorMessage);
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.4._
-     */
     function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
         return functionDelegateCall(target, data, "Address: low-level delegate call failed");
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.4._
-     */
     function functionDelegateCall(address target, bytes memory data, string memory errorMessage) internal returns (bytes memory) {
         require(isContract(target), "Address: delegate call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = target.delegatecall(data);
         return _verifyCallResult(success, returndata, errorMessage);
     }
@@ -501,11 +142,7 @@ library Address {
         if (success) {
             return returndata;
         } else {
-            // Look for revert reason and bubble it up if present
             if (returndata.length > 0) {
-                // The easiest way to bubble the revert reason is using memory via assembly
-
-                // solhint-disable-next-line no-inline-assembly
                 assembly {
                     let returndata_size := mload(returndata)
                     revert(add(32, returndata), returndata_size)
@@ -517,24 +154,6 @@ library Address {
     }
 }
 
-
-// File @openzeppelin/contracts/token/ERC20/SafeERC20.sol@v3.4.1
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-
-
-/**
- * @title SafeERC20
- * @dev Wrappers around ERC20 operations that throw on failure (when the token
- * contract returns false). Tokens that return no value (and instead revert or
- * throw on failure) are also supported, non-reverting calls are assumed to be
- * successful.
- * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,
- * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
- */
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
@@ -547,18 +166,7 @@ library SafeERC20 {
         _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
 
-    /**
-     * @dev Deprecated. This function has issues similar to the ones found in
-     * {IERC20-approve}, and its usage is discouraged.
-     *
-     * Whenever possible, use {safeIncreaseAllowance} and
-     * {safeDecreaseAllowance} instead.
-     */
     function safeApprove(IERC20 token, address spender, uint256 value) internal {
-        // safeApprove should only be called when setting an initial allowance,
-        // or when resetting it to zero. To increase and decrease it, use
-        // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'
-        // solhint-disable-next-line max-line-length
         require((value == 0) || (token.allowance(address(this), spender) == 0),
             "SafeERC20: approve from non-zero to non-zero allowance"
         );
@@ -575,52 +183,79 @@ library SafeERC20 {
         _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
-    /**
-     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
-     * on the return value: the return value is optional (but if data is returned, it must not be false).
-     * @param token The token targeted by the call.
-     * @param data The call data (encoded using abi.encode or one of its variants).
-     */
     function _callOptionalReturn(IERC20 token, bytes memory data) private {
-        // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
-        // we're implementing it ourselves. We use {Address.functionCall} to perform this call, which verifies that
-        // the target address contains contract code and also asserts for success in the low-level call.
-
         bytes memory returndata = address(token).functionCall(data, "SafeERC20: low-level call failed");
         if (returndata.length > 0) { // Return data is optional
-            // solhint-disable-next-line max-line-length
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
     }
 }
 
+abstract contract Context {
+    function _msgSender() internal view virtual returns (address payable) {
+        return msg.sender;
+    }
 
-// File contracts/libraries/IterableOrderedOrderSet.sol
+    function _msgData() internal view virtual returns (bytes memory) {
+        this;
+        return msg.data;
+    }
+}
 
-pragma solidity >=0.6.8;
+abstract contract Ownable is Context {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    constructor () internal {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
+    }
+
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    modifier onlyOwner() {
+        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    function renounceOwnership() public virtual onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+
+    function transferOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
+
+library Math {
+    function max(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a >= b ? a : b;
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
+    function average(uint256 a, uint256 b) internal pure returns (uint256) {
+        // (a + b) / 2 can overflow, so we distribute
+        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
+    }
+}
 
 library IterableOrderedOrderSet {
     using SafeMath for uint96;
     using IterableOrderedOrderSet for bytes32;
-
-    // represents smallest possible value for an order under comparison of fn smallerThan()
     bytes32 internal constant QUEUE_START =
         0x0000000000000000000000000000000000000000000000000000000000000001;
-    // represents highest possible value for an order under comparison of fn smallerThan()
     bytes32 internal constant QUEUE_END =
         0xffffffffffffffffffffffffffffffffffffffff000000000000000000000001;
 
-    /// The struct is used to implement a modified version of a doubly linked
-    /// list with sorted elements. The list starts from QUEUE_START to
-    /// QUEUE_END, and each node keeps track of its predecessor and successor.
-    /// Nodes can be added or removed.
-    ///
-    /// `next` and `prev` have a different role. The list is supposed to be
-    /// traversed with `next`. If `next` is empty, the node is not part of the
-    /// list. However, `prev` might be set for elements that are not in the
-    /// list, which is why it should not be used for traversing. Having a `prev`
-    /// set for elements not in the list is used to keep track of the history of
-    /// the position in the list of a removed element.
     struct Data {
         mapping(bytes32 => bytes32) nextMap;
         mapping(bytes32 => bytes32) prevMap;
@@ -665,19 +300,10 @@ library IterableOrderedOrderSet {
             return false;
         }
 
-        // `elementBeforeNewOne` might have been removed during the time it
-        // took to the transaction calling this function to be mined, so
-        // the new order cannot be appended directly to this. We follow the
-        // history of previous links backwards until we find an element in
-        // the list from which to start our search.
-        // Note that following the link backwards returns elements that are
-        // before `elementBeforeNewOne` in sorted order.
         while (self.nextMap[elementBeforeNewOne] == bytes32(0)) {
             elementBeforeNewOne = self.prevMap[elementBeforeNewOne];
         }
 
-        // `elementBeforeNewOne` belongs now to the linked list. We search the
-        // largest entry that is smaller than the element to insert.
         bytes32 previous;
         bytes32 current = elementBeforeNewOne;
         do {
@@ -693,9 +319,6 @@ library IterableOrderedOrderSet {
         return true;
     }
 
-    /// The element is removed from the linked list, but the node retains
-    /// information on which predecessor it had, so that a node in the chain
-    /// can be reached by following the predecessor chain of deleted elements.
     function removeKeepHistory(Data storage self, bytes32 elementToRemove)
         internal
         returns (bool)
@@ -711,10 +334,6 @@ library IterableOrderedOrderSet {
         return true;
     }
 
-    /// Remove an element from the chain, clearing all related storage.
-    /// Note that no elements should be inserted using as a reference point a
-    /// node deleted after calling `remove`, since an element in the `prev`
-    /// chain might be missing.
     function remove(Data storage self, bytes32 elementToRemove)
         internal
         returns (bool)
@@ -734,15 +353,9 @@ library IterableOrderedOrderSet {
         if (value == QUEUE_START) {
             return false;
         }
-        // Note: QUEUE_END is not contained in the list since it has no
-        // successor.
         return self.nextMap[value] != bytes32(0);
     }
-
-    // @dev orders are ordered by
-    // 1. their price - buyAmount/sellAmount
-    // 2. by the sellAmount
-    // 3. their userId,
+	
     function smallerThan(bytes32 orderLeft, bytes32 orderRight)
         internal
         pure
@@ -808,8 +421,6 @@ library IterableOrderedOrderSet {
             uint96 sellAmount
         )
     {
-        // Note: converting to uint discards the binary digits that do not fit
-        // the type.
         userId = uint64(uint256(_orderData) >> 192);
         buyAmount = uint96(uint256(_orderData) >> 96);
         sellAmount = uint96(uint256(_orderData));
@@ -829,51 +440,17 @@ library IterableOrderedOrderSet {
     }
 }
 
-
-// File @openzeppelin/contracts/math/Math.sol@v3.4.1
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Standard math utilities missing in the Solidity language.
- */
-library Math {
-    /**
-     * @dev Returns the largest of two numbers.
-     */
-    function max(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a >= b ? a : b;
-    }
-
-    /**
-     * @dev Returns the smallest of two numbers.
-     */
-    function min(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a < b ? a : b;
-    }
-
-    /**
-     * @dev Returns the average of two numbers. The result is rounded towards
-     * zero.
-     */
-    function average(uint256 a, uint256 b) internal pure returns (uint256) {
-        // (a + b) / 2 can overflow, so we distribute
-        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
-    }
+library AllowListVerifierHelper {
+    bytes4 internal constant MAGICVALUE = 0x19a05a7e;
 }
 
-
-// File contracts/libraries/IdToAddressBiMap.sol
-
-pragma solidity ^0.6.0;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Contract does not have test coverage, as it was nearly copied from:
-// https://github.com/gnosis/solidity-data-structures/blob/master/contracts/libraries/IdToAddressBiMap.sol
-// The only change is uint16 -> uint64
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
+interface AllowListVerifier {
+    function isAllowed(
+        address user,
+        uint256 auctionId,
+        bytes calldata callData
+    ) external view returns (bytes4);
+}
 
 library IdToAddressBiMap {
     struct Data {
@@ -931,19 +508,6 @@ library IdToAddressBiMap {
     }
 }
 
-
-// File contracts/libraries/SafeCast.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Wrappers over Solidity's uintXX/intXX casting operators with added overflow
- * checks.
- *
- * Logic was copied and modified from here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/SafeCast.sol
- */
 library SafeCast {
     function toUint96(uint256 value) internal pure returns (uint96) {
         require(value < 2**96, "SafeCast: value doesn't fit in 96 bits");
@@ -956,119 +520,108 @@ library SafeCast {
     }
 }
 
-
-// File @openzeppelin/contracts/utils/Context.sol@v3.4.1
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
+contract Documents {
+    struct Document {
+        uint32 docIndex;
+        uint64 lastModified;
+        string data;
     }
 
-    function _msgData() internal view virtual returns (bytes memory) {
-        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
-        return msg.data;
+    mapping(string => Document) internal _documents;
+    mapping(string => uint32) internal _docIndexes;
+    bytes32[] private _docNames;
+    event DocumentRemoved(string indexed _name, string _data);
+    event DocumentUpdated(string indexed _name, string _data);
+
+    function _setDocument(string calldata _name, string calldata _data)
+        internal
+    {
+        require(bytes(_name).length > 0, "Zero name is not allowed");
+        require(bytes(_data).length > 0, "Should not be a empty data");
+        if (_documents[_name].lastModified == uint64(0)) {
+            _docNames.push(stringToBytes32(_name));
+            _documents[_name].docIndex = uint32(_docNames.length);
+        }
+        _documents[_name] = Document(
+            _documents[_name].docIndex,
+            uint64(block.timestamp),
+            _data
+        );
+        emit DocumentUpdated(_name, _data);
+    }
+
+    function _removeDocument(string calldata _name) internal {
+        require(
+            _documents[_name].lastModified != uint64(0),
+            "Document should exist"
+        );
+        uint32 index = _documents[_name].docIndex - 1;
+        if (index != _docNames.length - 1) {
+            _docNames[index] = _docNames[_docNames.length - 1];
+            _documents[bytes32ToString(_docNames[index])].docIndex = index + 1;
+        }
+        _docNames.pop();
+        emit DocumentRemoved(_name, _documents[_name].data);
+        delete _documents[_name];
+    }
+
+    function getDocument(string calldata _name)
+        external
+        view
+        returns (string memory, uint256)
+    {
+        return (
+            _documents[_name].data,
+            uint256(_documents[_name].lastModified)
+        );
+    }
+
+    function getAllDocuments() external view returns (bytes32[] memory) {
+        return _docNames;
+    }
+
+    function getDocumentCount() external view returns (uint256) {
+        return _docNames.length;
+    }
+
+    function getDocumentName(uint256 _index)
+        external
+        view
+        returns (string memory)
+    {
+        require(_index < _docNames.length, "Index out of bounds");
+        return bytes32ToString(_docNames[_index]);
+    }
+
+    function stringToBytes32(string memory source)
+        public
+        pure
+        returns (bytes32 result)
+    {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+    function bytes32ToString(bytes32 _bytes32) public pure returns (string memory) {
+        uint8 i = 0;
+        while(i < 32 && _bytes32[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 32 && _bytes32[i] != 0; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
     }
 }
 
-
-// File @openzeppelin/contracts/access/Ownable.sol@v3.4.1
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor () internal {
-        address msgSender = _msgSender();
-        _owner = msgSender;
-        emit OwnershipTransferred(address(0), msgSender);
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
-}
-
-
-// File contracts/AnnexAuction.sol
-
-pragma solidity >=0.6.8;
-
-
-
-
-
-
-
-
-
-contract AnnexAuction is Ownable {
+contract AnnexBatchAuction is Ownable, Documents {
     using SafeERC20 for IERC20;
     using SafeMath for uint64;
     using SafeMath for uint96;
@@ -1172,16 +725,18 @@ contract AnnexAuction is Ownable {
         uint256 feeNumerator;
         uint256 minFundingThreshold;
     }
-    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders;
-    mapping(uint256 => AuctionData) public auctionData;
+    mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
+    mapping(uint256 => AuctionData) public auctionData; // Store auctions details
     mapping(uint256 => address) public auctionAccessManager;
     mapping(uint256 => bytes) public auctionAccessData;
 
     IdToAddressBiMap.Data private registeredUsers;
-    uint64 public numUsers;
-    uint256 public auctionCounter;
+    uint64 public numUsers; // counter of users
+    uint256 public auctionCounter; // counter for auctions
 
-    constructor() public Ownable() {}
+    constructor() public Ownable() {
+        // initAccessControls(_msgSender());
+    }
 
     uint256 public feeNumerator = 0;
     uint256 public constant FEE_DENOMINATOR = 1000;
@@ -1195,19 +750,10 @@ contract AnnexAuction is Ownable {
             newFeeNumerator <= 15,
             "Fee is not allowed to be set higher than 1.5%"
         );
-        // caution: for currently running auctions, the feeReceiverUserId is changing as well.
         feeReceiverUserId = getUserId(newfeeReceiverAddress);
         feeNumerator = newFeeNumerator;
     }
 
-    // @dev: function to intiate a new auction
-    // Warning: In case the auction is expected to raise more than
-    // 2^96 units of the biddingToken, don't start the auction, as
-    // it will not be settlable. This corresponds to about 79
-    // billion DAI.
-    //
-    // Prices between biddingToken and auctioningToken are expressed by a
-    // fraction whose components are stored as uint96.
     function initiateAuction(
         IERC20 _auctioningToken,
         IERC20 _biddingToken,
@@ -1221,7 +767,6 @@ contract AnnexAuction is Ownable {
         address accessManagerContract,
         bytes memory accessManagerContractData
     ) public returns (uint256) {
-        // withdraws sellAmount + fees
         _auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -1359,15 +904,13 @@ contract AnnexAuction is Ownable {
         }
         uint256 sumOfSellAmounts = 0;
         userId = getUserId(orderSubmitter);
-        uint256 minimumBiddingAmountPerOrder =
-            auctionData[auctionId].minimumBiddingAmountPerOrder;
+        uint256 minimumBiddingAmountPerOrder = auctionData[auctionId]
+        .minimumBiddingAmountPerOrder;
         for (uint256 i = 0; i < _minBuyAmounts.length; i++) {
             require(
                 _minBuyAmounts[i] > 0,
                 "_minBuyAmounts must be greater than 0"
             );
-            // orders should have a minimum bid size in order to limit the gas
-            // required to compute the final price of the auction.
             require(
                 _sellAmounts[i] > minimumBiddingAmountPerOrder,
                 "order too small"
@@ -1405,10 +948,9 @@ contract AnnexAuction is Ownable {
         uint64 userId = getUserId(msg.sender);
         uint256 claimableAmount = 0;
         for (uint256 i = 0; i < _sellOrders.length; i++) {
-            // Note: we keep the back pointer of the deleted element so that
-            // it can be used as a reference point to insert a new node.
-            bool success =
-                sellOrders[auctionId].removeKeepHistory(_sellOrders[i]);
+            bool success = sellOrders[auctionId].removeKeepHistory(
+                _sellOrders[i]
+            );
             if (success) {
                 (
                     uint64 userIdOfIter,
@@ -1438,8 +980,9 @@ contract AnnexAuction is Ownable {
         uint256 auctionId,
         uint256 iterationSteps
     ) public atStageSolutionSubmission(auctionId) {
-        (, , uint96 auctioneerSellAmount) =
-            auctionData[auctionId].initialAuctionOrder.decodeOrder();
+        (, , uint96 auctioneerSellAmount) = auctionData[auctionId]
+        .initialAuctionOrder
+        .decodeOrder();
         uint256 sumBidAmount = auctionData[auctionId].interimSumBidAmount;
         bytes32 iterOrder = auctionData[auctionId].interimOrder;
 
@@ -1454,11 +997,8 @@ contract AnnexAuction is Ownable {
             "reached end of order list"
         );
 
-        // it is checked that not too many iteration steps were taken:
-        // require that the sum of SellAmounts times the price of the last order
-        // is not more than initially sold amount
-        (, uint96 buyAmountOfIter, uint96 sellAmountOfIter) =
-            iterOrder.decodeOrder();
+        (, uint96 buyAmountOfIter, uint96 sellAmountOfIter) = iterOrder
+        .decodeOrder();
         require(
             sumBidAmount.mul(buyAmountOfIter) <
                 auctioneerSellAmount.mul(sellAmountOfIter),
@@ -1506,7 +1046,6 @@ contract AnnexAuction is Ownable {
         settleAuction(auctionId);
     }
 
-    // @dev function settling the auction and calculating the price
     function settleAuction(uint256 auctionId)
         public
         atStageSolutionSubmission(auctionId)
@@ -1523,7 +1062,6 @@ contract AnnexAuction is Ownable {
         uint256 buyAmountOfIter;
         uint256 sellAmountOfIter;
         uint96 fillVolumeOfAuctioneerOrder = fullAuctionedAmount;
-        // Sum order up, until fullAuctionedAmount is fully bought or queue end is reached
         do {
             bytes32 nextOrder = sellOrders[auctionId].next(currentOrder);
             if (nextOrder == IterableOrderedOrderSet.QUEUE_END) {
@@ -1542,29 +1080,20 @@ contract AnnexAuction is Ownable {
             currentBidSum.mul(buyAmountOfIter) >=
             fullAuctionedAmount.mul(sellAmountOfIter)
         ) {
-            // All considered/summed orders are sufficient to close the auction fully
-            // at price between current and previous orders.
-            uint256 uncoveredBids =
-                currentBidSum.sub(
-                    fullAuctionedAmount.mul(sellAmountOfIter).div(
-                        buyAmountOfIter
-                    )
-                );
+            uint256 uncoveredBids = currentBidSum.sub(
+                fullAuctionedAmount.mul(sellAmountOfIter).div(buyAmountOfIter)
+            );
 
             if (sellAmountOfIter >= uncoveredBids) {
                 //[13]
-                // Auction fully filled via partial match of currentOrder
-                uint256 sellAmountClearingOrder =
-                    sellAmountOfIter.sub(uncoveredBids);
+                uint256 sellAmountClearingOrder = sellAmountOfIter.sub(
+                    uncoveredBids
+                );
                 auctionData[auctionId]
-                    .volumeClearingPriceOrder = sellAmountClearingOrder
-                    .toUint96();
+                .volumeClearingPriceOrder = sellAmountClearingOrder.toUint96();
                 currentBidSum = currentBidSum.sub(uncoveredBids);
                 clearingOrder = currentOrder;
             } else {
-                //[14]
-                // Auction fully filled via price strictly between currentOrder and the order
-                // immediately before. For a proof, see the security-considerations.md
                 currentBidSum = currentBidSum.sub(sellAmountOfIter);
                 clearingOrder = IterableOrderedOrderSet.encodeOrder(
                     0,
@@ -1573,29 +1102,23 @@ contract AnnexAuction is Ownable {
                 );
             }
         } else {
-            // All considered/summed orders are not sufficient to close the auction fully at price of last order //[18]
-            // Either a higher price must be used or auction is only partially filled
 
             if (currentBidSum > minAuctionedBuyAmount) {
-                //[15]
-                // Price higher than last order would fill the auction
                 clearingOrder = IterableOrderedOrderSet.encodeOrder(
                     0,
                     fullAuctionedAmount,
                     currentBidSum.toUint96()
                 );
             } else {
-                //[16]
-                // Even at the initial auction price, the auction is partially filled
                 clearingOrder = IterableOrderedOrderSet.encodeOrder(
                     0,
                     fullAuctionedAmount,
                     minAuctionedBuyAmount
                 );
                 fillVolumeOfAuctioneerOrder = currentBidSum
-                    .mul(fullAuctionedAmount)
-                    .div(minAuctionedBuyAmount)
-                    .toUint96();
+                .mul(fullAuctionedAmount)
+                .div(minAuctionedBuyAmount)
+                .toUint96();
             }
         }
         auctionData[auctionId].clearingPriceOrder = clearingOrder;
@@ -1615,7 +1138,6 @@ contract AnnexAuction is Ownable {
             uint96(currentBidSum),
             clearingOrder
         );
-        // Gas refunds
         auctionAccessManager[auctionId] = address(0);
         delete auctionAccessData[auctionId];
         auctionData[auctionId].initialAuctionOrder = bytes32(0);
@@ -1636,50 +1158,47 @@ contract AnnexAuction is Ownable {
         )
     {
         for (uint256 i = 0; i < orders.length; i++) {
-            // Note: we don't need to keep any information about the node since
-            // no new elements need to be inserted.
             require(
                 sellOrders[auctionId].remove(orders[i]),
                 "order is no longer claimable"
             );
         }
         AuctionData memory auction = auctionData[auctionId];
-        (, uint96 priceNumerator, uint96 priceDenominator) =
-            auction.clearingPriceOrder.decodeOrder();
+        (, uint96 priceNumerator, uint96 priceDenominator) = auction
+        .clearingPriceOrder
+        .decodeOrder();
+
         (uint64 userId, , ) = orders[0].decodeOrder();
-        bool minFundingThresholdNotReached =
-            auctionData[auctionId].minFundingThresholdNotReached;
+        bool minFundingThresholdNotReached = auctionData[auctionId]
+        .minFundingThresholdNotReached;
         for (uint256 i = 0; i < orders.length; i++) {
-            (uint64 userIdOrder, uint96 buyAmount, uint96 sellAmount) =
-                orders[i].decodeOrder();
+            (uint64 userIdOrder, uint96 buyAmount, uint96 sellAmount) = orders[
+                i
+            ]
+            .decodeOrder();
             require(
                 userIdOrder == userId,
                 "only allowed to claim for same user"
             );
             if (minFundingThresholdNotReached) {
-                //[10]
                 sumBiddingTokenAmount = sumBiddingTokenAmount.add(sellAmount);
             } else {
-                //[23]
                 if (orders[i] == auction.clearingPriceOrder) {
-                    //[25]
                     sumAuctioningTokenAmount = sumAuctioningTokenAmount.add(
                         auction
-                            .volumeClearingPriceOrder
-                            .mul(priceNumerator)
-                            .div(priceDenominator)
+                        .volumeClearingPriceOrder
+                        .mul(priceNumerator)
+                        .div(priceDenominator)
                     );
                     sumBiddingTokenAmount = sumBiddingTokenAmount.add(
                         sellAmount.sub(auction.volumeClearingPriceOrder)
                     );
                 } else {
                     if (orders[i].smallerThan(auction.clearingPriceOrder)) {
-                        //[17]
                         sumAuctioningTokenAmount = sumAuctioningTokenAmount.add(
                             sellAmount.mul(priceNumerator).div(priceDenominator)
                         );
                     } else {
-                        //[24]
                         sumBiddingTokenAmount = sumBiddingTokenAmount.add(
                             sellAmount
                         );
@@ -1693,7 +1212,7 @@ contract AnnexAuction is Ownable {
             sumAuctioningTokenAmount,
             sumBiddingTokenAmount,
             userId
-        ); //[3]
+        );
     }
 
     function processFeesAndAuctioneerFunds(
@@ -1702,39 +1221,38 @@ contract AnnexAuction is Ownable {
         uint64 auctioneerId,
         uint96 fullAuctionedAmount
     ) internal {
-        uint256 feeAmount =
-            fullAuctionedAmount.mul(auctionData[auctionId].feeNumerator).div(
-                FEE_DENOMINATOR
-            ); //[20]
+        uint256 feeAmount = fullAuctionedAmount
+        .mul(auctionData[auctionId].feeNumerator)
+        .div(FEE_DENOMINATOR); //[20]
         if (auctionData[auctionId].minFundingThresholdNotReached) {
             sendOutTokens(
                 auctionId,
                 fullAuctionedAmount.add(feeAmount),
                 0,
                 auctioneerId
-            ); //[4]
+            );
         } else {
-            //[11]
-            (, uint96 priceNumerator, uint96 priceDenominator) =
-                auctionData[auctionId].clearingPriceOrder.decodeOrder();
-            uint256 unsettledAuctionTokens =
-                fullAuctionedAmount.sub(fillVolumeOfAuctioneerOrder);
-            uint256 auctioningTokenAmount =
-                unsettledAuctionTokens.add(
-                    feeAmount.mul(unsettledAuctionTokens).div(
-                        fullAuctionedAmount
-                    )
-                );
-            uint256 biddingTokenAmount =
-                fillVolumeOfAuctioneerOrder.mul(priceDenominator).div(
-                    priceNumerator
-                );
+
+            (, uint96 priceNumerator, uint96 priceDenominator) = auctionData[
+                auctionId
+            ]
+            .clearingPriceOrder
+            .decodeOrder();
+            uint256 unsettledAuctionTokens = fullAuctionedAmount.sub(
+                fillVolumeOfAuctioneerOrder
+            );
+            uint256 auctioningTokenAmount = unsettledAuctionTokens.add(
+                feeAmount.mul(unsettledAuctionTokens).div(fullAuctionedAmount)
+            );
+            uint256 biddingTokenAmount = fillVolumeOfAuctioneerOrder
+            .mul(priceDenominator)
+            .div(priceNumerator);
             sendOutTokens(
                 auctionId,
                 auctioningTokenAmount,
                 biddingTokenAmount,
                 auctioneerId
-            ); //[5]
+            );
             sendOutTokens(
                 auctionId,
                 feeAmount.mul(fillVolumeOfAuctioneerOrder).div(
@@ -1742,7 +1260,7 @@ contract AnnexAuction is Ownable {
                 ),
                 0,
                 feeReceiverUserId
-            ); //[7]
+            );
         }
     }
 
@@ -1804,92 +1322,14 @@ contract AnnexAuction is Ownable {
     {
         return sellOrders[auctionId].contains(order);
     }
-}
 
-
-// File contracts/allowListExamples/AllowListOffChainManaged.sol
-
-pragma solidity >=0.6.8;
-
-
-// Idea was first mentioned in the blog:
-// https://medium.com/@PhABC/off-chain-whitelist-with-on-chain-verification-for-ethereum-smart-contracts-1563ca4b8f11
-
-contract AllowListOffChainManaged {
-    /// @dev The EIP-712 domain type hash used for computing the domain
-    /// separator.
-    bytes32 private constant DOMAIN_TYPE_HASH =
-        keccak256(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-        );
-
-    /// @dev The EIP-712 domain name used for computing the domain separator.
-    bytes32 private constant DOMAIN_NAME = keccak256("AccessManager");
-
-    /// @dev The EIP-712 domain version used for computing the domain separator.
-    bytes32 private constant DOMAIN_VERSION = keccak256("v1");
-
-    /// @dev The domain separator used for signing orders that gets mixed in
-    /// making signatures for different domains incompatible. This domain
-    /// separator is computed following the EIP-712 standard and has replay
-    /// protection mixed in so that signed orders are only valid for specific
-    /// GPv2 contracts.
-    bytes32 public immutable domainSeparator;
-
-    constructor() public {
-        // NOTE: Currently, the only way to get the chain ID in solidity is
-        // using assembly.
-        uint256 chainId;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            chainId := chainid()
-        }
-
-        domainSeparator = keccak256(
-            abi.encode(
-                DOMAIN_TYPE_HASH,
-                DOMAIN_NAME,
-                DOMAIN_VERSION,
-                chainId,
-                address(this)
-            )
-        );
+    function setDocument(string calldata _name, string calldata _data)
+        external onlyOwner()
+    {
+        _setDocument(_name, _data);
     }
 
-    function isAllowed(
-        address user,
-        uint256 auctionId,
-        bytes calldata callData
-    ) external view returns (bytes4) {
-        return isAllowedBy(user, auctionId, msg.sender, callData);
-    }
-
-    function isAllowedBy(
-        address user,
-        uint256 auctionId,
-        address allower,
-        bytes calldata callData
-    ) public view returns (bytes4) {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        (v, r, s) = abi.decode(callData, (uint8, bytes32, bytes32));
-        bytes32 hash = keccak256(abi.encode(domainSeparator, user, auctionId));
-        address signer =
-            ecrecover(
-                keccak256(
-                    abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-                ),
-                v,
-                r,
-                s
-            );
-        bytes memory allowListData =
-            AnnexAuction(allower).auctionAccessData(auctionId);
-        if (abi.decode(allowListData, (address)) == signer) {
-            return AllowListVerifierHelper.MAGICVALUE;
-        } else {
-            return bytes4(0);
-        }
+    function removeDocument(string calldata _name) external onlyOwner() {
+        _removeDocument(_name);
     }
 }
