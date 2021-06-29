@@ -16,7 +16,8 @@ library AnnexERC20 {
     /// @param token The address of the ERC-20 token contract.
     /// @return (string) Token symbol.
     function safeSymbol(IERC20 token) internal view returns (string memory) {
-        (bool success, bytes memory data) = address(token).staticcall(abi.encodeWithSelector(SIG_SYMBOL));
+        (bool success, bytes memory data) =
+            address(token).staticcall(abi.encodeWithSelector(SIG_SYMBOL));
         return success && data.length > 0 ? abi.decode(data, (string)) : "???";
     }
 
@@ -24,7 +25,8 @@ library AnnexERC20 {
     /// @param token The address of the ERC-20 token contract.
     /// @return (string) Token name.
     function safeName(IERC20 token) internal view returns (string memory) {
-        (bool success, bytes memory data) = address(token).staticcall(abi.encodeWithSelector(SIG_NAME));
+        (bool success, bytes memory data) =
+            address(token).staticcall(abi.encodeWithSelector(SIG_NAME));
         return success && data.length > 0 ? abi.decode(data, (string)) : "???";
     }
 
@@ -32,7 +34,8 @@ library AnnexERC20 {
     /// @param token The address of the ERC-20 token contract.
     /// @return (uint8) Token decimals.
     function safeDecimals(IERC20 token) internal view returns (uint8) {
-        (bool success, bytes memory data) = address(token).staticcall(abi.encodeWithSelector(SIG_DECIMALS));
+        (bool success, bytes memory data) =
+            address(token).staticcall(abi.encodeWithSelector(SIG_DECIMALS));
         return success && data.length == 32 ? abi.decode(data, (uint8)) : 18;
     }
 
@@ -46,8 +49,14 @@ library AnnexERC20 {
         address to,
         uint256 amount
     ) internal {
-        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(SIG_TRANSFER, to, amount));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "AnnexERC20: Transfer failed");
+        (bool success, bytes memory data) =
+            address(token).call(
+                abi.encodeWithSelector(SIG_TRANSFER, to, amount)
+            );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "AnnexERC20: Transfer failed"
+        );
     }
 
     /// @notice Provides a safe ERC20.transferFrom version for different ERC-20 implementations.
@@ -62,7 +71,13 @@ library AnnexERC20 {
         address to,
         uint256 amount
     ) internal {
-        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(SIG_TRANSFER_FROM, from, to, amount));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "AnnexERC20: TransferFrom failed");
+        (bool success, bytes memory data) =
+            address(token).call(
+                abi.encodeWithSelector(SIG_TRANSFER_FROM, from, to, amount)
+            );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "AnnexERC20: TransferFrom failed"
+        );
     }
 }

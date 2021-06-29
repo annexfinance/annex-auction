@@ -2,8 +2,8 @@
 pragma solidity >=0.6.8;
 
 contract SafeTransfer {
-
-    address private constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address private constant ETH_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @dev Helper function to handle both ETH and ERC20 payments
     function _safeTokenPayment(
@@ -12,12 +12,11 @@ contract SafeTransfer {
         uint256 _amount
     ) internal {
         if (address(_token) == ETH_ADDRESS) {
-            _safeTransferETH(_to,_amount );
+            _safeTransferETH(_to, _amount);
         } else {
             _safeTransfer(_token, _to, _amount);
         }
     }
-
 
     /// @dev Helper function to handle both ETH and ERC20 payments
     function _tokenPayment(
@@ -32,14 +31,20 @@ contract SafeTransfer {
         }
     }
 
-
     /// @dev Transfer helper from UniswapV2 Router
-    function _safeApprove(address token, address to, uint value) internal {
+    function _safeApprove(
+        address token,
+        address to,
+        uint value
+    ) internal {
         // bytes4(keccak256(bytes('approve(address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "TransferHelper: APPROVE_FAILED");
+        (bool success, bytes memory data) =
+            token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "TransferHelper: APPROVE_FAILED"
+        );
     }
-
 
     /**
      * There are many non-compliant ERC20 tokens... this can handle most, adapted from UniSwap V2
@@ -74,16 +79,23 @@ contract SafeTransfer {
         require(success && (data.length == 0 || abi.decode(data, (bool)))); // ERC20 TransferFrom failed
     }
 
-    function _safeTransferFrom(address token, address from, address to, uint value) internal {
+    function _safeTransferFrom(
+        address token,
+        address from,
+        address to,
+        uint value
+    ) internal {
         // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "TransferHelper: TRANSFER_FROM_FAILED");
+        (bool success, bytes memory data) =
+            token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "TransferHelper: TRANSFER_FROM_FAILED"
+        );
     }
 
     function _safeTransferETH(address to, uint value) internal {
-        (bool success,) = to.call{value:value}(new bytes(0));
+        (bool success, ) = to.call{value: value}(new bytes(0));
         require(success, "TransferHelper: ETH_TRANSFER_FAILED");
     }
-
-
 }

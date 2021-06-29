@@ -6,7 +6,8 @@ import "./AnnexAdminAccess.sol";
 contract ANNEXAccessControls is AnnexAdminAccess {
     /// @notice Role definitions
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant SMART_CONTRACT_ROLE = keccak256("SMART_CONTRACT_ROLE");
+    bytes32 public constant SMART_CONTRACT_ROLE =
+        keccak256("SMART_CONTRACT_ROLE");
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
 
     /// @notice Events for adding and removing various roles
@@ -44,9 +45,7 @@ contract ANNEXAccessControls is AnnexAdminAccess {
     /**
      * @notice The deployer is automatically given the admin role which will allow them to then grant roles to other addresses
      */
-    constructor() public {
-    }
-
+    constructor() public {}
 
     /////////////
     // Lookups //
@@ -142,5 +141,4 @@ contract ANNEXAccessControls is AnnexAdminAccess {
         revokeRole(OPERATOR_ROLE, _address);
         emit OperatorRoleRemoved(_address, _msgSender());
     }
-
 }

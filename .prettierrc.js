@@ -6,6 +6,7 @@ module.exports = {
       files: "*.sol",
       options: {
         bracketSpacing: false,
+        explicitTypes: "preserve",
       },
     },
   ],
