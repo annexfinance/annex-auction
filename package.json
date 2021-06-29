@@ -10,7 +10,7 @@
     "deploy": "hardhat deploy --network bsctestnet",
     "flatten": "hardhat flatten ./contracts/AnnexBatchAuction.sol > ./flatten/AnnexBatchAuction.sol",
     "verify": "hardhat etherscan-verify --license None --network bsctestnet",
-    "lint": "yarn lint:sol && yarn lint:ts",
+    "lint": "yarn install --frozen-lockfile && yarn lint:sol && yarn lint:ts",
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "eslint --max-warnings 0 .",
     "fmt:sol": "prettier 'contracts/**/*.sol' -w",
