@@ -7,6 +7,8 @@ export const contractNames = {
   dutchAuction: "AnnexDutchAuction",
   fixedSwap: "AnnexFixedSwap",
   multiCall: "MultiCall",
+  wbnb:"WBNB",
+  documents:"BatchDocuments",
   allowListOffChainManaged: "AllowListOffChainManaged",
   depositAndPlaceOrder: "DepositAndPlaceOrder",
 };

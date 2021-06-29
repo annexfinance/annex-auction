@@ -1,5 +1,6 @@
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
+import "hardhat-contract-sizer";
 import "hardhat-deploy";
 import dotenv from "dotenv";
 import { utils } from "ethers";
@@ -22,13 +23,8 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const {
-  GAS_PRICE_GWEI,
-  INFURA_KEY,
-  MNEMONIC,
-  MY_ETHERSCAN_API_KEY,
-  PK,
-} = process.env;
+const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY, PK } =
+  process.env;
 
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
@@ -64,6 +60,12 @@ export default {
   solidity: {
     compilers: [
       {
+        version: "0.4.18",
+      },
+      {
+        version: "0.5.0",
+      },
+      {
         // used to compile WETH9.sol
         version: "0.5.5",
       },
@@ -80,7 +82,7 @@ export default {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 2,
       },
     },
   },
@@ -163,5 +165,10 @@ export default {
   },
   etherscan: {
     apiKey: MY_ETHERSCAN_API_KEY,
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
 };
