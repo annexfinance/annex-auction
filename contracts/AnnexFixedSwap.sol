@@ -13,7 +13,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./Utils/Governable.sol";
 import "./interfaces/IAnnexStake.sol";
 
-contract AnnexFixedSwap is Ownable ,Configurable, ReentrancyGuard {
+contract AnnexFixedSwap is Ownable, Configurable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
@@ -118,29 +118,22 @@ contract AnnexFixedSwap is Ownable ,Configurable, ReentrancyGuard {
         address indexed sender,
         uint256 amount0
     );
-    
 
     function initialize() public {
         config[TX_FEE_RATIO] = 0.015 ether;
         config[MIN_VALUE_OF_BOT_HOLDER] = 60 ether;
 
         config[ANNEX_TOKEN] = uint256(token);
-        config[STAKE_CONTRACT] = uint256(
-            stakeContract
-        );
+        config[STAKE_CONTRACT] = uint256(stakeContract);
     }
 
-    function setAddresses(address _token,address _stakeContract) external {
-
-    }
+    function setAddresses(address _token, address _stakeContract) external {}
 
     function initialize_rinkeby() public {
         initialize();
 
         config[ANNEX_TOKEN] = uint256(token);
-        config[STAKE_CONTRACT] = uint256(
-            stakeContract
-        );
+        config[STAKE_CONTRACT] = uint256(stakeContract);
     }
 
     function create(CreateReq memory poolReq, address[] memory whitelist_)
@@ -229,9 +222,8 @@ contract AnnexFixedSwap is Ownable ,Configurable, ReentrancyGuard {
         }
 
         // check if amount0 is exceeded
-        uint256 amount0 = _amount1.mul(pool.amountTotal0).div(
-            pool.amountTotal1
-        );
+        uint256 amount0 =
+            _amount1.mul(pool.amountTotal0).div(pool.amountTotal1);
         uint256 _amount0 = pool.amountTotal0.sub(amountSwap0P[index]);
         if (_amount0 > amount0) {
             _amount0 = amount0;
@@ -250,7 +242,7 @@ contract AnnexFixedSwap is Ownable ,Configurable, ReentrancyGuard {
                 "swapped amount of token1 is exceeded maximum allowance"
             );
             myAmountSwapped1[sender][index] = myAmountSwapped1[sender][index]
-            .add(_amount1);
+                .add(_amount1);
         }
 
         if (pool.amountTotal1 == amountSwap1P[index]) {

@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/GSN/Context.sol";
 import "./Access/AnnexAccessControls.sol";
 import "./Access/AnnexAdminAccess.sol";
 import "./interfaces/IAnnexMarket.sol";
@@ -19,8 +19,14 @@ import "./Utils/SafeTransfer.sol";
 import "./interfaces/IERC20.sol";
 import "./Utils/Documents.sol";
 
-
-contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable, SafeTransfer, Documents , ReentrancyGuard  {
+contract AnnexDutchAuction is
+    IAnnexMarket,
+    ANNEXAccessControls,
+    AnnexBatchable,
+    SafeTransfer,
+    Documents,
+    ReentrancyGuard
+{
     using AnnexMath for uint256;
     using AnnexMath128 for uint128;
     using AnnexMath64 for uint64;
@@ -30,7 +36,8 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
     /// @dev For different marketplace types, this must be incremented.
     uint256 public constant override marketTemplate = 2;
     /// @dev The placeholder ETH address.
-    address private constant ETH_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+    address private constant ETH_ADDRESS =
+        0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     /// @dev Main market variables.
     struct MarketInfo {
@@ -57,28 +64,28 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
     MarketStatus public marketStatus;
 
     /// @dev The token being sold.
-    address public auctionToken; 
+    address public auctionToken;
     /// @dev The currency the auction accepts for payment. Can be ETH or token address.
-    address public paymentCurrency;  
+    address public paymentCurrency;
     /// @dev Where the auction funds will get paid.
-    address payable public wallet;  
+    address payable public wallet;
     /// @dev Address that manages auction approvals.
     address public pointList;
 
     /// @dev The commited amount of accounts.
-    mapping(address => uint256) public commitments; 
+    mapping(address => uint256) public commitments;
     /// @dev Amount of tokens to claim per address.
     mapping(address => uint256) public claimed;
 
     /// @dev Event for updating auction times.  Needs to be before auction starts.
-    event AuctionTimeUpdated(uint256 startTime, uint256 endTime); 
+    event AuctionTimeUpdated(uint256 startTime, uint256 endTime);
     /// @dev Event for updating auction prices. Needs to be before auction starts.
-    event AuctionPriceUpdated(uint256 startPrice, uint256 minimumPrice); 
+    event AuctionPriceUpdated(uint256 startPrice, uint256 minimumPrice);
     /// @dev Event for updating auction wallet. Needs to be before auction starts.
-    event AuctionWalletUpdated(address wallet); 
+    event AuctionWalletUpdated(address wallet);
 
     /// @dev Event for adding a commitment.
-    event AddedCommitment(address addr, uint256 commitment);   
+    event AddedCommitment(address addr, uint256 commitment);
     /// @dev Event for finalization of the auction.
     event AuctionFinalized();
     /// @dev Event for cancellation of the auction.
@@ -112,18 +119,51 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         address _pointList,
         address payable _wallet
     ) public {
-        require(_startTime < 10000000000, "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds");
-        require(_endTime < 10000000000, "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds");
-        require(_startTime >= block.timestamp, "AnnexDutchAuction: start time is before current time");
-        require(_endTime > _startTime, "AnnexDutchAuction: end time must be older than start price");
-        require(_totalTokens > 0,"AnnexDutchAuction: total tokens must be greater than zero");
-        require(_startPrice > _minimumPrice, "AnnexDutchAuction: start price must be higher than minimum price");
-        require(_minimumPrice > 0, "AnnexDutchAuction: minimum price must be greater than 0"); 
-        require(_admin != address(0), "AnnexDutchAuction: admin is the zero address");
-        require(_wallet != address(0), "AnnexDutchAuction: wallet is the zero address");
-        require(IERC20(_token).decimals() == 18, "AnnexDutchAuction: Token does not have 18 decimals");
+        require(
+            _startTime < 10000000000,
+            "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds"
+        );
+        require(
+            _endTime < 10000000000,
+            "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds"
+        );
+        require(
+            _startTime >= block.timestamp,
+            "AnnexDutchAuction: start time is before current time"
+        );
+        require(
+            _endTime > _startTime,
+            "AnnexDutchAuction: end time must be older than start price"
+        );
+        require(
+            _totalTokens > 0,
+            "AnnexDutchAuction: total tokens must be greater than zero"
+        );
+        require(
+            _startPrice > _minimumPrice,
+            "AnnexDutchAuction: start price must be higher than minimum price"
+        );
+        require(
+            _minimumPrice > 0,
+            "AnnexDutchAuction: minimum price must be greater than 0"
+        );
+        require(
+            _admin != address(0),
+            "AnnexDutchAuction: admin is the zero address"
+        );
+        require(
+            _wallet != address(0),
+            "AnnexDutchAuction: wallet is the zero address"
+        );
+        require(
+            IERC20(_token).decimals() == 18,
+            "AnnexDutchAuction: Token does not have 18 decimals"
+        );
         if (_paymentCurrency != ETH_ADDRESS) {
-            require(IERC20(_paymentCurrency).decimals() > 0, "AnnexDutchAuction: Payment currency is not ERC20");
+            require(
+                IERC20(_paymentCurrency).decimals() > 0,
+                "AnnexDutchAuction: Payment currency is not ERC20"
+            );
         }
 
         marketInfo.startTime = AnnexMath.to64(_startTime);
@@ -142,8 +182,6 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         _setList(_pointList);
         _safeTransferFrom(_token, _funder, _totalTokens);
     }
-
-
 
     /**
      AnnexDutch Auction Price Function
@@ -166,7 +204,10 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @return Average token price.
      */
     function tokenPrice() public view returns (uint256) {
-        return uint256(marketStatus.commitmentsTotal).mul(1e18).div(uint256(marketInfo.totalTokens));
+        return
+            uint256(marketStatus.commitmentsTotal).mul(1e18).div(
+                uint256(marketInfo.totalTokens)
+            );
     }
 
     /**
@@ -197,7 +238,6 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         return priceFunction();
     }
 
-
     ///--------------------------------------------------------
     /// Commit to buying tokens!
     ///--------------------------------------------------------
@@ -206,17 +246,25 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         revertBecauseUserDidNotProvideAgreement();
     }
 
-    /** 
+    /**
      * @dev Attribution to the awesome delta.financial contracts
-    */  
-    function marketParticipationAgreement() public pure returns (string memory) {
-        return "I understand that I'm interacting with a smart contract. I understand that tokens commited are subject to the token issuer and local laws where applicable. I reviewed code of the smart contract and understand it fully. I agree to not hold developers or other people associated with the project liable for any losses or misunderstandings";
+     */
+    function marketParticipationAgreement()
+        public
+        pure
+        returns (string memory)
+    {
+        return
+            "I understand that I'm interacting with a smart contract. I understand that tokens commited are subject to the token issuer and local laws where applicable. I reviewed code of the smart contract and understand it fully. I agree to not hold developers or other people associated with the project liable for any losses or misunderstandings";
     }
-    /** 
+
+    /**
      * @dev Not using modifiers is a purposeful choice for code readability.
-    */ 
+     */
     function revertBecauseUserDidNotProvideAgreement() internal pure {
-        revert("No agreement provided, please review the smart contract before interacting with it");
+        revert(
+            "No agreement provided, please review the smart contract before interacting with it"
+        );
     }
 
     /**
@@ -226,11 +274,12 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
     function commitEth(
         address payable _beneficiary,
         bool readAndAgreedToMarketParticipationAgreement
-    )
-        public payable
-    {
-        require(paymentCurrency == ETH_ADDRESS, "AnnexDutchAuction: payment currency is not ETH address"); 
-        if(readAndAgreedToMarketParticipationAgreement == false) {
+    ) public payable {
+        require(
+            paymentCurrency == ETH_ADDRESS,
+            "AnnexDutchAuction: payment currency is not ETH address"
+        );
+        if (readAndAgreedToMarketParticipationAgreement == false) {
             revertBecauseUserDidNotProvideAgreement();
         }
         // Get ETH able to be committed
@@ -251,10 +300,16 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @dev Buy Tokens by commiting approved ERC20 tokens to this contract address.
      * @param _amount Amount of tokens to commit.
      */
-    function commitTokens(uint256 _amount, bool readAndAgreedToMarketParticipationAgreement) public {
-        commitTokensFrom(msg.sender, _amount, readAndAgreedToMarketParticipationAgreement);
+    function commitTokens(
+        uint256 _amount,
+        bool readAndAgreedToMarketParticipationAgreement
+    ) public {
+        commitTokensFrom(
+            msg.sender,
+            _amount,
+            readAndAgreedToMarketParticipationAgreement
+        );
     }
-
 
     /**
      * @dev Checks how much is user able to commit and processes that commitment.
@@ -266,11 +321,12 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         address _from,
         uint256 _amount,
         bool readAndAgreedToMarketParticipationAgreement
-    )
-        public   nonReentrant  
-    {
-        require(address(paymentCurrency) != ETH_ADDRESS, "AnnexDutchAuction: Payment currency is not a token");
-        if(readAndAgreedToMarketParticipationAgreement == false) {
+    ) public nonReentrant {
+        require(
+            address(paymentCurrency) != ETH_ADDRESS,
+            "AnnexDutchAuction: Payment currency is not a token"
+        );
+        if (readAndAgreedToMarketParticipationAgreement == false) {
             revertBecauseUserDidNotProvideAgreement();
         }
         uint256 tokensToTransfer = calculateCommitment(_amount);
@@ -288,19 +344,21 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         MarketInfo memory _marketInfo = marketInfo;
         MarketPrice memory _marketPrice = marketPrice;
 
-        uint256 numerator = uint256(_marketPrice.startPrice.sub(_marketPrice.minimumPrice));
-        uint256 denominator = uint256(_marketInfo.endTime.sub(_marketInfo.startTime));
+        uint256 numerator =
+            uint256(_marketPrice.startPrice.sub(_marketPrice.minimumPrice));
+        uint256 denominator =
+            uint256(_marketInfo.endTime.sub(_marketInfo.startTime));
         return numerator / denominator;
     }
 
-
-   /**
+    /**
      * @dev How many tokens the user is able to claim.
      * @param _user Auction participant address.
      * @return User commitments reduced by already claimed tokens.
      */
     function tokensClaimable(address _user) public view returns (uint256) {
-        uint256 tokensAvailable = commitments[_user].mul(1e18).div(clearingPrice());
+        uint256 tokensAvailable =
+            commitments[_user].mul(1e18).div(clearingPrice());
         return tokensAvailable.sub(claimed[_user]);
     }
 
@@ -309,7 +367,10 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @return Number of tokens commited.
      */
     function totalTokensCommitted() public view returns (uint256) {
-        return uint256(marketStatus.commitmentsTotal).mul(1e18).div(clearingPrice());
+        return
+            uint256(marketStatus.commitmentsTotal).mul(1e18).div(
+                clearingPrice()
+            );
     }
 
     /**
@@ -317,9 +378,17 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @param _commitment Commitment user would like to make.
      * @return committed Amount allowed to commit.
      */
-    function calculateCommitment(uint256 _commitment) public view returns (uint256 committed) {
-        uint256 maxCommitment = uint256(marketInfo.totalTokens).mul(clearingPrice()).div(1e18);
-        if (uint256(marketStatus.commitmentsTotal).add(_commitment) > maxCommitment) {
+    function calculateCommitment(uint256 _commitment)
+        public
+        view
+        returns (uint256 committed)
+    {
+        uint256 maxCommitment =
+            uint256(marketInfo.totalTokens).mul(clearingPrice()).div(1e18);
+        if (
+            uint256(marketStatus.commitmentsTotal).add(_commitment) >
+            maxCommitment
+        ) {
             return maxCommitment.sub(uint256(marketStatus.commitmentsTotal));
         }
         return _commitment;
@@ -330,7 +399,9 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @return True if current time is greater than startTime and less than endTime.
      */
     function isOpen() public view returns (bool) {
-        return block.timestamp >= uint256(marketInfo.startTime) && block.timestamp <= uint256(marketInfo.endTime);
+        return
+            block.timestamp >= uint256(marketInfo.startTime) &&
+            block.timestamp <= uint256(marketInfo.endTime);
     }
 
     /**
@@ -346,7 +417,9 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @return True if auction is successful or time has ended.
      */
     function auctionEnded() public view returns (bool) {
-        return auctionSuccessful() || block.timestamp > uint256(marketInfo.endTime);
+        return
+            auctionSuccessful() ||
+            block.timestamp > uint256(marketInfo.endTime);
     }
 
     /**
@@ -368,7 +441,8 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @return Current auction price.
      */
     function _currentPrice() private view returns (uint256) {
-        uint256 priceDiff = block.timestamp.sub(uint256(marketInfo.startTime)).mul(priceDrop());
+        uint256 priceDiff =
+            block.timestamp.sub(uint256(marketInfo.startTime)).mul(priceDrop());
         return uint256(marketPrice.startPrice).sub(priceDiff);
     }
 
@@ -378,36 +452,49 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @param _commitment The amount to commit.
      */
     function _addCommitment(address _addr, uint256 _commitment) internal {
-        require(block.timestamp >= uint256(marketInfo.startTime) && block.timestamp <= uint256(marketInfo.endTime), "AnnexDutchAuction: outside auction hours");
+        require(
+            block.timestamp >= uint256(marketInfo.startTime) &&
+                block.timestamp <= uint256(marketInfo.endTime),
+            "AnnexDutchAuction: outside auction hours"
+        );
         MarketStatus storage status = marketStatus;
-        
+
         uint256 newCommitment = commitments[_addr].add(_commitment);
         if (status.usePointList) {
             require(IPointList(pointList).hasPoints(_addr, newCommitment));
         }
-        
+
         commitments[_addr] = newCommitment;
-        status.commitmentsTotal = AnnexMath.to128(uint256(status.commitmentsTotal).add(_commitment));
+        status.commitmentsTotal = AnnexMath.to128(
+            uint256(status.commitmentsTotal).add(_commitment)
+        );
         emit AddedCommitment(_addr, _commitment);
     }
-
 
     //--------------------------------------------------------
     // Finalize Auction
     //--------------------------------------------------------
 
-
     /**
      * @dev Cancel Auction
      * @dev Admin can cancel the auction before it starts
      */
-    function cancelAuction() public   nonReentrant  
-    {
+    function cancelAuction() public nonReentrant {
         require(hasAdminRole(msg.sender));
         MarketStatus storage status = marketStatus;
-        require(!status.finalized, "AnnexDutchAuction: auction already finalized");
-        require( uint256(status.commitmentsTotal) == 0, "AnnexDutchAuction: auction already committed" );
-        _safeTokenPayment(auctionToken, wallet, uint256(marketInfo.totalTokens));
+        require(
+            !status.finalized,
+            "AnnexDutchAuction: auction already finalized"
+        );
+        require(
+            uint256(status.commitmentsTotal) == 0,
+            "AnnexDutchAuction: auction already committed"
+        );
+        _safeTokenPayment(
+            auctionToken,
+            wallet,
+            uint256(marketInfo.totalTokens)
+        );
         status.finalized = true;
         emit AuctionCancelled();
     }
@@ -416,74 +503,94 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @dev Auction finishes successfully above the reserve.
      * @dev Transfer contract funds to initialized wallet.
      */
-    function finalize() public   nonReentrant  
-    {
-
-        require(hasAdminRole(msg.sender) 
-                || hasSmartContractRole(msg.sender) 
-                || wallet == msg.sender
-                || finalizeTimeExpired(), "AnnexDutchAuction: sender must be an admin");
+    function finalize() public nonReentrant {
+        require(
+            hasAdminRole(msg.sender) ||
+                hasSmartContractRole(msg.sender) ||
+                wallet == msg.sender ||
+                finalizeTimeExpired(),
+            "AnnexDutchAuction: sender must be an admin"
+        );
         MarketStatus storage status = marketStatus;
 
-        require(!status.finalized, "AnnexDutchAuction: auction already finalized");
+        require(
+            !status.finalized,
+            "AnnexDutchAuction: auction already finalized"
+        );
         if (auctionSuccessful()) {
             /// @dev Successful auction
             /// @dev Transfer contributed tokens to wallet.
-            _safeTokenPayment(paymentCurrency, wallet, uint256(status.commitmentsTotal));
+            _safeTokenPayment(
+                paymentCurrency,
+                wallet,
+                uint256(status.commitmentsTotal)
+            );
         } else {
             /// @dev Failed auction
             /// @dev Return auction tokens back to wallet.
-            require(block.timestamp > uint256(marketInfo.endTime), "AnnexDutchAuction: auction has not finished yet"); 
-            _safeTokenPayment(auctionToken, wallet, uint256(marketInfo.totalTokens));
+            require(
+                block.timestamp > uint256(marketInfo.endTime),
+                "AnnexDutchAuction: auction has not finished yet"
+            );
+            _safeTokenPayment(
+                auctionToken,
+                wallet,
+                uint256(marketInfo.totalTokens)
+            );
         }
         status.finalized = true;
         emit AuctionFinalized();
     }
 
-
     /// @dev Withdraws bought tokens, or returns commitment if the sale is unsuccessful.
-    function withdrawTokens() public  {
+    function withdrawTokens() public {
         withdrawTokens(msg.sender);
     }
 
-   /**
+    /**
      * @dev Withdraws bought tokens, or returns commitment if the sale is unsuccessful.
      * @dev Withdraw tokens only after auction ends.
      * @param beneficiary Whose tokens will be withdrawn.
      */
-    function withdrawTokens(address payable beneficiary) public   nonReentrant  {
+    function withdrawTokens(address payable beneficiary) public nonReentrant {
         if (auctionSuccessful()) {
             require(marketStatus.finalized, "AnnexDutchAuction: not finalized");
             // Successful auction! Transfer claimed tokens.
             uint256 tokensToClaim = tokensClaimable(beneficiary);
-            require(tokensToClaim > 0, "AnnexDutchAuction: No tokens to claim"); 
+            require(tokensToClaim > 0, "AnnexDutchAuction: No tokens to claim");
             claimed[beneficiary] = claimed[beneficiary].add(tokensToClaim);
             _safeTokenPayment(auctionToken, beneficiary, tokensToClaim);
         } else {
             /// @dev Auction did not meet reserve price.
             /// @dev Return committed funds back to user.
-            require(block.timestamp > uint256(marketInfo.endTime), "AnnexDutchAuction: auction has not finished yet");
+            require(
+                block.timestamp > uint256(marketInfo.endTime),
+                "AnnexDutchAuction: auction has not finished yet"
+            );
             uint256 fundsCommitted = commitments[beneficiary];
             commitments[beneficiary] = 0; // Stop multiple withdrawals and free some gas
             _safeTokenPayment(paymentCurrency, beneficiary, fundsCommitted);
         }
     }
 
-
     //--------------------------------------------------------
     // Documents
     //--------------------------------------------------------
 
-    function setDocument(string calldata _name, string calldata _data) external {
-        require(hasAdminRole(msg.sender) );
-        _setDocument( _name, _data);
+    function setDocument(string calldata _name, string calldata _data)
+        external
+    {
+        require(hasAdminRole(msg.sender));
+        _setDocument(_name, _data);
     }
 
-    function setDocuments(string[] calldata _name, string[] calldata _data) external {
-        require(hasAdminRole(msg.sender) );
+    function setDocuments(string[] calldata _name, string[] calldata _data)
+        external
+    {
+        require(hasAdminRole(msg.sender));
         uint256 numDocs = _name.length;
         for (uint256 i = 0; i < numDocs; i++) {
-            _setDocument( _name[i], _data[i]);
+            _setDocument(_name[i], _data[i]);
         }
     }
 
@@ -492,11 +599,9 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         _removeDocument(_name);
     }
 
-
     //--------------------------------------------------------
     // Point Lists
     //--------------------------------------------------------
-
 
     function setList(address _list) external {
         require(hasAdminRole(msg.sender));
@@ -526,16 +631,31 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      */
     function setAuctionTime(uint256 _startTime, uint256 _endTime) external {
         require(hasAdminRole(msg.sender));
-        require(_startTime < 10000000000, "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds");
-        require(_endTime < 10000000000, "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds");
-        require(_startTime >= block.timestamp, "AnnexDutchAuction: start time is before current time");
-        require(_endTime > _startTime, "AnnexDutchAuction: end time must be older than start time");
-        require(marketStatus.commitmentsTotal == 0, "AnnexDutchAuction: auction cannot have already started");
+        require(
+            _startTime < 10000000000,
+            "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds"
+        );
+        require(
+            _endTime < 10000000000,
+            "AnnexDutchAuction: enter an unix timestamp in seconds, not miliseconds"
+        );
+        require(
+            _startTime >= block.timestamp,
+            "AnnexDutchAuction: start time is before current time"
+        );
+        require(
+            _endTime > _startTime,
+            "AnnexDutchAuction: end time must be older than start time"
+        );
+        require(
+            marketStatus.commitmentsTotal == 0,
+            "AnnexDutchAuction: auction cannot have already started"
+        );
 
         marketInfo.startTime = AnnexMath.to64(_startTime);
         marketInfo.endTime = AnnexMath.to64(_endTime);
-        
-        emit AuctionTimeUpdated(_startTime,_endTime);
+
+        emit AuctionTimeUpdated(_startTime, _endTime);
     }
 
     /**
@@ -543,15 +663,26 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @param _startPrice Auction start price.
      * @param _minimumPrice Auction minimum price.
      */
-    function setAuctionPrice(uint256 _startPrice, uint256 _minimumPrice) external {
+    function setAuctionPrice(uint256 _startPrice, uint256 _minimumPrice)
+        external
+    {
         require(hasAdminRole(msg.sender));
-        require(_startPrice > _minimumPrice, "AnnexDutchAuction: start price must be higher than minimum price");
-        require(_minimumPrice > 0, "AnnexDutchAuction: minimum price must be greater than 0"); 
-        require(marketStatus.commitmentsTotal == 0, "AnnexDutchAuction: auction cannot have already started");
+        require(
+            _startPrice > _minimumPrice,
+            "AnnexDutchAuction: start price must be higher than minimum price"
+        );
+        require(
+            _minimumPrice > 0,
+            "AnnexDutchAuction: minimum price must be greater than 0"
+        );
+        require(
+            marketStatus.commitmentsTotal == 0,
+            "AnnexDutchAuction: auction cannot have already started"
+        );
 
         marketPrice.startPrice = AnnexMath.to128(_startPrice);
         marketPrice.minimumPrice = AnnexMath.to128(_minimumPrice);
-        emit AuctionPriceUpdated(_startPrice,_minimumPrice);
+        emit AuctionPriceUpdated(_startPrice, _minimumPrice);
     }
 
     /**
@@ -560,15 +691,17 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      */
     function setAuctionWallet(address payable _wallet) external {
         require(hasAdminRole(msg.sender));
-        require(_wallet != address(0), "AnnexDutchAuction: wallet is the zero address");
+        require(
+            _wallet != address(0),
+            "AnnexDutchAuction: wallet is the zero address"
+        );
 
         wallet = _wallet;
 
         emit AuctionWalletUpdated(_wallet);
     }
 
-
-   //--------------------------------------------------------
+    //--------------------------------------------------------
     // Market Launchers
     //--------------------------------------------------------
 
@@ -577,39 +710,51 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
      * @param _data Encoded data for initialization.
      */
 
-    function init(bytes calldata _data) external override payable {
+    function init(bytes calldata _data) external payable override {}
 
-    }
-
-    function initMarket(
-        bytes calldata _data
-    ) public override {
+    function initMarket(bytes calldata _data) public override {
         (
-        address _funder,
-        address _token,
-        uint256 _totalTokens,
-        uint256 _startTime,
-        uint256 _endTime,
-        address _paymentCurrency,
-        uint256 _startPrice,
-        uint256 _minimumPrice,
-        address _admin,
-        address _pointList,
-        address payable _wallet
-        ) = abi.decode(_data, (
-            address,
-            address,
-            uint256,
-            uint256,
-            uint256,
-            address,
-            uint256,
-            uint256,
-            address,
-            address,
-            address
-        ));
-        initAuction(_funder, _token, _totalTokens, _startTime, _endTime, _paymentCurrency, _startPrice, _minimumPrice, _admin, _pointList, _wallet);
+            address _funder,
+            address _token,
+            uint256 _totalTokens,
+            uint256 _startTime,
+            uint256 _endTime,
+            address _paymentCurrency,
+            uint256 _startPrice,
+            uint256 _minimumPrice,
+            address _admin,
+            address _pointList,
+            address payable _wallet
+        ) =
+            abi.decode(
+                _data,
+                (
+                    address,
+                    address,
+                    uint256,
+                    uint256,
+                    uint256,
+                    address,
+                    uint256,
+                    uint256,
+                    address,
+                    address,
+                    address
+                )
+            );
+        initAuction(
+            _funder,
+            _token,
+            _totalTokens,
+            _startTime,
+            _endTime,
+            _paymentCurrency,
+            _startPrice,
+            _minimumPrice,
+            _admin,
+            _pointList,
+            _wallet
+        );
     }
 
     /**
@@ -639,12 +784,9 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
         address _admin,
         address _pointList,
         address payable _wallet
-    )
-        external 
-        pure
-        returns (bytes memory _data)
-    {
-            return abi.encode(
+    ) external pure returns (bytes memory _data) {
+        return
+            abi.encode(
                 _funder,
                 _token,
                 _totalTokens,
@@ -658,18 +800,26 @@ contract AnnexDutchAuction is IAnnexMarket, ANNEXAccessControls, AnnexBatchable,
                 _wallet
             );
     }
-        
-    function getBaseInformation() external view returns(
-        address, 
-        uint64,
-        uint64,
-        bool 
-    ) {
-        return (auctionToken, marketInfo.startTime, marketInfo.endTime, marketStatus.finalized);
+
+    function getBaseInformation()
+        external
+        view
+        returns (
+            address,
+            uint64,
+            uint64,
+            bool
+        )
+    {
+        return (
+            auctionToken,
+            marketInfo.startTime,
+            marketInfo.endTime,
+            marketStatus.finalized
+        );
     }
 
-    function getTotalTokens() external view returns(uint256) {
+    function getTotalTokens() external view returns (uint256) {
         return uint256(marketInfo.totalTokens);
     }
-
 }
