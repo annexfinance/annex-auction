@@ -2,14 +2,12 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-
 /**
  * @title Standard implementation of ERC1643 Document management
  */
 contract Documents {
-
     struct Document {
-        uint32 docIndex;    // Store the document name indexes
+        uint32 docIndex; // Store the document name indexes
         uint64 lastModified; // Timestamp at which document details was last modified
         string data; // data of the document that exist off-chain
     }
@@ -31,7 +29,9 @@ contract Documents {
      * @param _name Name of the document. It should be unique always
      * @param _data Off-chain data of the document from where it is accessible to investors/advisors to read.
      */
-    function _setDocument(string calldata _name, string calldata _data) internal {
+    function _setDocument(string calldata _name, string calldata _data)
+        internal
+    {
         require(bytes(_name).length > 0, "Zero name is not allowed");
         require(bytes(_data).length > 0, "Should not be a empty data");
         // Document storage document = _documents[_name];
@@ -39,7 +39,11 @@ contract Documents {
             _docNames.push(_name);
             _documents[_name].docIndex = uint32(_docNames.length);
         }
-        _documents[_name] = Document(_documents[_name].docIndex, uint64(now), _data);
+        _documents[_name] = Document(
+            _documents[_name].docIndex,
+            uint64(now),
+            _data
+        );
         emit DocumentUpdated(_name, _data);
     }
 
@@ -50,11 +54,14 @@ contract Documents {
      */
 
     function _removeDocument(string calldata _name) internal {
-        require(_documents[_name].lastModified != uint64(0), "Document should exist");
+        require(
+            _documents[_name].lastModified != uint64(0),
+            "Document should exist"
+        );
         uint32 index = _documents[_name].docIndex - 1;
         if (index != _docNames.length - 1) {
             _docNames[index] = _docNames[_docNames.length - 1];
-            _documents[_docNames[index]].docIndex = index + 1; 
+            _documents[_docNames[index]].docIndex = index + 1;
         }
         _docNames.pop();
         emit DocumentRemoved(_name, _documents[_name].data);
@@ -67,7 +74,11 @@ contract Documents {
      * @return string The data associated with the document.
      * @return uint256 the timestamp at which the document was last modified.
      */
-    function getDocument(string calldata _name) external view returns (string memory, uint256) {
+    function getDocument(string calldata _name)
+        external
+        view
+        returns (string memory, uint256)
+    {
         return (
             _documents[_name].data,
             uint256(_documents[_name].lastModified)
@@ -94,9 +105,12 @@ contract Documents {
      * @notice Used to retrieve the document name from index in the smart contract.
      * @return string Name of the document name.
      */
-    function getDocumentName(uint256 _index) external view returns (string memory) {
+    function getDocumentName(uint256 _index)
+        external
+        view
+        returns (string memory)
+    {
         require(_index < _docNames.length, "Index out of bounds");
         return _docNames[_index];
     }
-
 }

@@ -4,25 +4,16 @@ pragma solidity >=0.6.8;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract AnnexAdminAccess is AccessControl {
-
     /// @dev Whether access is initialised.
     bool private initAccess;
 
     /// @notice Events for adding and removing various roles.
-    event AdminRoleGranted(
-        address indexed beneficiary,
-        address indexed caller
-    );
+    event AdminRoleGranted(address indexed beneficiary, address indexed caller);
 
-    event AdminRoleRemoved(
-        address indexed beneficiary,
-        address indexed caller
-    );
-
+    event AdminRoleRemoved(address indexed beneficiary, address indexed caller);
 
     /// @notice The deployer is automatically given the admin role which will allow them to then grant roles to other addresses.
-    constructor() public {
-    }
+    constructor() public {}
 
     /**
      * @notice Initializes access controls.
@@ -43,7 +34,7 @@ contract AnnexAdminAccess is AccessControl {
      * @param _address EOA or contract being checked.
      * @return bool True if the account has the role or false if it does not.
      */
-    function hasAdminRole(address _address) public  view returns (bool) {
+    function hasAdminRole(address _address) public view returns (bool) {
         return hasRole(DEFAULT_ADMIN_ROLE, _address);
     }
 

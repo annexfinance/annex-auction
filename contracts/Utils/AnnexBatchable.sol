@@ -7,11 +7,14 @@ import "../interfaces/IERC20.sol";
 // solhint-disable avoid-low-level-calls
 // solhint-disable no-inline-assembly
 
-
 contract BaseAnnexBatchable {
     /// @dev Helper function to extract a useful revert message from a failed call.
     /// If the returned data is malformed or not correctly abi encoded then this call can fail itself.
-    function _getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    function _getRevertMsg(bytes memory _returnData)
+        internal
+        pure
+        returns (string memory)
+    {
         // If the _res length is less than 68, then the transaction failed silently (without a revert message)
         if (_returnData.length < 68) return "Transaction reverted silently";
 
@@ -31,11 +34,16 @@ contract BaseAnnexBatchable {
     // F2: Calls in the batch may be payable, delegatecall operates in the same context, so each call in the batch has access to msg.value
     // C3: The length of the loop is fully under user control, so can't be exploited
     // C7: Delegatecall is only used on the same contract, so it's safe
-    function batch(bytes[] calldata calls, bool revertOnFail) external payable returns (bool[] memory successes, bytes[] memory results) {
+    function batch(bytes[] calldata calls, bool revertOnFail)
+        external
+        payable
+        returns (bool[] memory successes, bytes[] memory results)
+    {
         successes = new bool[](calls.length);
         results = new bytes[](calls.length);
         for (uint256 i = 0; i < calls.length; i++) {
-            (bool success, bytes memory result) = address(this).delegatecall(calls[i]);
+            (bool success, bytes memory result) =
+                address(this).delegatecall(calls[i]);
             require(success || !revertOnFail, _getRevertMsg(result));
             successes[i] = success;
             results[i] = result;

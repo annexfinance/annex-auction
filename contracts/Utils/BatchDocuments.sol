@@ -8,10 +8,9 @@ import "../seriality/Seriality.sol";
 /**
  * @title Standard implementation of ERC1643 Document management
  */
-contract BatchDocuments is Ownable , Seriality {
-
+contract BatchDocuments is Ownable, Seriality {
     struct Document {
-        uint32 docIndex;    // Store the document name indexes
+        uint32 docIndex; // Store the document name indexes
         uint64 lastModified; // Timestamp at which document details was last modified
         string data; // data of the document that exist off-chain
     }
@@ -23,8 +22,7 @@ contract BatchDocuments is Ownable , Seriality {
     // Array use to store all the document name present in the contracts
     string[] internal _docNames;
 
-    constructor() public Ownable(){
-    }
+    constructor() public Ownable() {}
 
     // Document Events
     event DocumentRemoved(string indexed _name, string _data);
@@ -36,7 +34,10 @@ contract BatchDocuments is Ownable , Seriality {
      * @param _name Name of the document. It should be unique always
      * @param _data Off-chain data of the document from where it is accessible to investors/advisors to read.
      */
-    function _setDocument(string calldata _name, string calldata _data) external onlyOwner {
+    function _setDocument(string calldata _name, string calldata _data)
+        external
+        onlyOwner
+    {
         require(bytes(_name).length > 0, "Zero name is not allowed");
         require(bytes(_data).length > 0, "Should not be a empty data");
         // Document storage document = _documents[_name];
@@ -44,7 +45,11 @@ contract BatchDocuments is Ownable , Seriality {
             _docNames.push(_name);
             _documents[_name].docIndex = uint32(_docNames.length);
         }
-        _documents[_name] = Document(_documents[_name].docIndex, uint64(block.timestamp), _data);
+        _documents[_name] = Document(
+            _documents[_name].docIndex,
+            uint64(block.timestamp),
+            _data
+        );
         emit DocumentUpdated(_name, _data);
     }
 
@@ -55,11 +60,14 @@ contract BatchDocuments is Ownable , Seriality {
      */
 
     function _removeDocument(string calldata _name) external onlyOwner {
-        require(_documents[_name].lastModified != uint64(0), "Document should exist");
+        require(
+            _documents[_name].lastModified != uint64(0),
+            "Document should exist"
+        );
         uint32 index = _documents[_name].docIndex - 1;
         if (index != _docNames.length - 1) {
             _docNames[index] = _docNames[_docNames.length - 1];
-            _documents[_docNames[index]].docIndex = index + 1; 
+            _documents[_docNames[index]].docIndex = index + 1;
         }
         _docNames.pop();
         emit DocumentRemoved(_name, _documents[_name].data);
@@ -72,7 +80,11 @@ contract BatchDocuments is Ownable , Seriality {
      * @return string The data associated with the document.
      * @return uint256 the timestamp at which the document was last modified.
      */
-    function getDocument(string calldata _name) external view returns (string memory, uint256) {
+    function getDocument(string calldata _name)
+        external
+        view
+        returns (string memory, uint256)
+    {
         return (
             _documents[_name].data,
             uint256(_documents[_name].lastModified)
@@ -88,19 +100,18 @@ contract BatchDocuments is Ownable , Seriality {
         uint endindex = _docNames.length;
         require(endindex >= startindex);
 
-        if(endindex > (_docNames.length - 1)){
+        if (endindex > (_docNames.length - 1)) {
             endindex = _docNames.length - 1;
         }
 
-        uint offset = 64*((endindex - startindex) + 1);
-        
-        bytes memory buffer = new  bytes(offset);
-        string memory out1  = new string(32);
-        
-        
-        for(uint i = startindex; i <= endindex; i++){
+        uint offset = 64 * ((endindex - startindex) + 1);
+
+        bytes memory buffer = new bytes(offset);
+        string memory out1 = new string(32);
+
+        for (uint i = startindex; i <= endindex; i++) {
             out1 = _docNames[i];
-            
+
             stringToBytes(offset, bytes(out1), buffer);
             offset -= sizeOfString(out1);
         }
@@ -119,9 +130,12 @@ contract BatchDocuments is Ownable , Seriality {
      * @notice Used to retrieve the document name from index in the smart contract.
      * @return string Name of the document name.
      */
-    function getDocumentName(uint256 _index) external view returns (string memory) {
+    function getDocumentName(uint256 _index)
+        external
+        view
+        returns (string memory)
+    {
         require(_index < _docNames.length, "Index out of bounds");
         return _docNames[_index];
     }
-
 }

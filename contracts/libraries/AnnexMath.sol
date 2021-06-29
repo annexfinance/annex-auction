@@ -40,7 +40,6 @@ library AnnexMath {
         require(a <= uint16(-1), "AnnexMath: uint16 Overflow");
         c = uint16(a);
     }
-
 }
 
 /// @notice A library for performing overflow-/underflow-safe addition and subtraction on uint128.
