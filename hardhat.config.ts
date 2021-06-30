@@ -1,6 +1,7 @@
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "hardhat-contract-sizer";
+import "hardhat-watcher";
 import "hardhat-deploy";
 import dotenv from "dotenv";
 import { utils } from "ethers";
@@ -23,7 +24,7 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY, PK } =
+const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY,MY_BSCSCAN_API_KEY, PK } =
   process.env;
 
 const DEFAULT_MNEMONIC =
@@ -111,6 +112,15 @@ export default {
           )
         : "auto",
     },
+    ropsten: {
+      ...sharedNetworkConfig,
+      url: `https://ropsten.infura.io/v3/${INFURA_KEY}`,
+      gasPrice: GAS_PRICE_GWEI
+        ? parseInt(
+            utils.parseUnits(GAS_PRICE_GWEI.toString(), "gwei").toString(),
+          )
+        : "auto",
+    },
     kovan: {
       ...sharedNetworkConfig,
       url: `https://kovan.infura.io/v3/${INFURA_KEY}`,
@@ -147,7 +157,7 @@ export default {
           )
         : "auto",
     },
-    testnet: {
+    bsc: {
       ...sharedNetworkConfig,
       url: "https://data-seed-prebsc-2-s3.binance.org:8545/",
       chainId: 97,
@@ -172,4 +182,9 @@ export default {
     runOnCompile: true,
     disambiguatePaths: false,
   },
+  watcher: {
+    compilation: {
+      tasks: ["compile"],
+    }
+  }
 };

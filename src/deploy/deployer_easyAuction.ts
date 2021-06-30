@@ -9,30 +9,37 @@ const deployAnnexContract: DeployFunction = async function (
   const { deployments, getNamedAccounts } = hre;
   const { deployer } = await getNamedAccounts();
   const { deploy, get } = deployments;
-  const { depositAndPlaceOrder } = contractNames;
-  const { annexAuction, dutchAuction, fixedSwap } = contractNames;
+  const { annexAuction, documents } = contractNames;
+  const chainId = await hre.getChainId();
 
+  type GasLimits =  {
+    [key: string]: number
+  }
 
-  // const { dutchAuction } = contractNames;
-
-  // const { fixedSwap } = contractNames;
+  const gasLimits: GasLimits = {
+    "3": 30029267, // ropsten
+    "42": 12499988, // kovan
+    "4": 10000068, // rinkeby
+    "97": 30000000, // bsc testnet
+  };
 
   await deploy(documents, {
     from: deployer,
-    gasLimit: 1248779,
+    gasLimit: gasLimits[chainId],
     args: [],
     log: true,
     deterministicDeployment: false,
   });
-  // const annexAuctionDeployed = await get(annexAuction);
 
-  // await deploy(dutchAuction, {
-  //   from: deployer,
-  //   gasLimit: 30000000,
-  //   args: [],
-  //   log: true,
-  //   deterministicDeployment: false,
-  // });
+  const docmentDeployed = await get(documents);
+
+  await deploy(annexAuction, {
+    from: deployer,
+    gasLimit: 30000001,
+    args: [docmentDeployed.address],
+    log: true,
+    deterministicDeployment: false,
+  });
 
   // const weth9Address = await getWETH9Address(hre);
 

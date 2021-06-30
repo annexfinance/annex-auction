@@ -5,18 +5,23 @@
     "test": "test"
   },
   "scripts": {
-    "build": "hardhat compile",
     "test": "hardhat test",
-    "size":"hardhat size-contracts --show-stack-traces",
-    "deploy": "hardhat deploy --network bsctestnet",
-    "flatten": "hardhat flatten ./contracts/AnnexBatchAuction.sol > ./flatten/AnnexBatchAuction.sol",
-    "verify": "hardhat etherscan-verify --license None --network bsctestnet",
-    "lint": "yarn lint:sol && yarn lint:ts",
-    "lint:sol": "solhint 'contracts/**/*.sol'",
+    "clean": "hardhat clean",
+    "prepack": "npm build",
+    "build": "hardhat compile",
+    "watch": "hardhat watch compilation",
     "lint:ts": "eslint --max-warnings 0 .",
-    "fmt:sol": "prettier 'contracts/**/*.sol' -w",
+    "lint": "yarn lint:sol && yarn lint:ts",
     "precommit": "yarn fmt:sol && yarn lint",
-    "prepack": "npm build"
+    "lint:sol": "solhint 'contracts/**/*.sol'",
+    "deploy_ropsten": "hardhat deploy --network ropsten",
+    "deploy_kovan": "hardhat deploy --network kovan",
+    "deploy_rinkeby": "hardhat deploy --network rinkeby",
+    "deploy_bsc": "hardhat deploy --network bsc",
+    "fmt:sol": "prettier 'contracts/**/*.sol' -w",
+    "size": "hardhat size-contracts --show-stack-traces",
+    "verify": "hardhat etherscan-verify --license MIT --network ropsten",
+    "flatten": "hardhat flatten ./contracts/AnnexBatchAuction.sol > ./flatten/AnnexBatchAuction.sol"
   },
   "repository": {
     "type": "git"
@@ -30,6 +35,7 @@
     "dotenv": "^8.2.0",
     "ethers": "^5.0.22",
     "hardhat-contract-sizer": "^2.0.3",
+    "hardhat-watcher": "^2.1.1",
     "solc": "0.6.8",
     "yargs": "^16.1.1"
   },
@@ -58,6 +64,8 @@
     "ethereum-waffle": "^3.2.0",
     "hardhat": "^2.4.1",
     "hardhat-deploy": "^0.7.0-beta.30",
+    "hardhat-docgen": "^1.1.1",
+    "hardhat-spdx-license-identifier": "^2.0.3",
     "prettier": "^2.1.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.60",
     "solhint": "^3.3.2",

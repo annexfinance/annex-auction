@@ -105,8 +105,8 @@ contract AnnexBatchAuction is Ownable {
     mapping(uint256 => AuctionData) public auctionData; // Store auctions details
     mapping(uint256 => address) public auctionAccessManager;
     mapping(uint256 => bytes) public auctionAccessData;
-    mapping(uint256 => bytes32) public clearingPriceOrders; // clearing price orders
-    // auctionId => liquidity pool
+    mapping(uint256 => bytes32) internal clearingPriceOrders; // clearing price orders
+    // auctionId => IPancakeswapV2Pair (liquidity pool)
     //address of pancakeswap liquidity pools of pairs auctioningToken-biddingToken
     mapping(uint256 => address) public liquidityPools;
     // auctionId => pancakeswapV2Router address
@@ -205,6 +205,7 @@ contract AnnexBatchAuction is Ownable {
         bytes32 clearingPriceOrder
     );
     event UserRegistration(address indexed user, uint64 userId);
+    event AddRouters(address[] indexed routers);
 
     constructor(address _documents) public {
         documents = IDocuments(_documents);
@@ -264,11 +265,6 @@ contract AnnexBatchAuction is Ownable {
         auctionCounter = auctionCounter.add(1);
         sellOrders[auctionCounter].initializeEmptyList();
         uint64 userId = getUserId(msg.sender);
-        // address pancakeswapV2Pair =
-        //     IPancakeswapV2Factory(PancakeswapV2Router02(auction.router).factory()).createPair(
-        //         address(auction._auctioningToken),
-        //         address(auction._biddingToken)
-        //     );
 
         {
             auctionData[auctionCounter] = AuctionData(
@@ -290,7 +286,6 @@ contract AnnexBatchAuction is Ownable {
                 false,
                 auction.isAtomicClosureAllowed
             );
-            // liquidityPools[auctionCounter] = pancakeswapV2Pair;
             pancakeswapV2Router[auctionCounter] = routers[auction.router];
         }
 
@@ -309,89 +304,7 @@ contract AnnexBatchAuction is Ownable {
         );
         return auctionCounter;
     }
-
-    // function initiateAuction(
-    //     IERC20 _auctioningToken,
-    //     IERC20 _biddingToken,
-    //     address accessManagerContract,
-    //     uint256 orderCancellationEndDate,
-    //     uint256 auctionEndDate,
-    //     uint256 minimumBiddingAmountPerOrder,
-    //     uint256 minFundingThreshold,
-    //     uint96 _auctionedSellAmount,
-    //     uint96 _minBuyAmount,
-    //     bool isAtomicClosureAllowed,
-    //     bytes memory accessManagerContractData
-    // ) public returns (uint256) {
-    //     // Auctioner can init an auction if he has 100 Ann
-    //     require(
-    //         annexToken.balanceOf(msg.sender) >= threshold,
-    //         "NOT_ENOUGH_ANN"
-    //     );
-    //     _auctioningToken.safeTransferFrom(
-    //         msg.sender,
-    //         address(this),
-    //         _auctionedSellAmount.mul(FEE_DENOMINATOR.add(feeNumerator)).div(
-    //             FEE_DENOMINATOR
-    //         ) //[0]
-    //     );
-    //     require(_auctionedSellAmount > 0, "INVALID_AUCTION_TOKENS"); //
-    //     require(_minBuyAmount > 0, "TOKENS_CANT_AUCTIONED_FREE"); // tokens cannot be auctioned for free
-    //     require(minimumBiddingAmountPerOrder > 0, "MUST_NOT_ZERO");
-    //     require(
-    //         orderCancellationEndDate <= auctionEndDate,
-    //         "ERROR_TIME_PERIOD"
-    //     );
-    //     require(auctionEndDate > block.timestamp, "INVALID_AUTION_END");
-    //     auctionCounter = auctionCounter.add(1);
-    //     sellOrders[auctionCounter].initializeEmptyList();
-    //     uint64 userId = getUserId(msg.sender);
-    //     address pancakeswapV2Pair =
-    //         IPancakeswapV2Factory(pancakeswapV2Router.factory()).createPair(
-    //             address(_auctioningToken),
-    //             address(_biddingToken)
-    //         );
-
-    //     {
-    //         auctionData[auctionCounter] = AuctionData(
-    //             _auctioningToken,
-    //             _biddingToken,
-    //             orderCancellationEndDate,
-    //             auctionEndDate,
-    //             minimumBiddingAmountPerOrder,
-    //             0,
-    //             feeNumerator,
-    //             minFundingThreshold,
-    //             IterableOrderedOrderSet.encodeOrder(
-    //                 userId,
-    //                 _minBuyAmount,
-    //                 _auctionedSellAmount
-    //             ),
-    //             IterableOrderedOrderSet.QUEUE_START,
-    //             bytes32(0),
-    //             0,
-    //             false,
-    //             isAtomicClosureAllowed
-    //         );
-    //         liquidityPools[auctionCounter] = pancakeswapV2Pair;
-    //     }
-
-    //     auctionAccessManager[auctionCounter] = accessManagerContract;
-    //     auctionAccessData[auctionCounter] = accessManagerContractData;
-
-    //     // emit NewAuction(
-    //     //     auctionCounter,
-    //     //     _auctioningToken,
-    //     //     _biddingToken,
-    //     //     orderCancellationEndDate,
-    //     //     auctionEndDate,
-    //     //     userId,
-    //     //     _auctionedSellAmount,
-    //     //     _minBuyAmount
-    //     // );
-    //     return auctionCounter;
-    // }
-
+    
     function placeSellOrders(
         uint256 auctionId,
         uint96[] memory _minBuyAmounts,
@@ -755,11 +668,8 @@ contract AnnexBatchAuction is Ownable {
         }
         AuctionData memory auction = auctionData[auctionId];
         bytes32 clearingPriceOrder = clearingPriceOrders[auctionId];
-        (
-            ,
-            uint96 priceNumerator,
-            uint96 priceDenominator
-        ) = clearingPriceOrder.decodeOrder();
+        (, uint96 priceNumerator, uint96 priceDenominator) = clearingPriceOrder
+        .decodeOrder();
 
         (uint64 userId, , ) = orders[0].decodeOrder();
         bool minFundingThresholdNotReached = auctionData[auctionId]
@@ -810,19 +720,15 @@ contract AnnexBatchAuction is Ownable {
         }
         if (!minFundingThresholdNotReached) {
             // sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
-            // uint256 lp = 
             IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
                 registeredUsers.getAddressAt(userId),
-                calculateLPTokens(
-                auctionId,
-                uint96(sumBiddingTokenAmount)
-            )
-
+                calculateLPTokens(auctionId, uint96(sumBiddingTokenAmount))
             );
-            emit ClaimedLPFromOrder(auctionId, userId, calculateLPTokens(
+            emit ClaimedLPFromOrder(
                 auctionId,
-                uint96(sumBiddingTokenAmount)
-            ));
+                userId,
+                calculateLPTokens(auctionId, uint96(sumBiddingTokenAmount))
+            );
         }
     }
 
@@ -868,19 +774,11 @@ contract AnnexBatchAuction is Ownable {
 
             // instead of send bidding tokens to the auctioneer account we will add these bidding tokens
             // to the pool with total auctioned amount of tokens.
-            (, , uint256 liquidity) = addLiquidity(
+            (uint256 liquidity) = addLiquidity(
                 auctionId,
                 fullAuctionedAmount,
                 biddingTokenAmount
             );
-
-            liquidityPools[auctionId] = IPancakeswapV2Factory(
-                IPancakeswapV2Router02(pancakeswapV2Router[auctionId]).factory()
-            ).getPair(
-                address(auctionData[auctionId].auctioningToken),
-                address(auctionData[auctionId].biddingToken)
-            );
-
             emit ClaimedLPFromOrder(auctionId, auctioneerId, liquidity);
             sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
             // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
@@ -900,9 +798,7 @@ contract AnnexBatchAuction is Ownable {
         view
         returns (uint256)
     {
-        // AuctionData storage auction = auctionData[auctionId];
-        (, , uint96 totalBiddingTokenAmount) = 
-        clearingPriceOrders[auctionId]
+        (, , uint96 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
         .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
 
         uint96 totalLP = uint96(
@@ -922,8 +818,6 @@ contract AnnexBatchAuction is Ownable {
     )
         internal
         returns (
-            uint256 amountA,
-            uint256 amountB,
             uint256 liquidity
         )
     {
@@ -938,17 +832,23 @@ contract AnnexBatchAuction is Ownable {
             biddingTokenAmount
         );
         // add the liquidity
-        return
-            IPancakeswapV2Router02(pancakeswapV2Router[auctionId]).addLiquidity(
-                address(auction.auctioningToken),
-                address(auction.biddingToken),
-                auctionTokenAmount,
-                biddingTokenAmount,
-                0,
-                0,
-                address(this),
-                block.timestamp + 600
-            );
+        (, , liquidity) = IPancakeswapV2Router02(pancakeswapV2Router[auctionId])
+        .addLiquidity(
+            address(auction.auctioningToken),
+            address(auction.biddingToken),
+            auctionTokenAmount,
+            biddingTokenAmount,
+            0,
+            0,
+            address(this),
+            block.timestamp + 600
+        );
+        liquidityPools[auctionId] = IPancakeswapV2Factory(
+            IPancakeswapV2Router02(pancakeswapV2Router[auctionId]).factory()
+        ).getPair(
+            address(auction.auctioningToken),
+            address(auction.biddingToken)
+        );
     }
 
     /* send back either auctioning or bidding tokens to the given user.
@@ -986,7 +886,7 @@ contract AnnexBatchAuction is Ownable {
             registeredUsers.insert(numUsers, user),
             "REGISTERED" // User already registered
         );
-        // emit UserRegistration(user, numUsers);
+        emit UserRegistration(user, numUsers);
         return numUsers;
     }
 
@@ -994,7 +894,7 @@ contract AnnexBatchAuction is Ownable {
         if (registeredUsers.hasAddress(user)) {
             return registeredUsers.getId(user);
         } else {
-            // emit NewUser(registerUser(user), user);
+            emit NewUser(registerUser(user), user);
             return registerUser(user);
         }
     }
@@ -1022,20 +922,19 @@ contract AnnexBatchAuction is Ownable {
     // Getter & Setters
     //--------------------------------------------------------
 
-    function setThreshold(uint256 _threshold) external {
+    function setThreshold(uint256 _threshold) external onlyOwner {
         threshold = _threshold;
     }
 
-    function getThreshold() external view returns (uint256) {
-        return threshold;
-    }
-
-    function setAnnexAddress(address _annexToken) external {
+    function setAnnexAddress(address _annexToken) external onlyOwner {
         annexToken = IERC20(_annexToken);
     }
 
-    function getAnnexAddress() external view returns (address) {
-        return address(annexToken);
+    function setRouters(address[] memory _routers) external onlyOwner {
+        for (uint8 i = 0; i < _routers.length; i++) {
+            routers.push(_routers[i]);
+        }
+        emit AddRouters(_routers);
     }
 
     //--------------------------------------------------------
