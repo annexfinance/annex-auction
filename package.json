@@ -21,7 +21,8 @@
     "fmt:sol": "prettier 'contracts/**/*.sol' -w",
     "size": "hardhat size-contracts --show-stack-traces",
     "verify": "hardhat etherscan-verify --license MIT --network ropsten",
-    "flatten": "hardhat flatten ./contracts/AnnexBatchAuction.sol > ./flatten/AnnexBatchAuction.sol"
+    "flatten_batch": "hardhat flatten ./contracts/Utils/BatchDocuments.sol > ./flatten/BatchDocuments.sol",
+    "flatten_annex": "hardhat flatten ./contracts/AnnexBatchAuction.sol > ./flatten/AnnexBatchAuction.sol"
   },
   "repository": {
     "type": "git"

@@ -159,7 +159,7 @@ export default {
     },
     bsc: {
       ...sharedNetworkConfig,
-      url: "https://data-seed-prebsc-2-s3.binance.org:8545/",
+      url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
       chainId: 97,
       gasPrice: GAS_PRICE_GWEI
         ? parseInt(
@@ -175,7 +175,7 @@ export default {
     timeout: 2000000,
   },
   etherscan: {
-    apiKey: MY_ETHERSCAN_API_KEY,
+    apiKey: MY_BSCSCAN_API_KEY,
   },
   contractSizer: {
     alphaSort: true,

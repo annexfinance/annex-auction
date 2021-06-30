@@ -114,7 +114,7 @@ contract AnnexBatchAuction is Ownable {
     // address for PancakeswapV2Router02
     address[] public routers;
 
-    IDocuments public immutable documents; // for storing documents
+    IDocuments public documents; // for storing documents
     IERC20 public annexToken;
 
     IdToAddressBiMap.Data private registeredUsers;
@@ -206,10 +206,9 @@ contract AnnexBatchAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
     event AddRouters(address[] indexed routers);
+    event Log(uint256 indexed index, uint256 sumOfSellAmounts, uint256 ifel);
 
-    constructor(address _documents) public {
-        documents = IDocuments(_documents);
-    }
+    constructor() public {}
 
     function setFeeParameters(
         uint256 newFeeNumerator,
@@ -304,7 +303,7 @@ contract AnnexBatchAuction is Ownable {
         );
         return auctionCounter;
     }
-    
+
     function placeSellOrders(
         uint256 auctionId,
         uint96[] memory _minBuyAmounts,
@@ -402,6 +401,7 @@ contract AnnexBatchAuction is Ownable {
                     _prevSellOrders[i]
                 )
             ) {
+                emit Log(i, sumOfSellAmounts, 1);
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
                 emit NewSellOrder(
                     auctionId,
@@ -409,8 +409,11 @@ contract AnnexBatchAuction is Ownable {
                     _minBuyAmounts[i],
                     _sellAmounts[i]
                 );
+            } else {
+                emit Log(i, sumOfSellAmounts, 0);
             }
         }
+
         auctionData[auctionId].biddingToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -774,7 +777,7 @@ contract AnnexBatchAuction is Ownable {
 
             // instead of send bidding tokens to the auctioneer account we will add these bidding tokens
             // to the pool with total auctioned amount of tokens.
-            (uint256 liquidity) = addLiquidity(
+            uint256 liquidity = addLiquidity(
                 auctionId,
                 fullAuctionedAmount,
                 biddingTokenAmount
@@ -815,12 +818,7 @@ contract AnnexBatchAuction is Ownable {
         uint256 auctionId,
         uint256 auctionTokenAmount,
         uint256 biddingTokenAmount
-    )
-        internal
-        returns (
-            uint256 liquidity
-        )
-    {
+    ) internal returns (uint256 liquidity) {
         // approve token transfer to cover all possible scenarios
         AuctionData storage auction = auctionData[auctionId];
         auction.auctioningToken.approve(
@@ -880,7 +878,7 @@ contract AnnexBatchAuction is Ownable {
         }
     }
 
-    function registerUser(address user) public returns (uint64) {
+    function registerUser(address user) internal returns (uint64) {
         numUsers = numUsers.add(1).toUint64();
         require(
             registeredUsers.insert(numUsers, user),
@@ -890,12 +888,12 @@ contract AnnexBatchAuction is Ownable {
         return numUsers;
     }
 
-    function getUserId(address user) public returns (uint64) {
+    function getUserId(address user) public returns (uint64 userId) {
         if (registeredUsers.hasAddress(user)) {
-            return registeredUsers.getId(user);
+            userId = registeredUsers.getId(user);
         } else {
-            emit NewUser(registerUser(user), user);
-            return registerUser(user);
+            userId = registerUser(user);
+            emit NewUser(userId, user);
         }
     }
 
@@ -935,6 +933,10 @@ contract AnnexBatchAuction is Ownable {
             routers.push(_routers[i]);
         }
         emit AddRouters(_routers);
+    }
+
+    function setDocumentAddress(address _document) external onlyOwner {
+        documents = IDocuments(_document);
     }
 
     //--------------------------------------------------------
