@@ -235,72 +235,75 @@ contract AnnexBatchAuction is Ownable {
     // bidding Token    = ANN
     // pair             = USDT-ANN
 
-    function initiateAuction(AuctionReq calldata auction)
+    function initiateAuction(AuctionReq[] calldata auctions)
         public
-        returns (uint256)
+        
     {
         // Auctioner can init an auction if he has 100 Ann
         require(
             annexToken.balanceOf(msg.sender) >= threshold,
             "NOT_ENOUGH_ANN"
         );
-        auction._auctioningToken.safeTransferFrom(
+        for(uint i = 0 ; i < auctions.length ; i++ ){
+
+        auctions[i]._auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
-            auction
+            auctions[i]
                 ._auctionedSellAmount
                 .mul(FEE_DENOMINATOR.add(feeNumerator))
                 .div(FEE_DENOMINATOR) //[0]
         );
-        require(auction._auctionedSellAmount > 0, "INVALID_AUCTION_TOKENS"); //
-        require(auction._minBuyAmount > 0, "TOKENS_CANT_AUCTIONED_FREE"); // tokens cannot be auctioned for free
-        require(auction.minimumBiddingAmountPerOrder > 0, "MUST_NOT_ZERO");
+        require(auctions[i]._auctionedSellAmount > 0, "INVALID_AUCTION_TOKENS"); //
+        require(auctions[i]._minBuyAmount > 0, "TOKENS_CANT_AUCTIONED_FREE"); // tokens cannot be auctioned for free
+        require(auctions[i].minimumBiddingAmountPerOrder > 0, "MUST_NOT_ZERO");
         require(
-            auction.orderCancellationEndDate <= auction.auctionEndDate,
+            auctions[i].orderCancellationEndDate <= auctions[i].auctionEndDate,
             "ERROR_TIME_PERIOD"
         );
-        require(auction.auctionEndDate > block.timestamp, "INVALID_AUTION_END");
+        require(auctions[i].auctionEndDate > block.timestamp, "INVALID_AUTION_END");
         auctionCounter = auctionCounter.add(1);
         sellOrders[auctionCounter].initializeEmptyList();
         uint64 userId = getUserId(msg.sender);
 
         {
             auctionData[auctionCounter] = AuctionData(
-                auction._auctioningToken,
-                auction._biddingToken,
-                auction.orderCancellationEndDate,
-                auction.auctionEndDate,
-                auction.minimumBiddingAmountPerOrder,
+                auctions[i]._auctioningToken,
+                auctions[i]._biddingToken,
+                auctions[i].orderCancellationEndDate,
+                auctions[i].auctionEndDate,
+                auctions[i].minimumBiddingAmountPerOrder,
                 0,
                 feeNumerator,
-                auction.minFundingThreshold,
+                auctions[i].minFundingThreshold,
                 IterableOrderedOrderSet.encodeOrder(
                     userId,
-                    auction._minBuyAmount,
-                    auction._auctionedSellAmount
+                    auctions[i]._minBuyAmount,
+                    auctions[i]._auctionedSellAmount
                 ),
                 IterableOrderedOrderSet.QUEUE_START,
                 0,
                 false,
-                auction.isAtomicClosureAllowed
+                auctions[i].isAtomicClosureAllowed
             );
-            pancakeswapV2Router[auctionCounter] = routers[auction.router];
+            pancakeswapV2Router[auctionCounter] = routers[auctions[i].router];
         }
 
-        auctionAccessManager[auctionCounter] = auction.accessManagerContract;
-        auctionAccessData[auctionCounter] = auction.accessManagerContractData;
+        auctionAccessManager[auctionCounter] = auctions[i].accessManagerContract;
+        auctionAccessData[auctionCounter] = auctions[i].accessManagerContractData;
 
         emit NewAuction(
             auctionCounter,
-            auction._auctioningToken,
-            auction._biddingToken,
-            auction.orderCancellationEndDate,
-            auction.auctionEndDate,
+            auctions[i]._auctioningToken,
+            auctions[i]._biddingToken,
+            auctions[i].orderCancellationEndDate,
+            auctions[i].auctionEndDate,
             userId,
-            auction._auctionedSellAmount,
-            auction._minBuyAmount
+            auctions[i]._auctionedSellAmount,
+            auctions[i]._minBuyAmount
         );
-        return auctionCounter;
+        }
+        // return counters;
     }
 
     function placeSellOrders(
