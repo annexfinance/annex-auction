@@ -237,13 +237,14 @@ contract AnnexBatchAuction is Ownable {
 
     function initiateAuction(AuctionReq[] calldata auctions)
         public
-        
+        returns (uint256[] memory)
     {
         // Auctioner can init an auction if he has 100 Ann
         require(
             annexToken.balanceOf(msg.sender) >= threshold,
             "NOT_ENOUGH_ANN"
         );
+        uint256[] memory counters;
         for(uint i = 0 ; i < auctions.length ; i++ ){
 
         auctions[i]._auctioningToken.safeTransferFrom(
@@ -302,8 +303,9 @@ contract AnnexBatchAuction is Ownable {
             auctions[i]._auctionedSellAmount,
             auctions[i]._minBuyAmount
         );
+        counters[i]= auctionCounter;
         }
-        // return counters;
+        return counters;
     }
 
     function placeSellOrders(
