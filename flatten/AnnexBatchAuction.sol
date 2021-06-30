@@ -1,3 +1,4 @@
+// Sources flattened with hardhat v2.4.1 https://hardhat.org
 
 // File @openzeppelin/contracts/token/ERC20/IERC20.sol@v3.4.1
 
@@ -745,6 +746,10 @@ library IterableOrderedOrderSet {
         mapping(bytes32 => bytes32) prevMap;
     }
 
+     event Insert(
+        uint256 indexed line
+    );
+
     struct Order {
         uint64 owner;
         uint96 buyAmount;
@@ -774,15 +779,18 @@ library IterableOrderedOrderSet {
         if (contains(self, elementToInsert)) {
             return false;
         }
+        emit Insert(1);
         if (
             elementBeforeNewOne != QUEUE_START &&
             self.prevMap[elementBeforeNewOne] == bytes32(0)
         ) {
             return false;
         }
+        emit Insert(2);
         if (!elementBeforeNewOne.smallerThan(elementToInsert)) {
             return false;
         }
+        emit Insert(3);
 
         // `elementBeforeNewOne` might have been removed during the time it
         // took to the transaction calling this function to be mined, so
@@ -1464,6 +1472,18 @@ interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
 
 pragma solidity ^0.6.0;
 
+
+
+
+
+
+
+
+
+
+
+
+
 /**
 Errors details
     ERROR_ORDER_PLACEMENT = no longer in order placement phase
@@ -1516,7 +1536,6 @@ contract AnnexBatchAuction is Ownable {
         bytes accessManagerContractData;
         uint8 router;
     }
-
     struct AuctionData {
         // address of bidding token
         IERC20 auctioningToken;
@@ -1654,10 +1673,9 @@ contract AnnexBatchAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
     event AddRouters(address[] indexed routers);
-    event Log(uint256 indexed index,uint256 sumOfSellAmounts,uint256 type);
-    constructor() public {
-        
-    }
+    event Log(uint256 indexed index, uint256 sumOfSellAmounts, uint96 _minBuyAmounts, uint256 ifel);
+
+    constructor() public {}
 
     function setFeeParameters(
         uint256 newFeeNumerator,
@@ -1829,7 +1847,6 @@ contract AnnexBatchAuction is Ownable {
         userId = getUserId(orderSubmitter);
         uint256 minimumBiddingAmountPerOrder = auctionData[auctionId]
         .minimumBiddingAmountPerOrder;
-                emit Log(i,sumOfSellAmounts,1);
         for (uint256 i = 0; i < _minBuyAmounts.length; i++) {
             require(
                 _minBuyAmounts[i] > 0,
@@ -1851,7 +1868,7 @@ contract AnnexBatchAuction is Ownable {
                     _prevSellOrders[i]
                 )
             ) {
-                emit Log(i,sumOfSellAmounts,1);
+                emit Log(i, sumOfSellAmounts, _minBuyAmounts[i],_sellAmounts[i],1);
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
                 emit NewSellOrder(
                     auctionId,
@@ -1859,12 +1876,11 @@ contract AnnexBatchAuction is Ownable {
                     _minBuyAmounts[i],
                     _sellAmounts[i]
                 );
-            }
-            else{
-                emit Log(i,sumOfSellAmounts,0);
+            } else {
+                emit Log(i, sumOfSellAmounts, _minBuyAmounts[i],_sellAmounts[i],0);
             }
         }
-        
+
         auctionData[auctionId].biddingToken.safeTransferFrom(
             msg.sender,
             address(this),

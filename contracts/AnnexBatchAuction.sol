@@ -68,7 +68,6 @@ contract AnnexBatchAuction is Ownable {
         bytes accessManagerContractData;
         uint8 router;
     }
-
     struct AuctionData {
         // address of bidding token
         IERC20 auctioningToken;
@@ -206,7 +205,7 @@ contract AnnexBatchAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
     event AddRouters(address[] indexed routers);
-    event Log(uint256 indexed index, uint256 sumOfSellAmounts, uint256 ifel);
+    event Log(uint256 indexed index, uint256 sumOfSellAmounts, uint96 _minBuyAmounts,uint96 _minSellAmounts, uint256 ifel);
 
     constructor() public {}
 
@@ -401,7 +400,7 @@ contract AnnexBatchAuction is Ownable {
                     _prevSellOrders[i]
                 )
             ) {
-                emit Log(i, sumOfSellAmounts, 1);
+                emit Log(i, sumOfSellAmounts, _minBuyAmounts[i],_sellAmounts[i],1);
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
                 emit NewSellOrder(
                     auctionId,
@@ -410,7 +409,7 @@ contract AnnexBatchAuction is Ownable {
                     _sellAmounts[i]
                 );
             } else {
-                emit Log(i, sumOfSellAmounts, 0);
+                emit Log(i, sumOfSellAmounts, _minBuyAmounts[i],_sellAmounts[i],0);
             }
         }
 

@@ -42,6 +42,10 @@ library IterableOrderedOrderSet {
         mapping(bytes32 => bytes32) prevMap;
     }
 
+     event Insert(
+        uint256 indexed line
+    );
+
     struct Order {
         uint64 owner;
         uint96 buyAmount;
@@ -71,15 +75,18 @@ library IterableOrderedOrderSet {
         if (contains(self, elementToInsert)) {
             return false;
         }
+        emit Insert(1);
         if (
             elementBeforeNewOne != QUEUE_START &&
             self.prevMap[elementBeforeNewOne] == bytes32(0)
         ) {
             return false;
         }
+        emit Insert(2);
         if (!elementBeforeNewOne.smallerThan(elementToInsert)) {
             return false;
         }
+        emit Insert(3);
 
         // `elementBeforeNewOne` might have been removed during the time it
         // took to the transaction calling this function to be mined, so
