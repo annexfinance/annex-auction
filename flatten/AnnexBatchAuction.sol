@@ -746,10 +746,6 @@ library IterableOrderedOrderSet {
         mapping(bytes32 => bytes32) prevMap;
     }
 
-     event Insert(
-        uint256 indexed line
-    );
-
     struct Order {
         uint64 owner;
         uint96 buyAmount;
@@ -779,18 +775,15 @@ library IterableOrderedOrderSet {
         if (contains(self, elementToInsert)) {
             return false;
         }
-        emit Insert(1);
         if (
             elementBeforeNewOne != QUEUE_START &&
             self.prevMap[elementBeforeNewOne] == bytes32(0)
         ) {
             return false;
         }
-        emit Insert(2);
         if (!elementBeforeNewOne.smallerThan(elementToInsert)) {
             return false;
         }
-        emit Insert(3);
 
         // `elementBeforeNewOne` might have been removed during the time it
         // took to the transaction calling this function to be mined, so
@@ -1473,17 +1466,6 @@ interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
 pragma solidity ^0.6.0;
 
 
-
-
-
-
-
-
-
-
-
-
-
 /**
 Errors details
     ERROR_ORDER_PLACEMENT = no longer in order placement phase
@@ -1536,6 +1518,7 @@ contract AnnexBatchAuction is Ownable {
         bytes accessManagerContractData;
         uint8 router;
     }
+
     struct AuctionData {
         // address of bidding token
         IERC20 auctioningToken;
@@ -1572,7 +1555,8 @@ contract AnnexBatchAuction is Ownable {
     mapping(uint256 => AuctionData) public auctionData; // Store auctions details
     mapping(uint256 => address) public auctionAccessManager;
     mapping(uint256 => bytes) public auctionAccessData;
-    mapping(uint256 => bytes32) internal clearingPriceOrders; // clearing price orders
+    // auctionId => order bytes
+    mapping(uint256 => bytes32) public clearingPriceOrders; // clearing price orders
     // auctionId => IPancakeswapV2Pair (liquidity pool)
     //address of pancakeswap liquidity pools of pairs auctioningToken-biddingToken
     mapping(uint256 => address) public liquidityPools;
@@ -1673,7 +1657,14 @@ contract AnnexBatchAuction is Ownable {
     );
     event UserRegistration(address indexed user, uint64 userId);
     event AddRouters(address[] indexed routers);
-    event Log(uint256 indexed index, uint256 sumOfSellAmounts, uint96 _minBuyAmounts, uint256 ifel);
+    event Log(
+        uint256 indexed index,
+        uint256 sumOfSellAmounts,
+        uint96 _minBuyAmounts,
+        uint96 _minSellAmounts,
+        uint256 ifel
+    );
+    event Insert(uint256 indexed line);
 
     constructor() public {}
 
@@ -1868,7 +1859,6 @@ contract AnnexBatchAuction is Ownable {
                     _prevSellOrders[i]
                 )
             ) {
-                emit Log(i, sumOfSellAmounts, _minBuyAmounts[i],_sellAmounts[i],1);
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
                 emit NewSellOrder(
                     auctionId,
@@ -1876,8 +1866,6 @@ contract AnnexBatchAuction is Ownable {
                     _minBuyAmounts[i],
                     _sellAmounts[i]
                 );
-            } else {
-                emit Log(i, sumOfSellAmounts, _minBuyAmounts[i],_sellAmounts[i],0);
             }
         }
 
@@ -2113,7 +2101,6 @@ contract AnnexBatchAuction is Ownable {
         auctionData[auctionId].interimOrder = bytes32(0);
         auctionData[auctionId].interimSumBidAmount = uint256(0);
         auctionData[auctionId].minimumBiddingAmountPerOrder = uint256(0);
-        clearingPriceOrders[auctionId] = bytes32(0);
     }
 
     /**
@@ -2192,7 +2179,7 @@ contract AnnexBatchAuction is Ownable {
             // sendOutTokens(auctionId, 0, sumBiddingTokenAmount, userId); //[3]
             IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
                 registeredUsers.getAddressAt(userId),
-                calculateLPTokens(auctionId, uint96(sumBiddingTokenAmount))
+                calculateLPTokens(auctionId, sumBiddingTokenAmount)
             );
             emit ClaimedLPFromOrder(
                 auctionId,
@@ -2263,22 +2250,18 @@ contract AnnexBatchAuction is Ownable {
         }
     }
 
-    function calculateLPTokens(uint256 auctionId, uint96 biddingTokenAmount)
+    function calculateLPTokens(uint256 auctionId, uint256 biddingTokenAmount)
         internal
         view
         returns (uint256)
     {
-        (, , uint96 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
+        (, , uint256 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
         .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
 
-        uint96 totalLP = uint96(
-            IPancakeswapV2Pair(liquidityPools[auctionId]).balanceOf(
-                address(this)
-            )
-        );
-        return (
-            biddingTokenAmount.div(totalBiddingTokenAmount).mul(totalLP.div(2))
-        );
+        uint256 totalLP = IPancakeswapV2Pair(liquidityPools[auctionId])
+        .balanceOf(address(this));
+        return
+            biddingTokenAmount.div(totalBiddingTokenAmount).mul(totalLP.div(2));
     }
 
     function addLiquidity(
@@ -2404,6 +2387,26 @@ contract AnnexBatchAuction is Ownable {
 
     function setDocumentAddress(address _document) external onlyOwner {
         documents = IDocuments(_document);
+    }
+
+    function getAuctionInfo(uint256 auctionId)
+        external
+        view
+        returns (
+            uint256 auctioningToken,
+            uint256 biddingToken,
+            uint112 reserve0,
+            uint112 reserve1
+        )
+    {
+        auctioningToken = auctionData[auctionId].auctioningToken.balanceOf(
+            address(this)
+        );
+        biddingToken = auctionData[auctionId].biddingToken.balanceOf(
+            address(this)
+        );
+        (reserve0, reserve1, ) = IPancakeswapV2Pair(liquidityPools[auctionId])
+        .getReserves();
     }
 
     //--------------------------------------------------------
