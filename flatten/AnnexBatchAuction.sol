@@ -83,7 +83,7 @@ interface IERC20 {
 
 // File @openzeppelin/contracts/math/SafeMath.sol@v3.4.1
 
-// SPDX-License-Identifier: MIT
+
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -301,7 +301,7 @@ library SafeMath {
 
 // File @openzeppelin/contracts/utils/Address.sol@v3.4.1
 
-// SPDX-License-Identifier: MIT
+
 
 pragma solidity >=0.6.2 <0.8.0;
 
@@ -494,7 +494,7 @@ library Address {
 
 // File @openzeppelin/contracts/token/ERC20/SafeERC20.sol@v3.4.1
 
-// SPDX-License-Identifier: MIT
+
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -571,7 +571,7 @@ library SafeERC20 {
 
 // File @openzeppelin/contracts/utils/Context.sol@v3.4.1
 
-// SPDX-License-Identifier: MIT
+
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -599,7 +599,7 @@ abstract contract Context {
 
 // File @openzeppelin/contracts/access/Ownable.sol@v3.4.1
 
-// SPDX-License-Identifier: MIT
+
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -670,7 +670,7 @@ abstract contract Ownable is Context {
 
 // File @openzeppelin/contracts/math/Math.sol@v3.4.1
 
-// SPDX-License-Identifier: MIT
+
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -705,7 +705,7 @@ library Math {
 
 // File contracts/libraries/IterableOrderedOrderSet.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.6.8;
 
 /**
@@ -744,6 +744,8 @@ library IterableOrderedOrderSet {
     struct Data {
         mapping(bytes32 => bytes32) nextMap;
         mapping(bytes32 => bytes32) prevMap;
+        uint256 counter;
+        uint96 averagePrice;
     }
 
     struct Order {
@@ -757,6 +759,14 @@ library IterableOrderedOrderSet {
         self.prevMap[QUEUE_END] = QUEUE_START;
     }
 
+    function average(Data storage self)
+        internal
+        view
+        returns (uint96 averagePrice, uint256 counter)
+    {
+        return (self.averagePrice, self.counter);
+    }
+
     function isEmpty(Data storage self) internal view returns (bool) {
         return self.nextMap[QUEUE_START] == QUEUE_END;
     }
@@ -766,7 +776,7 @@ library IterableOrderedOrderSet {
         bytes32 elementToInsert,
         bytes32 elementBeforeNewOne
     ) internal returns (bool) {
-        (, , uint96 denominator) = decodeOrder(elementToInsert);
+        (, uint96 numerator, uint96 denominator) = decodeOrder(elementToInsert);
         require(denominator != uint96(0), "ERROR_ZERO");
         require(
             elementToInsert != QUEUE_START && elementToInsert != QUEUE_END,
@@ -810,6 +820,11 @@ library IterableOrderedOrderSet {
         self.prevMap[elementToInsert] = previous;
         self.nextMap[elementToInsert] = current;
 
+        self.counter = self.counter + 1;
+        self.averagePrice =
+            self.averagePrice +
+            ((denominator * 10**18) / numerator);
+
         return true;
     }
 
@@ -823,11 +838,13 @@ library IterableOrderedOrderSet {
         if (!contains(self, elementToRemove)) {
             return false;
         }
+
         bytes32 previousElement = self.prevMap[elementToRemove];
         bytes32 nextElement = self.nextMap[elementToRemove];
         self.nextMap[previousElement] = nextElement;
         self.prevMap[nextElement] = previousElement;
         self.nextMap[elementToRemove] = bytes32(0);
+
         return true;
     }
 
@@ -840,9 +857,8 @@ library IterableOrderedOrderSet {
         returns (bool)
     {
         bool result = removeKeepHistory(self, elementToRemove);
-        if (result) {
-            self.prevMap[elementToRemove] = bytes32(0);
-        }
+        if (result) self.prevMap[elementToRemove] = bytes32(0);
+
         return result;
     }
 
@@ -890,10 +906,7 @@ library IterableOrderedOrderSet {
 
         if (priceNumeratorLeft < priceNumeratorRight) return true;
         if (priceNumeratorLeft > priceNumeratorRight) return false;
-        require(
-            userIdLeft != userIdRight,
-            "ERROR_SAME_ORDER"
-        );
+        require(userIdLeft != userIdRight, "ERROR_SAME_ORDER");
         if (userIdLeft < userIdRight) {
             return true;
         }
@@ -912,10 +925,7 @@ library IterableOrderedOrderSet {
     {
         require(value != QUEUE_END, "ERROR_NEXT");
         bytes32 nextElement = self.nextMap[value];
-        require(
-            nextElement != bytes32(0),
-            "NON_EXISTENT"
-        );
+        require(nextElement != bytes32(0), "NON_EXISTENT");
         return nextElement;
     }
 
@@ -952,7 +962,7 @@ library IterableOrderedOrderSet {
 
 // File contracts/interfaces/AllowListVerifier.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.6.8;
 
 library AllowListVerifierHelper {
@@ -978,7 +988,7 @@ interface AllowListVerifier {
 
 // File contracts/libraries/IdToAddressBiMap.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.6.0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1053,7 +1063,7 @@ library IdToAddressBiMap {
 
 // File contracts/libraries/SafeCast.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
@@ -1077,7 +1087,7 @@ library SafeCast {
 
 // File contracts/interfaces/IDocuments.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
@@ -1105,7 +1115,7 @@ interface IDocuments {
 
 // File contracts/interfaces/IPancakeswapV2Pair.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.0;
 
 interface IPancakeswapV2Pair {
@@ -1214,7 +1224,7 @@ interface IPancakeswapV2Pair {
 
 // File contracts/interfaces/IPancakeswapV2Factory.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.0;
 
 interface IPancakeswapV2Factory {
@@ -1250,7 +1260,7 @@ interface IPancakeswapV2Factory {
 
 // File contracts/interfaces/IPancakeswapV2Router02.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity >=0.6.2;
 
 interface IPancakeswapV2Router01 {
@@ -1462,19 +1472,8 @@ interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
 
 // File contracts/AnnexBatchAuction.sol
 
-// SPDX-License-Identifier: MIT
+
 pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1671,22 +1670,10 @@ contract AnnexBatchAuction is Ownable {
     event UserRegistration(address indexed user, uint64 userId);
     event AddRouters(address[] indexed routers);
     event AddLiquidity(uint256 indexed auctionId, uint256 liquidity);
-    // Omly for testing
-    event Log(
-        uint256 indexed index,
-        uint256 sumOfSellAmounts,
-        uint96 _minBuyAmounts,
-        uint96 _minSellAmounts,
-        uint256 ifel
-    );
 
-    event Log(
-        uint256 indexed auctionId,
-        uint256 totalLP,
-        uint256 totalBiddingTokenAmount
-    );
     event CalculatedLP(
-        uint256 indexed biddingTokenAmount,
+        uint256 indexed auctionId,
+        uint256 biddingTokenAmount,
         uint256 totalBiddingTokenAmount,
         uint256 totalLP
     );
@@ -2181,9 +2168,9 @@ contract AnnexBatchAuction is Ownable {
                 } else {
                     if (orders[i].smallerThan(clearingPriceOrder)) {
                         //[17]
-
-                        // Don't need to calculate sumAuctioningTokenAmount because we are not send auctioning tokens to
-                        // the bidder so here we also calculate sumBiddingTokenAmount
+                        // In case of successful order:
+                        // Don't need to calculate sumAuctioningTokenAmount because we are not sending auctioning tokens to
+                        // the bidder so here we will calculate sumBiddingTokenAmount and conside this order as a successful order
 
                         // sumAuctioningTokenAmount = sumAuctioningTokenAmount.add(
                         //     sellAmount.mul(priceNumerator).div(priceDenominator)
@@ -2195,7 +2182,8 @@ contract AnnexBatchAuction is Ownable {
                         }
                     } else {
                         //[24]
-
+                        // In case of unsuccessful order we will calculate totalBiddingToken
+                        //amount to return it to the bidder.
                         {
                             r_sumBiddingTokenAmount = r_sumBiddingTokenAmount
                             .add(sellAmount);
@@ -2215,17 +2203,19 @@ contract AnnexBatchAuction is Ownable {
         if (!minFundingThresholdNotReached) {
             sendOutTokens(auctionId, 0, r_sumBiddingTokenAmount, userId); //[3]
             uint256 lp = calculateLPTokens(auctionId, sumBiddingTokenAmount);
-            emit ClaimedLPFromOrder(
-                auctionId,
-                userId,
-                sumBiddingTokenAmount,
-                lp
-            );
-            if (lp > 0)
+
+            if (lp > 0) {
                 IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
                     registeredUsers.getAddressAt(userId),
                     lp
                 );
+                emit ClaimedLPFromOrder(
+                    auctionId,
+                    userId,
+                    sumBiddingTokenAmount,
+                    lp
+                );
+            }
         }
     }
 
@@ -2299,7 +2289,7 @@ contract AnnexBatchAuction is Ownable {
 
         uint256 totalLP = IPancakeswapV2Pair(liquidityPools[auctionId])
         .balanceOf(address(this));
-        emit CalculatedLP(biddingTokenAmount, totalBiddingTokenAmount, totalLP);
+        emit CalculatedLP(auctionId,biddingTokenAmount, totalBiddingTokenAmount, totalLP);
         return
             biddingTokenAmount
                 .mul(10**18)
@@ -2436,6 +2426,7 @@ contract AnnexBatchAuction is Ownable {
     function getAuctionInfo(uint256 auctionId)
         external
         view
+        atStageFinished(auctionId)
         returns (
             uint256 auctioningToken,
             uint256 biddingToken,
@@ -2452,6 +2443,27 @@ contract AnnexBatchAuction is Ownable {
         (reserve0, reserve1, ) = IPancakeswapV2Pair(liquidityPools[auctionId])
         .getReserves();
     }
+
+    // Every successful bid will be the part of lp token price
+    // If a bidder will cancel his order it will not effect the
+    // lp token price.
+    function getLpPrice(uint256 auctionId)
+        external
+        view
+        atStageFinished(auctionId)
+        returns (uint96 averagePrice, uint256 counter)
+    {
+        (averagePrice, counter) = sellOrders[auctionId].average();
+    }
+
+    // function userAuctionStatus(uint256 auctionId, address user)
+    //     external
+    //     view
+    //     returns (bool isAuctionSuccess, uint96 purchased)
+    // {
+    //     isAuctionSuccess = auctionData[auctionId].minFundingThresholdNotReached;
+
+    // }
 
     //--------------------------------------------------------
     // Documents

@@ -3,7 +3,6 @@ pragma solidity >=0.6.8;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-
 /**
     ERROR_ZERO : Inserting zero is not supported
     INVALID_ELE : Inserting element is not valid
@@ -40,6 +39,8 @@ library IterableOrderedOrderSet {
     struct Data {
         mapping(bytes32 => bytes32) nextMap;
         mapping(bytes32 => bytes32) prevMap;
+        uint256 counter;
+        uint96 averagePrice;
     }
 
     struct Order {
@@ -53,6 +54,14 @@ library IterableOrderedOrderSet {
         self.prevMap[QUEUE_END] = QUEUE_START;
     }
 
+    function average(Data storage self)
+        internal
+        view
+        returns (uint96 averagePrice, uint256 counter)
+    {
+        return (self.averagePrice, self.counter);
+    }
+
     function isEmpty(Data storage self) internal view returns (bool) {
         return self.nextMap[QUEUE_START] == QUEUE_END;
     }
@@ -62,7 +71,7 @@ library IterableOrderedOrderSet {
         bytes32 elementToInsert,
         bytes32 elementBeforeNewOne
     ) internal returns (bool) {
-        (, , uint96 denominator) = decodeOrder(elementToInsert);
+        (, uint96 numerator, uint96 denominator) = decodeOrder(elementToInsert);
         require(denominator != uint96(0), "ERROR_ZERO");
         require(
             elementToInsert != QUEUE_START && elementToInsert != QUEUE_END,
@@ -106,6 +115,11 @@ library IterableOrderedOrderSet {
         self.prevMap[elementToInsert] = previous;
         self.nextMap[elementToInsert] = current;
 
+        self.counter = self.counter + 1;
+        self.averagePrice =
+            self.averagePrice +
+            ((denominator * 10**18) / numerator);
+
         return true;
     }
 
@@ -119,11 +133,13 @@ library IterableOrderedOrderSet {
         if (!contains(self, elementToRemove)) {
             return false;
         }
+
         bytes32 previousElement = self.prevMap[elementToRemove];
         bytes32 nextElement = self.nextMap[elementToRemove];
         self.nextMap[previousElement] = nextElement;
         self.prevMap[nextElement] = previousElement;
         self.nextMap[elementToRemove] = bytes32(0);
+
         return true;
     }
 
@@ -136,9 +152,8 @@ library IterableOrderedOrderSet {
         returns (bool)
     {
         bool result = removeKeepHistory(self, elementToRemove);
-        if (result) {
-            self.prevMap[elementToRemove] = bytes32(0);
-        }
+        if (result) self.prevMap[elementToRemove] = bytes32(0);
+
         return result;
     }
 
@@ -186,10 +201,7 @@ library IterableOrderedOrderSet {
 
         if (priceNumeratorLeft < priceNumeratorRight) return true;
         if (priceNumeratorLeft > priceNumeratorRight) return false;
-        require(
-            userIdLeft != userIdRight,
-            "ERROR_SAME_ORDER"
-        );
+        require(userIdLeft != userIdRight, "ERROR_SAME_ORDER");
         if (userIdLeft < userIdRight) {
             return true;
         }
@@ -208,10 +220,7 @@ library IterableOrderedOrderSet {
     {
         require(value != QUEUE_END, "ERROR_NEXT");
         bytes32 nextElement = self.nextMap[value];
-        require(
-            nextElement != bytes32(0),
-            "NON_EXISTENT"
-        );
+        require(nextElement != bytes32(0), "NON_EXISTENT");
         return nextElement;
     }
 
