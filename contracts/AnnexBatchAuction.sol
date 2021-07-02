@@ -828,7 +828,12 @@ contract AnnexBatchAuction is Ownable {
 
         uint256 totalLP = IPancakeswapV2Pair(liquidityPools[auctionId])
         .balanceOf(address(this));
-        emit CalculatedLP(auctionId,biddingTokenAmount, totalBiddingTokenAmount, totalLP);
+        emit CalculatedLP(
+            auctionId,
+            biddingTokenAmount,
+            totalBiddingTokenAmount,
+            totalLP
+        );
         return
             biddingTokenAmount
                 .mul(10**18)
@@ -909,6 +914,13 @@ contract AnnexBatchAuction is Ownable {
         );
         emit UserRegistration(user, numUsers);
         return numUsers;
+    }
+
+    function getUserAddress(uint256 userId) external view returns (address) {
+        return
+            registeredUsers.hasId(userId.toUint64()) == true
+                ? registeredUsers.getAddressAt(userId.toUint64())
+                : address(0);
     }
 
     function getUserId(address user) public returns (uint64 userId) {
