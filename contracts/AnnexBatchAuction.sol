@@ -209,20 +209,8 @@ contract AnnexBatchAuction is Ownable {
     event UserRegistration(address indexed user, uint64 userId);
     event AddRouters(address[] indexed routers);
     event AddLiquidity(uint256 indexed auctionId, uint256 liquidity);
-    // Omly for testing
-    event Log(
-        uint256 indexed index,
-        uint256 sumOfSellAmounts,
-        uint96 _minBuyAmounts,
-        uint96 _minSellAmounts,
-        uint256 ifel
-    );
+    // Only for testing
 
-    event Log(
-        uint256 indexed auctionId,
-        uint256 totalLP,
-        uint256 totalBiddingTokenAmount
-    );
     event CalculatedLP(
         uint256 indexed biddingTokenAmount,
         uint256 totalBiddingTokenAmount,
