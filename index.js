@@ -5,13 +5,13 @@ const {BigNumber} = require("ethers");
 
  var bytes =     "0x" +
       BigNumber.from(2n).toHexString().slice(2).padStart(16, "0") +
-      BigNumber.from(4000000000000000000n).toHexString().slice(2).padStart(24, "0") +
-      BigNumber.from(9200000000000000000n).toHexString().slice(2).padStart(24, "0")
+      BigNumber.from(1000000000000000000n).toHexString().slice(2).padStart(24, "0") +
+      BigNumber.from(2000000000000000000n).toHexString().slice(2).padStart(24, "0")
 
       console.log(bytes);
 
 // decoding
-var order_bytes = "0x0000000000000000000000008ac7230489e8000000000000d9e19ad15da20000";
+var order_bytes = "0x000000000000000100000000094079cd1a42aaaa00000000094079cd1a42aaab";
 console.log(
      {
           userId: BigNumber.from("0x" + order_bytes.substring(2, 18)).toString(),

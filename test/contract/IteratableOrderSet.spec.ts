@@ -151,7 +151,7 @@ describe("IterableOrderedOrderSet", function () {
   });
   it("should throw if the same orders are compared with smallerThan", async () => {
     await expect(set.smallerThan(BYTES32_ONE, BYTES32_ONE)).to.be.revertedWith(
-      "user is not allowed to place same order twice",
+      "ERROR_SAME_ORDER",
     );
   });
 
@@ -184,12 +184,12 @@ describe("IterableOrderedOrderSet", function () {
   it("should not allow to insert queue start element", async () => {
     await expect(
       set.callStatic.insertAt(queueStartElement, queueStartElement),
-    ).to.be.revertedWith("Inserting element is not valid");
+    ).to.be.revertedWith("INVALID_ELE");
   });
   it("should not allow to insert queue end element", async () => {
     await expect(
       set.callStatic.insertAt(queueLastElement, queueStartElement),
-    ).to.be.revertedWith("Inserting element is not valid");
+    ).to.be.revertedWith("INVALID_ELE");
   });
 
   it("should insert element according to rate", async () => {
@@ -212,19 +212,19 @@ describe("IterableOrderedOrderSet", function () {
     const first = await set.first();
     const second = await set.next(first);
     await expect(set.next(second)).to.be.revertedWith(
-      "Trying to get next of last element",
+      "ERROR_NEXT",
     );
   });
 
   it("doesn't allow to insert a number with denominator == 0", async () => {
     await expect(set.insert(BYTES32_ZERO)).to.be.revertedWith(
-      "Inserting zero is not supported",
+      "ERROR_ZERO",
     );
   });
 
   it("cannot get first of empty list", async () => {
     await expect(set.first()).to.be.revertedWith(
-      "Trying to get first from empty set",
+      "EMPTY_SET",
     );
   });
 

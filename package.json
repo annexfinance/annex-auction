@@ -6,6 +6,7 @@
   },
   "scripts": {
     "test": "hardhat test",
+    "coverage": "hardhat coverage",
     "clean": "hardhat clean",
     "prepack": "npm build",
     "build": "hardhat compile",

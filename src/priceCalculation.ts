@@ -7,8 +7,9 @@ export interface Price {
 }
 
 export interface ReceivedFunds {
-  auctioningTokenAmount: BigNumber;
-  biddingTokenAmount: BigNumber;
+  sumBiddingTokenAmount: BigNumber;
+  rSumBiddingTokenAmount: BigNumber;
+  sumLiquidityPoolTokens:BigNumber;
 }
 
 export interface OrderResult {
@@ -60,10 +61,11 @@ export function decodeOrder(bytes: string): Order {
   };
 }
 
-export function toReceivedFunds(result: [BigNumber, BigNumber]): ReceivedFunds {
+export function toReceivedFunds(result: [BigNumber, BigNumber,BigNumber]): ReceivedFunds {
   return {
-    auctioningTokenAmount: result[0],
-    biddingTokenAmount: result[1],
+    sumBiddingTokenAmount: result[0],
+    rSumBiddingTokenAmount: result[1],
+    sumLiquidityPoolTokens:result[2]
   };
 }
 
@@ -287,10 +289,11 @@ export async function createTokensAndMintAndApprove(
   annexAuction: Contract,
   users: Wallet[],
   hre: HardhatRuntimeEnvironment,
-): Promise<{ auctioningToken: Contract; biddingToken: Contract }> {
+): Promise<{ auctioningToken: Contract; biddingToken: Contract,annexToken:Contract }> {
   const ERC20 = await hre.ethers.getContractFactory("ERC20Mintable");
   const biddingToken = await ERC20.deploy("BT", "BT");
   const auctioningToken = await ERC20.deploy("BT", "BT");
+  const annexToken = await ERC20.deploy("BT", "BT");
 
   for (const user of users) {
     await biddingToken.mint(user.address, BigNumber.from(10).pow(30));
@@ -300,10 +303,15 @@ export async function createTokensAndMintAndApprove(
 
     await auctioningToken.mint(user.address, BigNumber.from(10).pow(30));
     await auctioningToken
-      .connect(user)
-      .approve(annexAuction.address, BigNumber.from(10).pow(30));
+    .connect(user)
+    .approve(annexAuction.address, BigNumber.from(10).pow(30));
+
+    await annexToken.mint(user.address, BigNumber.from(1000).pow(18));
+    await annexToken
+    .connect(user)
+    .approve(annexAuction.address, BigNumber.from(1000).pow(18));
   }
-  return { auctioningToken: auctioningToken, biddingToken: biddingToken };
+  return { auctioningToken: auctioningToken, biddingToken: biddingToken,annexToken:annexToken };
 }
 
 export function toPrice(result: [BigNumber, BigNumber]): Price {

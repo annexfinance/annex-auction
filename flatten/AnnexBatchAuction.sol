@@ -1476,7 +1476,6 @@ interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
 pragma solidity ^0.6.0;
 
 
-
 /**
 Errors details
     ERROR_ORDER_PLACEMENT = no longer in order placement phase
@@ -1571,6 +1570,7 @@ contract AnnexBatchAuction is Ownable {
     // auctionId => IPancakeswapV2Pair (liquidity pool)
     //address of pancakeswap liquidity pools of pairs auctioningToken-biddingToken
     mapping(uint256 => address) public liquidityPools;
+    mapping(uint256 => uint256) public poolLiquidities;
     // auctionId => pancakeswapV2Router address
     mapping(uint256 => address) public pancakeswapV2Router;
     // address for PancakeswapV2Router02
@@ -1578,6 +1578,7 @@ contract AnnexBatchAuction is Ownable {
 
     IDocuments public documents; // for storing documents
     IERC20 public annexToken;
+    address public treasury;
 
     IdToAddressBiMap.Data private registeredUsers;
     uint256 public auctionCounter; // counter for auctions
@@ -1641,7 +1642,8 @@ contract AnnexBatchAuction is Ownable {
         uint256 indexed auctionId,
         uint64 indexed userId,
         uint96 buyAmount,
-        uint96 sellAmount
+        uint96 sellAmount,
+        uint256 liquidityPoolTokens
     );
     event ClaimedLPFromOrder(
         uint256 indexed auctionId,
@@ -1715,6 +1717,7 @@ contract AnnexBatchAuction is Ownable {
             annexToken.balanceOf(msg.sender) >= threshold,
             "NOT_ENOUGH_ANN"
         );
+        annexToken.safeTransferFrom(msg.sender,treasury,100 ether);
         auction._auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -2126,8 +2129,9 @@ contract AnnexBatchAuction is Ownable {
     )
         public
         atStageFinished(auctionId)
-        returns (uint256 sumBiddingTokenAmount, uint256 r_sumBiddingTokenAmount)
+        returns (uint256 sumBiddingTokenAmount, uint256 r_sumBiddingTokenAmount,uint256 sumLiquidityPoolTokens)
     {
+        uint256 LiquidityPoolTokens;
         for (uint256 i = 0; i < orders.length; i++) {
             // Note: we don't need to keep any information about the node since
             // no new elements need to be inserted.
@@ -2176,6 +2180,8 @@ contract AnnexBatchAuction is Ownable {
                         //     sellAmount.mul(priceNumerator).div(priceDenominator)
                         // );
                         {
+                            LiquidityPoolTokens = calculateLPTokens(auctionId, sellAmount);
+                            sumLiquidityPoolTokens.add(LiquidityPoolTokens);
                             sumBiddingTokenAmount = sumBiddingTokenAmount.add(
                                 sellAmount
                             );
@@ -2191,8 +2197,8 @@ contract AnnexBatchAuction is Ownable {
                     }
                 }
             }
-            emit ClaimedFromOrder(auctionId, userId, buyAmount, sellAmount);
-        }
+            emit ClaimedFromOrder(auctionId, userId, buyAmount, sellAmount,LiquidityPoolTokens);
+        }   
 
         // here we will calculate user lp tokens using his bidding tokens
         // if minimum funding threshold is not reached then we will simply
@@ -2202,18 +2208,18 @@ contract AnnexBatchAuction is Ownable {
         }
         if (!minFundingThresholdNotReached) {
             sendOutTokens(auctionId, 0, r_sumBiddingTokenAmount, userId); //[3]
-            uint256 lp = calculateLPTokens(auctionId, sumBiddingTokenAmount);
+            // uint256 lp = calculateLPTokens(auctionId, sumBiddingTokenAmount);
 
-            if (lp > 0) {
+            if (sumLiquidityPoolTokens > 0) {
                 IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
                     registeredUsers.getAddressAt(userId),
-                    lp
+                    sumLiquidityPoolTokens
                 );
                 emit ClaimedLPFromOrder(
                     auctionId,
                     userId,
                     sumBiddingTokenAmount,
-                    lp
+                    sumLiquidityPoolTokens
                 );
             }
         }
@@ -2266,6 +2272,7 @@ contract AnnexBatchAuction is Ownable {
                 fullAuctionedAmount,
                 biddingTokenAmount
             );
+            poolLiquidities[auctionId] = liquidity;
             emit AddLiquidity(auctionId, liquidity);
             sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
             // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
@@ -2287,9 +2294,13 @@ contract AnnexBatchAuction is Ownable {
         (, , uint256 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
         .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
 
-        uint256 totalLP = IPancakeswapV2Pair(liquidityPools[auctionId])
-        .balanceOf(address(this));
-        emit CalculatedLP(auctionId,biddingTokenAmount, totalBiddingTokenAmount, totalLP);
+        uint256 totalLP = poolLiquidities[auctionId];
+        emit CalculatedLP(
+            auctionId,
+            biddingTokenAmount,
+            totalBiddingTokenAmount,
+            totalLP
+        );
         return
             biddingTokenAmount
                 .mul(10**18)
@@ -2372,6 +2383,13 @@ contract AnnexBatchAuction is Ownable {
         return numUsers;
     }
 
+    function getUserAddress(uint256 userId) external view returns (address) {
+        return
+            registeredUsers.hasId(userId.toUint64()) == true
+                ? registeredUsers.getAddressAt(userId.toUint64())
+                : address(0);
+    }
+
     function getUserId(address user) public returns (uint64 userId) {
         if (registeredUsers.hasAddress(user)) {
             userId = registeredUsers.getId(user);
@@ -2410,6 +2428,10 @@ contract AnnexBatchAuction is Ownable {
 
     function setAnnexAddress(address _annexToken) external onlyOwner {
         annexToken = IERC20(_annexToken);
+    }
+
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
     }
 
     function setRouters(address[] memory _routers) external onlyOwner {

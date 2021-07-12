@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-contract-sizer";
 import "hardhat-watcher";
 import "hardhat-deploy";
+// import "solidity-coverage"
 import dotenv from "dotenv";
 import { utils } from "ethers";
 import type { HttpNetworkUserConfig } from "hardhat/types";
@@ -179,7 +180,7 @@ export default {
   },
   contractSizer: {
     alphaSort: true,
-    runOnCompile: true,
+    runOnCompile: false,
     disambiguatePaths: false,
   },
   watcher: {

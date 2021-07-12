@@ -12,15 +12,23 @@ import {
 import { domain } from "../../src/tasks/utils";
 
 import { createAuctionWithDefaultsAndReturnId } from "./defaultContractInteractions";
-import { MAGIC_VALUE_FROM_ALLOW_LIST_VERIFIER_INTERFACE } from "./utilities";
+import {
+  MAGIC_VALUE_FROM_ALLOW_LIST_VERIFIER_INTERFACE,
+  setPrequistes,
+  setupRouter
+} from "./utilities";
 
 describe("AccessManager - integration tests", async () => {
-  const [user_1, user_2] = waffle.provider.getWallets();
+  const [user_1, user_2, treasury] = waffle.provider.getWallets();
   let annexAuction: Contract;
+  let router: Contract;
   let allowListManager: Contract;
   let testDomain: any;
   beforeEach(async () => {
-    const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
+    const AnnexAuction = await ethers.getContractFactory(
+      "AnnexBatchAuction",
+      user_1,
+    );
 
     annexAuction = await AnnexAuction.deploy();
     const AllowListManger = await ethers.getContractFactory(
@@ -29,17 +37,21 @@ describe("AccessManager - integration tests", async () => {
     allowListManager = await AllowListManger.deploy();
     const { chainId } = await ethers.provider.getNetwork();
     testDomain = domain(chainId, allowListManager.address);
+
+    router = await setupRouter(user_1);
+    annexAuction.setRouters([router.address]);
   });
   describe("AccessManager - placing order in annexAuction with auctioneer signature", async () => {
     it("integration test: places a new order and checks that tokens were transferred - with whitelisting", async () => {
-      const {
-        auctioningToken,
-        biddingToken,
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
+      const { auctioningToken, biddingToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await auctioningToken.mint(user_1.address, BigNumber.from(100).pow(18));
+
+      await setPrequistes(annexAuction, auctioningToken,router, user_1, treasury);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -50,9 +62,9 @@ describe("AccessManager - integration tests", async () => {
             ["address"],
             [user_1.address],
           ),
+          router:0
         },
       );
-
       const auctioneerMessage = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "address", "uint256"],
@@ -88,6 +100,10 @@ describe("AccessManager - integration tests", async () => {
           auctioneerSignatureEncoded,
         );
       const transferredbiddingTokenAmount = sellAmount.add(sellAmount.add(1));
+      const annexAddress = await annexAuction.annexToken();
+      const treasuryAddress = await annexAuction.treasury();
+      expect(auctioningToken.address).to.equal(annexAddress);
+      expect(treasury.address).to.equal(treasuryAddress);
 
       expect(
         await biddingToken.connect(user_2).balanceOf(annexAuction.address),
@@ -98,20 +114,20 @@ describe("AccessManager - integration tests", async () => {
         balanceBeforeOrderPlacement.sub(transferredbiddingTokenAmount),
       );
     });
+
     it("integration test: places a new order and checks that allowListing prevents the tx", async () => {
       const AllowListManager = await ethers.getContractFactory(
         "AllowListOffChainManaged",
       );
 
       const allowListManager = await AllowListManager.deploy();
-      const {
-        auctioningToken,
-        biddingToken,
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
+      const { auctioningToken, biddingToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+        await setPrequistes(annexAuction, auctioningToken,router, user_1, treasury);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -122,6 +138,7 @@ describe("AccessManager - integration tests", async () => {
             ["address"],
             [user_1.address],
           ),
+          router:0
         },
       );
 
@@ -159,7 +176,7 @@ describe("AccessManager - integration tests", async () => {
             [queueStartElement, queueStartElement],
             auctioneerSignatureEncoded,
           ),
-      ).to.be.revertedWith("user not allowed to place order");
+      ).to.be.revertedWith("NOT_ALLOWED");
     });
   });
 });

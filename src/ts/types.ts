@@ -4,6 +4,7 @@ export interface InitiateAuctionInput {
   auctioningToken: Contract;
   biddingToken: Contract;
   orderCancellationEndDate: BigNumberish;
+  auctionStartingDate: BigNumberish;
   auctionEndDate: BigNumberish;
   auctionedSellAmount: BigNumberish;
   minBuyAmount: BigNumberish;
@@ -12,4 +13,5 @@ export interface InitiateAuctionInput {
   isAtomicClosureAllowed: boolean;
   allowListManager: BytesLike;
   allowListData: BytesLike;
+  router:BigNumberish
 }
