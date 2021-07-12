@@ -18,7 +18,7 @@ async function createAuctionInputWithDefaults(
     parameters.auctionStartingDate || now,
     parameters.auctionEndDate || now + 3600,
     parameters.minimumBiddingAmountPerOrder || 1,
-    parameters.minFundingThreshold || 0,
+    parameters.minFundingThreshold || 1,
     parameters.auctionedSellAmount || ethers.utils.parseEther("1"),
     parameters.minBuyAmount || ethers.utils.parseEther("1"),
     parameters.isAtomicClosureAllowed || false,

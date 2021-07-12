@@ -31,6 +31,7 @@ import {
 
 import factoryAbi from "./Externals/factory.json";
 import pairAbi from "./Externals/pair.json";
+import _ from "underscore";
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Some tests use different test cases 1,..,10. These test cases are illustrated in the following jam board:
@@ -41,12 +42,15 @@ describe("AnnexBatchAuction", async () => {
   const [user_1, user_2, user_3] = waffle.provider.getWallets();
   let annexAuction: Contract;
   let router: Contract;
+  let factory: Contract;
   beforeEach(async () => {
     const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
     annexAuction = await AnnexAuction.deploy();
-    router = await setupRouter(user_1);
+    let { _router, _factory } = await setupRouter(user_1);
+    router = _router;
+    factory = _factory;
   });
-
+  
   describe("initiate Auction", async () => {
     it("throws if minimumBiddingAmountPerOrder is zero", async () => {
       const { auctioningToken, biddingToken,annexToken } =
@@ -910,22 +914,19 @@ describe("AnnexBatchAuction", async () => {
         },
       ];
 
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
         auctionedSellAmount: initialAuctionOrder.sellAmount,
         minBuyAmount: initialAuctionOrder.buyAmount,
-        router:0
+        router: 0,
       });
       const auctionId = BigNumber.from(1);
       await placeOrders(annexAuction, sellOrders, auctionId, hre);
@@ -944,8 +945,10 @@ describe("AnnexBatchAuction", async () => {
           sellOrders[0].sellAmount,
           encodeOrder(getClearingPriceFromInitialOrder(initialAuctionOrder)),
         );
-        
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(encodeOrder(price));
+
+      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(
+        encodeOrder(price),
+      );
     });
     it("checks case 4, it verifies the price in case of clearingOrder == initialAuctionOrder", async () => {
       const initialAuctionOrder = {
@@ -960,16 +963,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
@@ -993,8 +993,10 @@ describe("AnnexBatchAuction", async () => {
           sellOrders[0].sellAmount,
           encodeOrder(getClearingPriceFromInitialOrder(initialAuctionOrder)),
         );
-      
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(encodeOrder(price));
+
+      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(
+        encodeOrder(price),
+      );
       await claimFromAllOrders(annexAuction, auctionId, sellOrders);
     });
     it("checks case 4, it verifies the price in case of clearingOrder == initialAuctionOrder with 3 orders", async () => {
@@ -1020,16 +1022,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(3),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2, user_3],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2, user_3],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
@@ -1055,7 +1054,7 @@ describe("AnnexBatchAuction", async () => {
           sellOrders[0].sellAmount.mul(3),
           encodeOrder(getClearingPriceFromInitialOrder(initialAuctionOrder)),
         );
-      
+
       await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(
         encodeOrder(getClearingPriceFromInitialOrder(initialAuctionOrder)),
       );
@@ -1076,16 +1075,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken, router,user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
@@ -1105,7 +1101,7 @@ describe("AnnexBatchAuction", async () => {
           sellOrders[0].sellAmount,
           encodeOrder(getClearingPriceFromInitialOrder(initialAuctionOrder)),
         );
-      
+
       await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(
         encodeOrder(getClearingPriceFromInitialOrder(initialAuctionOrder)),
       );
@@ -1132,16 +1128,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(2),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
@@ -1181,16 +1174,13 @@ describe("AnnexBatchAuction", async () => {
         },
       ];
 
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2, user_3],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2, user_3],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
@@ -1221,16 +1211,13 @@ describe("AnnexBatchAuction", async () => {
         userId: BigNumber.from(1),
       };
 
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       await createAuctionWithDefaults(annexAuction, {
         auctioningToken,
         biddingToken,
@@ -1266,16 +1253,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1313,16 +1297,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1365,16 +1346,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(3),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2, user_3],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2, user_3],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1389,40 +1367,51 @@ describe("AnnexBatchAuction", async () => {
       await closeAuction(annexAuction, auctionId);
       await annexAuction.settleAuction(auctionId);
       const auctionData = await annexAuction.auctionData(auctionId);
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(encodeOrder(sellOrders[1]));
+      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(
+        encodeOrder(sellOrders[1]),
+      );
       expect(auctionData.volumeClearingPriceOrder).to.equal(
         sellOrders[1].sellAmount,
       );
 
-      const receivedAmounts = toReceivedFunds(
+      let receivedAmounts = toReceivedFunds(
         await annexAuction.callStatic.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[0]),
         ]),
-      )
-      let factory :Contract = new Contract(await router.callStatic.factory(),factoryAbi);
-      console.log(await factory.callStatic.getPair(auctioningToken.address,biddingToken.address))
-      console.log("Factory Address: ",factory.address)
-      let pair : Contract = new Contract(await factory.callStatic.getPair(auctioningToken.address,biddingToken.address),pairAbi);
-      console.log("Pair Address: ",pair.address)
+      );
+      
+      let pair = await ethers.getContractAt(
+        pairAbi,
+        await factory.callStatic.getPair(
+          auctioningToken.address,
+          biddingToken.address,
+        ),
+      );
+
       await expect(() =>
         annexAuction.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[0]),
         ]),
       ).to.changeTokenBalances(
         pair,
-        // auctioningToken,
         [user_2],
         [await annexAuction.callStatic.calculateLPTokens(auctionId,receivedAmounts.sumBiddingTokenAmount)],
       );
-      // await expect(() =>
-      //   annexAuction.claimFromParticipantOrder(auctionId, [
-      //     encodeOrder(sellOrders[1]),
-      //   ]),
-      // ).to.changeTokenBalances(
-      //   auctioningToken,
-      //   [user_3],
-      //   [sellOrders[1].sellAmount],
-      // );
+      receivedAmounts = toReceivedFunds(
+        await annexAuction.callStatic.claimFromParticipantOrder(auctionId, [
+          encodeOrder(sellOrders[1]),
+        ]),
+      );
+
+      await expect(() =>
+        annexAuction.claimFromParticipantOrder(auctionId, [
+          encodeOrder(sellOrders[1]),
+        ]),
+      ).to.changeTokenBalances(
+        pair,
+        [user_3],
+        [await annexAuction.callStatic.calculateLPTokens(auctionId,receivedAmounts.sumBiddingTokenAmount)],
+      );
     });
     it("checks case 7, bidding amount matches min buyAmount of initialOrder perfectly with additional order", async () => {
       const initialAuctionOrder = {
@@ -1447,16 +1436,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(3),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2, user_3],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2, user_3],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1471,28 +1457,55 @@ describe("AnnexBatchAuction", async () => {
       await closeAuction(annexAuction, auctionId);
       await annexAuction.settleAuction(auctionId);
       const auctionData = await annexAuction.auctionData(auctionId);
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(encodeOrder(sellOrders[1]));
+
+      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(
+        encodeOrder(sellOrders[1]),
+      );
+
       expect(auctionData.volumeClearingPriceOrder).to.equal(
         sellOrders[1].sellAmount,
       );
+
+      let pair = await ethers.getContractAt(
+        pairAbi,
+        await factory.callStatic.getPair(
+          auctioningToken.address,
+          biddingToken.address,
+        ),
+      );
+
+      let receivedAmounts = toReceivedFunds(
+        await annexAuction.callStatic.claimFromParticipantOrder(auctionId, [
+          encodeOrder(sellOrders[0]),
+        ]),
+      );
+
       await expect(() =>
         annexAuction.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[0]),
         ]),
       ).to.changeTokenBalances(
-        auctioningToken,
+        pair,
         [user_2],
-        [sellOrders[0].sellAmount],
+        [await annexAuction.callStatic.calculateLPTokens(auctionId,receivedAmounts.sumBiddingTokenAmount)],
       );
+
+      receivedAmounts = toReceivedFunds(
+        await annexAuction.callStatic.claimFromParticipantOrder(auctionId, [
+          encodeOrder(sellOrders[1]),
+        ]),
+      );
+
       await expect(() =>
         annexAuction.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[1]),
         ]),
       ).to.changeTokenBalances(
-        auctioningToken,
+        pair,
         [user_3],
-        [sellOrders[1].sellAmount],
+        [await annexAuction.callStatic.calculateLPTokens(auctionId,receivedAmounts.sumBiddingTokenAmount)],
       );
+
       await expect(() =>
         annexAuction.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[2]),
@@ -1526,16 +1539,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(3),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2, user_3],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2, user_3],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1550,6 +1560,21 @@ describe("AnnexBatchAuction", async () => {
       await closeAuction(annexAuction, auctionId);
       await annexAuction.settleAuction(auctionId);
       const auctionData = await annexAuction.auctionData(auctionId);
+
+      let pair = await ethers.getContractAt(
+        pairAbi,
+        await factory.callStatic.getPair(
+          auctioningToken.address,
+          biddingToken.address,
+        ),
+      );
+
+      let receivedAmounts = toReceivedFunds(
+        await annexAuction.callStatic.claimFromParticipantOrder(auctionId, [
+          encodeOrder(sellOrders[0]),
+        ]),
+      );
+
       await expect(await annexAuction.clearingPriceOrders(auctionId)).to.equal(
         encodeOrder(sellOrders[0]),
       );
@@ -1561,10 +1586,11 @@ describe("AnnexBatchAuction", async () => {
           encodeOrder(sellOrders[0]),
         ]),
       ).to.changeTokenBalances(
-        auctioningToken,
+        pair,
         [user_2],
-        [sellOrders[0].sellAmount],
+        [await annexAuction.callStatic.calculateLPTokens(auctionId,receivedAmounts.sumBiddingTokenAmount)],
       );
+
       await expect(() =>
         annexAuction.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[1]),
@@ -1574,14 +1600,21 @@ describe("AnnexBatchAuction", async () => {
         [user_3],
         [sellOrders[1].sellAmount],
       );
+
+      receivedAmounts = toReceivedFunds(
+        await annexAuction.callStatic.claimFromParticipantOrder(auctionId, [
+          encodeOrder(sellOrders[2]),
+        ]),
+      );
+
       await expect(() =>
         annexAuction.claimFromParticipantOrder(auctionId, [
           encodeOrder(sellOrders[2]),
         ]),
       ).to.changeTokenBalances(
-        auctioningToken,
+        pair,
         [user_3],
-        [sellOrders[2].sellAmount],
+        [await annexAuction.callStatic.calculateLPTokens(auctionId,receivedAmounts.sumBiddingTokenAmount)],
       );
     });
     it("checks case 1, it verifies the price in case of 2 of 3 sellOrders eating initialAuctionOrder completely", async () => {
@@ -1608,16 +1641,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1632,7 +1662,9 @@ describe("AnnexBatchAuction", async () => {
       await closeAuction(annexAuction, auctionId);
       await annexAuction.settleAuction(auctionId);
       const auctionData = await annexAuction.auctionData(auctionId);
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(encodeOrder(sellOrders[1]));
+      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(
+        encodeOrder(sellOrders[1]),
+      );
       expect(auctionData.volumeClearingPriceOrder).to.equal(0);
       await claimFromAllOrders(annexAuction, auctionId, sellOrders);
     });
@@ -1660,16 +1692,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1687,7 +1716,9 @@ describe("AnnexBatchAuction", async () => {
 
       await annexAuction.settleAuction(auctionId);
       const auctionData = await annexAuction.auctionData(auctionId);
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(encodeOrder(sellOrders[1]));
+      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.eql(
+        encodeOrder(sellOrders[1]),
+      );
       expect(auctionData.volumeClearingPriceOrder).to.equal(0);
     });
     it("verifies the price in case of 2 of 4 sellOrders eating initialAuctionOrder completely - with precalculateSellAmountSum step and one more step within settleAuction", async () => {
@@ -1719,16 +1750,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1781,16 +1809,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(2),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1801,14 +1826,14 @@ describe("AnnexBatchAuction", async () => {
         },
       );
       await placeOrders(annexAuction, sellOrders, auctionId, hre);
-      
+
       await closeAuction(annexAuction, auctionId);
       await annexAuction.settleAuction(auctionId);
       const auctionData = await annexAuction.auctionData(auctionId);
 
-      await expect(await annexAuction.clearingPriceOrders(auctionId)).to.be.equal(
-        encodeOrder(sellOrders[1]),
-      );
+      await expect(
+        await annexAuction.clearingPriceOrders(auctionId),
+      ).to.be.equal(encodeOrder(sellOrders[1]));
       expect(auctionData.volumeClearingPriceOrder).to.equal(0);
       await claimFromAllOrders(annexAuction, auctionId, sellOrders);
     });
@@ -1840,16 +1865,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -1857,7 +1879,7 @@ describe("AnnexBatchAuction", async () => {
           biddingToken,
           auctionedSellAmount: initialAuctionOrder.sellAmount,
           minBuyAmount: initialAuctionOrder.buyAmount,
-          router:0
+          router: 0,
         },
       );
       await placeOrders(annexAuction, sellOrders, auctionId, hre);
@@ -1896,16 +1918,13 @@ describe("AnnexBatchAuction", async () => {
           userId: BigNumber.from(1),
         },
       ];
-      const {
-        auctioningToken,
-        biddingToken,
-        annexToken
-      } = await createTokensAndMintAndApprove(
-        annexAuction,
-        [user_1, user_2],
-        hre,
-      );
-      await setPrequistes(annexAuction, annexToken,router, user_1, user_3);
+      const { auctioningToken, biddingToken, annexToken } =
+        await createTokensAndMintAndApprove(
+          annexAuction,
+          [user_1, user_2],
+          hre,
+        );
+      await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -2427,7 +2446,7 @@ describe("AnnexBatchAuction", async () => {
     const { auctioningToken, biddingToken, annexToken } =
       await createTokensAndMintAndApprove(annexAuction, [user_1, user_2], hre);
     await setPrequistes(annexAuction, annexToken, router, user_1, user_3);
-    router = await setupRouter(user_1);
+    router = await (await setupRouter(user_1))._router;
 
     const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
       annexAuction,

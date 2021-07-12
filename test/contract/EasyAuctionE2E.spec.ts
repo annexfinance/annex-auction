@@ -14,7 +14,7 @@ describe("AnnexAuction", async () => {
   let router: Contract;
   beforeEach(async () => {
     const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
-    router = await setupRouter(user_1);
+    router = await (await setupRouter(user_1))._router;
     annexAuction = await AnnexAuction.deploy();
     annexAuction.setRouters([router.address]);
   });

@@ -653,7 +653,6 @@ contract AnnexBatchAuction is Ownable {
             }
         }
         clearingPriceOrders[auctionId] = clearingOrder;
-
         if (auctionData[auctionId].minFundingThreshold > currentBidSum) {
             auctionData[auctionId].minFundingThresholdNotReached = true;
         }

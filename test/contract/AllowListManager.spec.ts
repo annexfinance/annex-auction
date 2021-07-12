@@ -38,7 +38,7 @@ describe("AccessManager - integration tests", async () => {
     const { chainId } = await ethers.provider.getNetwork();
     testDomain = domain(chainId, allowListManager.address);
 
-    router = await setupRouter(user_1);
+    router = await (await setupRouter(user_1))._router;
     annexAuction.setRouters([router.address]);
   });
   describe("AccessManager - placing order in annexAuction with auctioneer signature", async () => {

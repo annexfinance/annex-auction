@@ -31,14 +31,14 @@ export async function claimFromAllOrders(
   }
 }
 
-export async function setupRouter(signer:Wallet):Promise<Contract>{
+export async function setupRouter(signer:Wallet):Promise<{_router:Contract,_factory:Contract}>{
   const PancakeFactory = await ethers.getContractFactory(factoryAbi,factoryBytecode,signer);
-  const factory = await PancakeFactory.deploy(signer.address);
+  const _factory = await PancakeFactory.deploy(signer.address);
   const WBNB = await ethers.getContractFactory("WBNB");
   const wbnb = await WBNB.deploy();
   const PancakeRouter = await ethers.getContractFactory(routerAbi,routerBytecode,signer);
-  const router = await PancakeRouter.deploy(factory.address,wbnb.address);
-  return router;
+  const _router = await PancakeRouter.deploy(_factory.address,wbnb.address);
+  return {_router,_factory};
 }
 
 export async function increaseTime(duration: number): Promise<void> {

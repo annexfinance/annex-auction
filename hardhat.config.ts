@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-contract-sizer";
 import "hardhat-watcher";
 import "hardhat-deploy";
-// import "solidity-coverage"
+import "solidity-coverage"
 import dotenv from "dotenv";
 import { utils } from "ethers";
 import type { HttpNetworkUserConfig } from "hardhat/types";
