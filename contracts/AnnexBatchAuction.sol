@@ -15,7 +15,7 @@ import "./interfaces/IDocuments.sol";
 import "./interfaces/IPancakeswapV2Pair.sol";
 import "./interfaces/IPancakeswapV2Factory.sol";
 import "./interfaces/IPancakeswapV2Router02.sol";
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 /**
 Errors details
     ERROR_ORDER_PLACEMENT = no longer in order placement phase
@@ -56,6 +56,14 @@ contract AnnexBatchAuction is Ownable {
     using IterableOrderedOrderSet for bytes32;
     using IdToAddressBiMap for IdToAddressBiMap.Data;
 
+    struct AuctionAbout{
+        string telegram;
+        string discord;
+        string medium;
+        string twitter;
+        string description;
+    }
+
     struct AuctionReq {
         IERC20 _auctioningToken;
         IERC20 _biddingToken;
@@ -70,6 +78,7 @@ contract AnnexBatchAuction is Ownable {
         bool isAtomicClosureAllowed;
         bytes accessManagerContractData;
         uint8 router;
+        AuctionAbout about;
     }
 
     struct AuctionData {
@@ -238,6 +247,15 @@ contract AnnexBatchAuction is Ownable {
         string status
     );
 
+    event AuctionDetails(
+        uint256 indexed auctionId,
+        string telegram,
+        string discord,
+        string medium,
+        string twitter,
+        string description
+    );
+
     constructor() public {}
 
     function setFeeParameters(
@@ -334,6 +352,14 @@ contract AnnexBatchAuction is Ownable {
             auction._auctionedSellAmount,
             auction._minBuyAmount,
             auction.minimumBiddingAmountPerOrder
+        );
+        emit AuctionDetails(
+            auctionCounter,
+            auction.about.telegram,
+            auction.about.discord,
+            auction.about.medium,
+            auction.about.twitter,
+            auction.about.description
         );
         return auctionCounter;
     }
