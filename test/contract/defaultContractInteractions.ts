@@ -1,7 +1,7 @@
 import { Contract, BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { InitiateAuctionInput,About } from "../../src/ts/types";
-import { sendTxAndGetReturnValue } from "./utilities"; 
+import { InitiateAuctionInput, About } from "../../src/ts/types";
+import { sendTxAndGetReturnValue } from "./utilities";
 
 type PartialAuctionInput = Partial<InitiateAuctionInput> &
   Pick<InitiateAuctionInput, "auctioningToken" | "biddingToken">;
@@ -24,13 +24,14 @@ async function createAuctionInputWithDefaults(
     parameters.isAtomicClosureAllowed || false,
     parameters.allowListData || "0x",
     parameters.router || 0,
-    parameters.about=  {
-      telegram : "https://telegram.org",
-      discord : "https://discord.org",
-      medium : "https://medium.org",
+    parameters.about = {
+      website: "https://www.link.com/",
+      description: "My Batch Auction",
+      telegram: "https://telegram.org",
+      discord: "https://discord.org",
+      medium: "https://medium.org",
       twitter: "https://twitter.org",
-      description : "My Batch Auction",
-    }
+    },
   ];
 }
 
@@ -38,9 +39,9 @@ export async function createAuctionWithDefaults(
   annexAuction: Contract,
   parameters: PartialAuctionInput,
 ): Promise<unknown> {
-  return annexAuction.initiateAuction(
-    [...(await createAuctionInputWithDefaults(parameters))]
-  );
+  return annexAuction.initiateAuction([
+    ...(await createAuctionInputWithDefaults(parameters)),
+  ]);
 }
 
 export async function createAuctionWithDefaultsAndReturnId(
@@ -49,7 +50,7 @@ export async function createAuctionWithDefaultsAndReturnId(
 ): Promise<BigNumber> {
   return sendTxAndGetReturnValue(
     annexAuction,
-    "initiateAuction((address,address,address,uint256,uint256,uint256,uint256,uint256,uint96,uint96,bool,bytes,uint8,(string,string,string,string,string)))",
+    "initiateAuction((address,address,address,uint256,uint256,uint256,uint256,uint256,uint96,uint96,bool,bytes,uint8,(string,string,string,string,string,string)))",
     ...(await createAuctionInputWithDefaults(parameters)),
   );
 }

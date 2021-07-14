@@ -19,9 +19,10 @@ export interface InitiateAuctionInput {
 }
 
 export interface About{ 
+  website: BytesLike;
+  description: BytesLike;
   telegram: BytesLike;
   discord: BytesLike;
   medium: BytesLike;
   twitter: BytesLike;
-  description: BytesLike;
 }
