@@ -63,7 +63,7 @@ contract AnnexBatchAuction is Ownable {
         string twitter;
         string description;
     }
-
+    
     struct AuctionReq {
         IERC20 _auctioningToken;
         IERC20 _biddingToken;
@@ -774,7 +774,7 @@ contract AnnexBatchAuction is Ownable {
                             rSumBiddingTokenAmount = rSumBiddingTokenAmount
                             .add(sellAmount);
                         }
-                        emit Bidder(auctionId,buyAmount,sellAmount,userIdOrder,"FAILED");
+                        emit Bidder(auctionId,buyAmount,sellAmount,userIdOrder,"FAIL");
                     }
                 }
             }
@@ -873,18 +873,14 @@ contract AnnexBatchAuction is Ownable {
 
     function calculateLPTokens(uint256 auctionId, uint256 biddingTokenAmount)
         public
+        view
         returns (uint256)
     {
+        require(startingDate[auctionId] != 0,"NOT_EXIST");
         (, , uint256 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
         .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
 
         uint256 totalLP = poolLiquidities[auctionId];
-        emit CalculatedLP(
-            auctionId,
-            biddingTokenAmount,
-            totalBiddingTokenAmount,
-            totalLP
-        );
         return
             biddingTokenAmount
                 .mul(10**18)

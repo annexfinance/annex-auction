@@ -5,8 +5,8 @@ const {BigNumber} = require("ethers");
 
  var bytes =     "0x" +
       BigNumber.from(2n).toHexString().slice(2).padStart(16, "0") +
-      BigNumber.from(1000000000000000000n).toHexString().slice(2).padStart(24, "0") +
-      BigNumber.from(2000000000000000000n).toHexString().slice(2).padStart(24, "0")
+      BigNumber.from(4000000000000000000n).toHexString().slice(2).padStart(24, "0") +
+      BigNumber.from(9200000000000000000n).toHexString().slice(2).padStart(24, "0")
 
       console.log(bytes);
 
