@@ -21,8 +21,6 @@ of the gas-prices to get included into the auction
 
 ## Instructions
 
-### Backend
-
 Install dependencies
 
 ```
