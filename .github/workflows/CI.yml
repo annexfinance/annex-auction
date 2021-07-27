@@ -9,7 +9,7 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [10.*]
+        node-version: ['10.15.3']
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
