@@ -4,15 +4,12 @@
 Annex Auction is a suite of open-source smart contracts created to ease the process of launching a new project on the AnnexSwap exchange. 
 Annex Auction aims to drive new capital and trade to the exchange by increasing the attractiveness of AnnexSwap as a place for token creators and communities to launch new project tokens.
 
-
 ## Benefit of Auction
 
 The key benefit of Annex Auction is that it provides Initial Liquidity 
 Providers for new listing tokens with low prices and keeps the auction token price higher than the listing price.
 Annex supports several types of auctions based on auctioneer requirements to incentivize more new tokens listings.
-ANN will be an auction payment currency, for example, 1,000 ANN required to create a new auction therefore it will incentivize ANN tokens usage and circulating supply.
-
-
+ANN will be an auction payment currency and 100 ANN required to create a new auction therefore it will incentivize ANN tokens usage and circulating supply.
 
 # Advantage of Batch Auction
 
