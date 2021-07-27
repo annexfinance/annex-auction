@@ -1,4 +1,4 @@
-(./assets/logo.svg)
+![aneex logo](./assets/logo.svg)
 
 
 # Annex Auction
