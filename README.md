@@ -11,7 +11,7 @@ Providers for new listing tokens with low prices and keeps the auction token pri
 Annex supports several types of auctions based on auctioneer requirements to incentivize more new tokens listings.
 ANN will be an auction payment currency and 100 ANN required to create a new auction therefore it will incentivize ANN tokens usage and circulating supply.
 
-# Advantage of Batch Auction
+## Advantage of Batch Auction
 
 The biggest advantage is certainly that buyers don't have to wait for a certain time to submit orders, but that they can submit orders at any time. This makes the system much more convenient for users.
 Dutch auctions have a very high activity right before the auction is closing. If pieces of the infrastructure are not working reliably during this time period, then prices can fall further than expected, causing a loss for the auctioneer. Also, high gas prices during this short time period can be a hindering factor for buyers to quickly join the auction.
