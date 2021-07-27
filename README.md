@@ -1,3 +1,6 @@
+(./assets/Auction_info_pic.png)
+
+
 # Annex Auction
 
 Annex Auction is a suite of open-source smart contracts created to ease the process of launching a new project on the AnnexSwap exchange. 
