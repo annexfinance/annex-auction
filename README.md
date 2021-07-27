@@ -1,7 +1,4 @@
-![aneex logo](./assets/logo.svg)
-
-
-# Annex Auction
+![aneex logo](./assets/logo.svg)   # Annex Auction
 
 Annex Auction is a suite of open-source smart contracts created to ease the process of launching a new project on the AnnexSwap exchange. 
 Annex Auction aims to drive new capital and trade to the exchange by increasing the attractiveness of AnnexSwap as a place for token creators and communities to launch new project tokens.
