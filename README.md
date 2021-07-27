@@ -1,4 +1,4 @@
-(./assets/Auction_info_pic.png)
+(./assets/logo.svg)
 
 
 # Annex Auction
