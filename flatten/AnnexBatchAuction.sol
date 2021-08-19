@@ -1,6 +1,4 @@
-// Sources flattened with hardhat v2.4.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v3.4.1
+// File: @openzeppelin/contracts/token/ERC20/IERC20.sol
 
 // SPDX-License-Identifier: MIT
 
@@ -80,10 +78,9 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+// File: @openzeppelin/contracts/math/SafeMath.sol
 
-// File @openzeppelin/contracts/math/SafeMath.sol@v3.4.1
-
-
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -298,10 +295,9 @@ library SafeMath {
     }
 }
 
+// File: @openzeppelin/contracts/utils/Address.sol
 
-// File @openzeppelin/contracts/utils/Address.sol@v3.4.1
-
-
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.2 <0.8.0;
 
@@ -491,12 +487,12 @@ library Address {
     }
 }
 
+// File: @openzeppelin/contracts/token/ERC20/SafeERC20.sol
 
-// File @openzeppelin/contracts/token/ERC20/SafeERC20.sol@v3.4.1
-
-
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
+
 
 
 
@@ -568,10 +564,9 @@ library SafeERC20 {
     }
 }
 
+// File: @openzeppelin/contracts/utils/Context.sol
 
-// File @openzeppelin/contracts/utils/Context.sol@v3.4.1
-
-
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -596,10 +591,9 @@ abstract contract Context {
     }
 }
 
+// File: @openzeppelin/contracts/access/Ownable.sol
 
-// File @openzeppelin/contracts/access/Ownable.sol@v3.4.1
-
-
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -667,10 +661,9 @@ abstract contract Ownable is Context {
     }
 }
 
+// File: @openzeppelin/contracts/math/Math.sol
 
-// File @openzeppelin/contracts/math/Math.sol@v3.4.1
-
-
+// SPDX-License-Identifier: MIT
 
 pragma solidity >=0.6.0 <0.8.0;
 
@@ -702,11 +695,11 @@ library Math {
     }
 }
 
+// File: contracts/libraries/IterableOrderedOrderSet.sol
 
-// File contracts/libraries/IterableOrderedOrderSet.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.8;
+
 
 /**
     ERROR_ZERO : Inserting zero is not supported
@@ -959,10 +952,9 @@ library IterableOrderedOrderSet {
     }
 }
 
+// File: contracts/interfaces/AllowListVerifier.sol
 
-// File contracts/interfaces/AllowListVerifier.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.8;
 
 library AllowListVerifierHelper {
@@ -985,10 +977,9 @@ interface AllowListVerifier {
     ) external view returns (bytes4);
 }
 
+// File: contracts/libraries/IdToAddressBiMap.sol
 
-// File contracts/libraries/IdToAddressBiMap.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1060,10 +1051,9 @@ library IdToAddressBiMap {
     }
 }
 
+// File: contracts/libraries/SafeCast.sol
 
-// File contracts/libraries/SafeCast.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.8.0;
 
 /**
@@ -1084,10 +1074,9 @@ library SafeCast {
     }
 }
 
+// File: contracts/interfaces/IDocuments.sol
 
-// File contracts/interfaces/IDocuments.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
@@ -1112,10 +1101,9 @@ interface IDocuments {
         returns (string memory, uint256);
 }
 
+// File: contracts/interfaces/IPancakeswapV2Pair.sol
 
-// File contracts/interfaces/IPancakeswapV2Pair.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 
 interface IPancakeswapV2Pair {
@@ -1221,10 +1209,9 @@ interface IPancakeswapV2Pair {
     function initialize(address, address) external;
 }
 
+// File: contracts/interfaces/IPancakeswapV2Factory.sol
 
-// File contracts/interfaces/IPancakeswapV2Factory.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 
 interface IPancakeswapV2Factory {
@@ -1257,10 +1244,9 @@ interface IPancakeswapV2Factory {
     function setFeeToSetter(address) external;
 }
 
+// File: contracts/interfaces/IPancakeswapV2Router02.sol
 
-// File contracts/interfaces/IPancakeswapV2Router02.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.6.2;
 
 interface IPancakeswapV2Router01 {
@@ -1469,11 +1455,24 @@ interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
     ) external;
 }
 
+// File: contracts/AnnexBatchAuction.sol
 
-// File contracts/AnnexBatchAuction.sol
-
-
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
+pragma experimental ABIEncoderV2;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // import "hardhat/console.sol";
 /**
@@ -1767,7 +1766,7 @@ contract AnnexBatchAuction is Ownable {
             "ERROR_TIME_PERIOD"
         );
         // require(auction.auctionStartDate > block.timestamp && auction.auctionStartDate < auction.auctionEndDate , "INVALID_AUCTION_START");
-        require(auction.auctionEndDate > block.timestamp, "INVALID_AUTION_END");
+        require(auction.auctionEndDate > block.timestamp, "INVALID_AUCTION_END");
         auctionCounter = auctionCounter.add(1);
         sellOrders[auctionCounter].initializeEmptyList();
         uint64 userId = getUserId(msg.sender);
@@ -2365,9 +2364,11 @@ contract AnnexBatchAuction is Ownable {
         returns (uint256)
     {
         require(startingDate[auctionId] != 0, "NOT_EXIST");
-        (, , uint256 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
-        .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
+        uint256 totalBiddingTokenAmount = auctionData[auctionId].interimSumBidAmount;
 
+        if (totalBiddingTokenAmount == 0) {
+            return 0;
+        }
         uint256 totalLP = poolLiquidities[auctionId];
         return
             biddingTokenAmount

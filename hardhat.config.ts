@@ -3,7 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-contract-sizer";
 import "hardhat-watcher";
 import "hardhat-deploy";
-import "solidity-coverage"
+import "solidity-coverage";
 import dotenv from "dotenv";
 import { utils } from "ethers";
 import type { HttpNetworkUserConfig } from "hardhat/types";
@@ -25,9 +25,9 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_ETHERSCAN_API_KEY,MY_BSCSCAN_API_KEY, PK } =
+const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_BSCSCAN_API_KEY, PK } =
   process.env;
-
+console.log('config: ', GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_BSCSCAN_API_KEY, PK);
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
@@ -87,7 +87,6 @@ export default {
         version: "0.7.6",
       },
     ],
-   
   },
   networks: {
     hardhat: {
@@ -160,7 +159,7 @@ export default {
     },
     bsc: {
       ...sharedNetworkConfig,
-      url: "https://data-seed-prebsc-2-s2.binance.org:8545/",
+      url: "https://data-seed-prebsc-1-s2.binance.org:8545/",
       chainId: 97,
       gasPrice: GAS_PRICE_GWEI
         ? parseInt(
@@ -186,6 +185,6 @@ export default {
   watcher: {
     compilation: {
       tasks: ["compile"],
-    }
-  }
+    },
+  },
 };

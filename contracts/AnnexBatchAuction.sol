@@ -906,9 +906,11 @@ contract AnnexBatchAuction is Ownable {
         returns (uint256)
     {
         require(startingDate[auctionId] != 0, "NOT_EXIST");
-        (, , uint256 totalBiddingTokenAmount) = clearingPriceOrders[auctionId]
-        .decodeOrder(); // fetching total bidding amounts of tokens from clearing price order
+        uint256 totalBiddingTokenAmount = auctionData[auctionId].interimSumBidAmount;
 
+        if (totalBiddingTokenAmount == 0) {
+            return 0;
+        }
         uint256 totalLP = poolLiquidities[auctionId];
         return
             biddingTokenAmount
