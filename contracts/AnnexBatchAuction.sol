@@ -910,6 +910,8 @@ contract AnnexBatchAuction is Ownable {
         returns (uint256)
     {
         require(startingDate[auctionId] != 0, "NOT_EXIST");
+        if(totalBiddingTokens[auctionId] == 0)
+            return 0;
         if(liquidityPools[auctionId] == address(0))
             return 0;
         return
