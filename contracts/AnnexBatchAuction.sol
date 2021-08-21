@@ -15,6 +15,7 @@ import "./interfaces/IDocuments.sol";
 import "./interfaces/IPancakeswapV2Pair.sol";
 import "./interfaces/IPancakeswapV2Factory.sol";
 import "./interfaces/IPancakeswapV2Router02.sol";
+import "hardhat/console.sol";
 
 // import "hardhat/console.sol";
 /**
@@ -117,7 +118,7 @@ contract AnnexBatchAuction is Ownable {
 
     mapping(uint256 => IterableOrderedOrderSet.Data) internal sellOrders; // Store total number of sell orders
     mapping(uint256 => AuctionData) public auctionData; // Store auctions details
-    mapping(uint256 => address) public auctionAccessManager;
+    mapping(uint256 => address) public auctionAccessManager;    
     mapping(uint256 => bytes) public auctionAccessData;
     // auctionId => order bytes
     mapping(uint256 => bytes32) public clearingPriceOrders; // clearing price orders
@@ -131,6 +132,8 @@ contract AnnexBatchAuction is Ownable {
     mapping(uint256 => address) public pancakeswapV2Router;
     // address for PancakeswapV2Router02
     address[] public routers;
+
+    mapping(uint256 => uint256) public totalBiddingTokens;
 
     IDocuments public documents; // for storing documents
     IERC20 public annexToken;
@@ -468,6 +471,7 @@ contract AnnexBatchAuction is Ownable {
                 )
             ) {
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
+                totalBiddingTokens[auctionId] = totalBiddingTokens[auctionId].add(sumOfSellAmounts);
                 emit NewSellOrder(
                     auctionId,
                     userId,
@@ -506,6 +510,7 @@ contract AnnexBatchAuction is Ownable {
                     userIdOfIter == userId,
                     "ONLY_USER_CAN_CANCEL" // Only the user can cancel his orders
                 );
+                totalBiddingTokens[auctionId] = totalBiddingTokens[auctionId].sub(sellAmountOfIter);
                 claimableAmount = claimableAmount.add(sellAmountOfIter);
                 emit CancellationSellOrder(
                     auctionId,
@@ -818,7 +823,6 @@ contract AnnexBatchAuction is Ownable {
         }
         if (!minFundingThresholdNotReached) {
             sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
-
             if (sumBiddingTokenAmount > 0) {
                 lpTokens = calculateLPTokens(auctionId, sumBiddingTokenAmount);
                 IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
@@ -906,18 +910,12 @@ contract AnnexBatchAuction is Ownable {
         returns (uint256)
     {
         require(startingDate[auctionId] != 0, "NOT_EXIST");
-        uint256 totalBiddingTokenAmount = auctionData[auctionId].interimSumBidAmount;
-
-        if (totalBiddingTokenAmount == 0) {
+        if(liquidityPools[auctionId] == address(0))
             return 0;
-        }
-        uint256 totalLP = poolLiquidities[auctionId];
         return
             biddingTokenAmount
-                .mul(10**18)
-                .div(totalBiddingTokenAmount)
-                .mul(totalLP.div(2))
-                .div(10**18);
+                .mul(poolLiquidities[auctionId].div(2))
+                .div(totalBiddingTokens[auctionId]);
     }
 
     function addLiquidity(

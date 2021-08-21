@@ -25,9 +25,14 @@ const argv = yargs
 
 // Load environment variables.
 dotenv.config();
-const { GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_BSCSCAN_API_KEY, PK } =
-  process.env;
-console.log('config: ', GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_BSCSCAN_API_KEY, PK);
+const {
+  GAS_PRICE_GWEI,
+  INFURA_KEY,
+  MNEMONIC,
+  MY_BSCSCAN_API_KEY,
+  PK,
+} = process.env;
+// console.log('config: ', GAS_PRICE_GWEI, INFURA_KEY, MNEMONIC, MY_BSCSCAN_API_KEY, PK);
 const DEFAULT_MNEMONIC =
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
