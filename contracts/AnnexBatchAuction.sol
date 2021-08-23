@@ -143,7 +143,7 @@ contract AnnexBatchAuction is Ownable {
     uint256 public auctionCounter; // counter for auctions
     uint256 public feeNumerator = 0;
     uint256 public constant FEE_DENOMINATOR = 1000;
-    uint256 public threshold = 100 ether; // 100 ANN
+    uint256 public threshold = 100000 ether; // 100000 ANN
 
     uint64 public feeReceiverUserId = 1;
     uint64 public numUsers; // counter of users
@@ -294,7 +294,10 @@ contract AnnexBatchAuction is Ownable {
             annexToken.balanceOf(msg.sender) >= threshold,
             "NOT_ENOUGH_ANN"
         );
-        annexToken.safeTransferFrom(msg.sender, treasury, 100 ether);
+        if (threshold > 0) {
+            annexToken.safeTransferFrom(msg.sender, treasury, threshold);
+        }
+        
         auction._auctioningToken.safeTransferFrom(
             msg.sender,
             address(this),
@@ -822,9 +825,11 @@ contract AnnexBatchAuction is Ownable {
             sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
         }
         if (!minFundingThresholdNotReached) {
-            sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
+            if (rSumBiddingTokenAmount > 0) {
+                sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
+            }
             if (sumBiddingTokenAmount > 0) {
-                lpTokens = calculateLPTokens(auctionId, sumBiddingTokenAmount);
+                lpTokens = getLPAmount(auctionId, sumBiddingTokenAmount);
                 IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
                     registeredUsers.getAddressAt(userId),
                     lpTokens
@@ -904,11 +909,7 @@ contract AnnexBatchAuction is Ownable {
         }
     }
 
-    function calculateLPTokens(uint256 auctionId, uint256 biddingTokenAmount)
-        public
-        view
-        returns (uint256)
-    {
+    function getLPAmount(uint256 auctionId, uint256 biddingTokenAmount) internal view returns (uint256){
         require(startingDate[auctionId] != 0, "NOT_EXIST");
         if(totalBiddingTokens[auctionId] == 0)
             return 0;
@@ -918,6 +919,55 @@ contract AnnexBatchAuction is Ownable {
             biddingTokenAmount
                 .mul(poolLiquidities[auctionId].div(2))
                 .div(totalBiddingTokens[auctionId]);
+    }
+
+    function calculateLPTokens(uint256 auctionId, uint64 userId, bytes32 order)
+        public
+        view
+        returns (uint256)
+    {
+        require(startingDate[auctionId] != 0, "NOT_EXIST");
+        if(totalBiddingTokens[auctionId] == 0)
+            return 0;
+        if(liquidityPools[auctionId] == address(0))
+            return 0;
+
+        if (!sellOrders[auctionId].contains(order)) {
+            return 0;
+        }
+        
+        AuctionData memory auction = auctionData[auctionId];
+        bytes32 clearingPriceOrder = clearingPriceOrders[auctionId];
+        // (, uint96 priceNumerator, uint96 priceDenominator) = clearingPriceOrder
+        // .decodeOrder();
+
+        // (uint64 userId, , ) = order.decodeOrder();
+        bool minFundingThresholdNotReached = auction.minFundingThresholdNotReached;
+        uint256 sumBiddingTokenAmount = 0;
+        {
+            (uint64 userIdOrder, ,uint96 sellAmount) = order.decodeOrder();
+            require(userIdOrder == userId, "SAME_USER_CAN_CLAIM");
+            if (!minFundingThresholdNotReached) {
+                
+                //[23]
+                if (order == clearingPriceOrder) {
+                    sumBiddingTokenAmount = sellAmount;
+                } else {
+                    if (order.smallerThan(clearingPriceOrder)) {
+                        //[17]
+                        // In case of successful order:
+                        // Don't need to calculate sumAuctioningTokenAmount because we are not sending auctioning tokens to
+                        // the bidder so here we will calculate sumBiddingTokenAmount and conside this order as a successful order
+                        sumBiddingTokenAmount = sellAmount;
+                    }
+                }
+            }
+        }
+        return
+            sumBiddingTokenAmount
+                .mul(poolLiquidities[auctionId].div(2))
+                .div(totalBiddingTokens[auctionId]);
+        
     }
 
     function addLiquidity(
