@@ -6,23 +6,20 @@ import {
 } from "../../src/priceCalculation";
 
 import { createAuctionWithDefaultsAndReturnId } from "./defaultContractInteractions";
-import { closeAuction, setPrequistes, setupRouter } from "./utilities";
+import { closeAuction, setPrequistes} from "./utilities";
 
 describe("AnnexAuction", async () => {
   const [user_1, user_2, treasury] = waffle.provider.getWallets();
   let annexAuction: Contract;
-  let router: Contract;
   beforeEach(async () => {
     const AnnexAuction = await ethers.getContractFactory("AnnexBatchAuction");
-    router = await (await setupRouter(user_1))._router;
     annexAuction = await AnnexAuction.deploy();
-    annexAuction.setRouters([router.address]);
   });
 
   it("e2e - places a lot of sellOrders, such that the second last order is the clearingOrder and calculates the price to test gas usage of settleAuction", async () => {
     const { auctioningToken, biddingToken } =
     await createTokensAndMintAndApprove(annexAuction, [user_1, user_2], hre);
-    await setPrequistes(annexAuction, auctioningToken,router, user_1, treasury);
+    await setPrequistes(annexAuction, auctioningToken, user_1, treasury);
     const nrTests = 12; // increase here for better gas estimations, nrTests-2 must be a divisor of 10**18
     const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
       annexAuction,
