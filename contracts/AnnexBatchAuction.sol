@@ -694,6 +694,7 @@ contract AnnexBatchAuction is Ownable {
                 .toUint96();
             }
         }
+        
         clearingPriceOrders[auctionId] = clearingOrder;
         if (auctionData[auctionId].minFundingThreshold > currentBidSum) {
             auctionData[auctionId].minFundingThresholdNotReached = true;
@@ -927,105 +928,6 @@ contract AnnexBatchAuction is Ownable {
             ); //[7]
         }
     }
-
-    // function getLPAmount(uint256 auctionId, uint256 biddingTokenAmount) internal view returns (uint256){
-    //     require(startingDate[auctionId] != 0, "NOT_EXIST");
-    //     if(totalBiddingTokens[auctionId] == 0)
-    //         return 0;
-    //     if(liquidityPools[auctionId] == address(0))
-    //         return 0;
-    //     return
-    //         biddingTokenAmount
-    //             .mul(poolLiquidities[auctionId].div(2))
-    //             .div(totalBiddingTokens[auctionId]);
-    // }
-
-    // function calculateLPTokens(uint256 auctionId, uint64 userId, bytes32 order)
-    //     public
-    //     view
-    //     returns (uint256)
-    // {
-    //     require(startingDate[auctionId] != 0, "NOT_EXIST");
-    //     if(totalBiddingTokens[auctionId] == 0)
-    //         return 0;
-    //     if(liquidityPools[auctionId] == address(0))
-    //         return 0;
-
-    //     if (!sellOrders[auctionId].contains(order)) {
-    //         return 0;
-    //     }
-        
-    //     AuctionData memory auction = auctionData[auctionId];
-    //     bytes32 clearingPriceOrder = clearingPriceOrders[auctionId];
-    //     // (, uint96 priceNumerator, uint96 priceDenominator) = clearingPriceOrder
-    //     // .decodeOrder();
-
-    //     // (uint64 userId, , ) = order.decodeOrder();
-    //     bool minFundingThresholdNotReached = auction.minFundingThresholdNotReached;
-    //     uint256 sumBiddingTokenAmount = 0;
-    //     {
-    //         (uint64 userIdOrder, ,uint96 sellAmount) = order.decodeOrder();
-    //         require(userIdOrder == userId, "SAME_USER_CAN_CLAIM");
-    //         if (!minFundingThresholdNotReached) {
-                
-    //             //[23]
-    //             if (order == clearingPriceOrder) {
-    //                 sumBiddingTokenAmount = sellAmount;
-    //             } else {
-    //                 if (order.smallerThan(clearingPriceOrder)) {
-    //                     //[17]
-    //                     // In case of successful order:
-    //                     // Don't need to calculate sumAuctioningTokenAmount because we are not sending auctioning tokens to
-    //                     // the bidder so here we will calculate sumBiddingTokenAmount and conside this order as a successful order
-    //                     sumBiddingTokenAmount = sellAmount;
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             return sellAmount;
-    //         }
-    //     }
-    //     return
-    //         sumBiddingTokenAmount
-    //             .mul(poolLiquidities[auctionId].div(2))
-    //             .div(totalBiddingTokens[auctionId]);
-        
-    // }
-
-    // function addLiquidity(
-    //     uint256 auctionId,
-    //     uint256 auctionTokenAmount,
-    //     uint256 biddingTokenAmount
-    // ) internal returns (uint256 liquidity) {
-    //     // approve token transfer to cover all possible scenarios
-    //     AuctionData storage auction = auctionData[auctionId];
-    //     auction.auctioningToken.approve(
-    //         address(pancakeswapV2Router[auctionId]),
-    //         auctionTokenAmount
-    //     );
-    //     auction.biddingToken.approve(
-    //         address(pancakeswapV2Router[auctionId]),
-    //         biddingTokenAmount
-    //     );
-    //     // add the liquidity
-    //     (, , liquidity) = IPancakeswapV2Router02(pancakeswapV2Router[auctionId])
-    //     .addLiquidity(
-    //         address(auction.auctioningToken),
-    //         address(auction.biddingToken),
-    //         auctionTokenAmount,
-    //         biddingTokenAmount,
-    //         0,
-    //         0,
-    //         address(this),
-    //         block.timestamp + 600
-    //     );
-    //     liquidityPools[auctionId] = IPancakeswapV2Factory(
-    //         IPancakeswapV2Router02(pancakeswapV2Router[auctionId]).factory()
-    //     ).getPair(
-    //         address(auction.auctioningToken),
-    //         address(auction.biddingToken)
-    //     );
-    // }
 
     /* send back either auctioning or bidding tokens to the given user.
     Transfers out occur on:
