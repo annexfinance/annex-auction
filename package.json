@@ -66,7 +66,7 @@
     "eslint-plugin-no-only-tests": "^2.4.0",
     "eslint-plugin-prettier": "^3.1.4",
     "ethereum-waffle": "^3.2.0",
-    "hardhat": "^2.4.1",
+    "hardhat": "^2.6.5",
     "hardhat-deploy": "^0.7.0-beta.30",
     "hardhat-docgen": "^1.1.1",
     "hardhat-spdx-license-identifier": "^2.0.3",
