@@ -1,10 +1,6 @@
-// Sources flattened with hardhat v2.6.5 https://hardhat.org
-
-// File @openzeppelin/contracts/math/SafeMath.sol@v3.4.1
-
-
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.6.0 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -217,13 +213,6 @@ library SafeMath {
     }
 }
 
-
-// File @openzeppelin/contracts/utils/Address.sol@v3.4.1
-
-
-
-pragma solidity >=0.6.2 <0.8.0;
-
 /**
  * @dev Collection of functions related to the address type
  */
@@ -410,13 +399,6 @@ library Address {
     }
 }
 
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v3.4.1
-
-
-
-
-
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
@@ -491,15 +473,6 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-
-// File @openzeppelin/contracts/token/ERC20/SafeERC20.sol@v3.4.1
-
-
-
-
-
-
-
 /**
  * @title SafeERC20
  * @dev Wrappers around ERC20 operations that throw on failure (when the token
@@ -568,13 +541,6 @@ library SafeERC20 {
     }
 }
 
-
-// File @openzeppelin/contracts/utils/ReentrancyGuard.sol@v3.4.1
-
-
-
-
-
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
  *
@@ -634,13 +600,6 @@ abstract contract ReentrancyGuard {
     }
 }
 
-
-// File contracts/interfaces/IDocuments.sol
-
-
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
-
 interface IDocuments {
     function _removeDocument(string calldata _name) external;
 
@@ -662,23 +621,9 @@ interface IDocuments {
         returns (string memory, uint256);
 }
 
-
-// File contracts/interfaces/IAnnexStake.sol
-
-
-
-pragma solidity ^0.6.0;
-
 interface IAnnexStake {
     function depositReward() external payable;
 }
-
-
-// File @openzeppelin/contracts/utils/Context.sol@v3.4.1
-
-
-
-
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -700,13 +645,6 @@ abstract contract Context {
         return msg.data;
     }
 }
-
-
-// File @openzeppelin/contracts/access/Ownable.sol@v3.4.1
-
-
-
-
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -772,14 +710,6 @@ abstract contract Ownable is Context {
     }
 }
 
-
-// File contracts/AnnexDutchAuction.sol
-
-
-
-pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
-// import "./Access/Governable.sol";
 contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     IDocuments public documents; // for storing documents
     IERC20 public annexToken;
@@ -794,8 +724,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     bytes32 internal constant BotToken = bytes32("BotToken");
     bytes32 internal constant StakeContract = bytes32("StakeContract");
     struct AuctionReq {
-        string name;
-        address payable creator;
+        // string name;
+        // address payable creator;
         address _auctioningToken;
         address _biddingToken;
         uint256 _auctionedSellAmount;
@@ -809,7 +739,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         AuctionAbout about;
     }
     struct AuctionData {
-        string name;
+        // string name;
         address payable creator;
         address _auctioningToken;
         address _biddingToken;
@@ -846,8 +776,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     event Bid(
         uint256 indexed auctionId,
         address indexed sender,
-        uint256 amount0,
-        uint256 amount1
+        uint256 _minBuyAmounts,
+        uint256 _sellAmounts
     );
     event Claimed(
         uint256 indexed auctionId,
@@ -902,19 +832,19 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         require(auctionReq.amountMax1 > auctionReq.amountMin1,"amountMax1 should larger than amountMin1");
         // require(auctionReq.auctionStartDate <= auctionReq.auctionEndDate && auctionReq.auctionEndDate.sub(auctionReq.auctionStartDate) < 7 days, "invalid closed");
         require(auctionReq.times != 0, "the value of times is zero");
-        require(bytes(auctionReq.name).length <= 15,"the length of name is too long");
+        // require(bytes(auctionReq.name).length <= 15,"the length of name is too long");
         uint256 auctionId = auctions.length;
         IERC20 __auctioningToken = IERC20(auctionReq._auctioningToken);
         uint256 _auctioningTokenBalanceBefore = __auctioningToken.balanceOf(address(this));
-        __auctioningToken.safeTransferFrom(auctionReq.creator,address(this),auctionReq._auctionedSellAmount);
+        __auctioningToken.safeTransferFrom(msg.sender,address(this),auctionReq._auctionedSellAmount);
         require(__auctioningToken.balanceOf(address(this)).sub(_auctioningTokenBalanceBefore) == auctionReq._auctionedSellAmount,"not support deflationary token");
         if (auctionReq.enableWhiteList) {
             require(whitelist_.length > 0, "no whitelist imported");
             _addWhitelist(auctionId, whitelist_);
         }
         AuctionData memory auction;
-        auction.name = auctionReq.name;
-        auction.creator = auctionReq.creator;
+        // auction.name = auctionReq.name;
+        auction.creator = msg.sender;
         auction._auctioningToken = auctionReq._auctioningToken;
         auction._biddingToken = auctionReq._biddingToken;
         auction._auctionedSellAmount = auctionReq._auctionedSellAmount;
@@ -929,7 +859,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         if (auctionReq.onlyBot) {
             onlyBotHolderP[auctionId] = auctionReq.onlyBot;
         }
-        myCreatedP[auctionReq.creator] = auctions.length;
+        myCreatedP[msg.sender] = auctions.length;
         emit Created(auctionId, msg.sender, auction);
 
         string[6] memory socials = [auctionReq.about.website,auctionReq.about.description,auctionReq.about.telegram,auctionReq.about.discord,auctionReq.about.medium,auctionReq.about.twitter];
@@ -940,14 +870,14 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     }
     function placeSellOrders(
         uint256 auctionId,
-        uint256 amount0,
-        uint256 amount1
+        uint256 _minBuyAmounts,
+        uint256 _sellAmounts
     )
         external
         payable
         nonReentrant
         isAuctionExist(auctionId)
-        checkBotHolder(auctionId)
+        // checkBotHolder(auctionId)
         isAuctionNotClosed(auctionId)
     {
         address payable sender = payable(msg.sender) ;
@@ -957,11 +887,11 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         }
         AuctionData memory auction = auctions[auctionId];
         require(auction.auctionStartDate <= block.timestamp , "auction not open");
-        require(amount0 != 0, "the value of amount0 is zero");
-        require(amount1 != 0, "the value of amount1 is zero");
+        require(_minBuyAmounts != 0, "the value of _minBuyAmounts is zero");
+        require(_sellAmounts != 0, "the value of _sellAmounts is zero");
         require(auction._auctionedSellAmount > amountSwap0P[auctionId], "swap amount is zero");
         uint256 curPrice = currentPrice(auctionId);
-        uint256 bidPrice = amount1.mul(1 ether).div(amount0);
+        uint256 bidPrice = _sellAmounts.mul(1 ether).div(_minBuyAmounts);
         require(
             bidPrice >= curPrice,
             "the bid price is lower than the current price"
@@ -971,12 +901,12 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         }
         address _biddingToken = auction._biddingToken;
         if (_biddingToken == address(0)) {
-            require(amount1 == msg.value, "invalid ETH amount");
+            require(_sellAmounts == msg.value, "invalid ETH amount");
         } else {
-            IERC20(_biddingToken).safeTransferFrom(sender, address(this), amount1);
+            IERC20(_biddingToken).safeTransferFrom(sender, address(this), _sellAmounts);
         }
-        _swap(sender, auctionId, amount0, amount1);
-        emit Bid(auctionId, sender, amount0, amount1);
+        _swap(sender, auctionId, _minBuyAmounts, _sellAmounts);
+        emit Bid(auctionId, sender, _minBuyAmounts, _sellAmounts);
     }
     function creatorClaim(uint256 auctionId)
         external
@@ -1000,7 +930,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         if (amount1 > 0) {
             if (auction._biddingToken == address(0)) {
                 // uint256 txFee = amount1.mul(getTxFeeRatio()).div(1 ether);
-                uint256 _actualAmount1 = amount1.sub(txFee);
+                // uint256 _actualAmount1 = amount1.sub(txFee);
+                uint256 _actualAmount1 = amount1;
                 if (_actualAmount1 > 0) {
                     auction.creator.transfer(_actualAmount1);
                 }
@@ -1159,16 +1090,16 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     // function getStakeContract() public view returns (address) {
     //     return address(uint160(config[StakeContract]));
     // }
-    modifier checkBotHolder(uint256 auctionId) {
-        if (onlyBotHolderP[auctionId]) {
-            require(
-                IERC20(getBotToken()).balanceOf(msg.sender) >=
-                    getMinValueOfBotHolder(),
-                "BOT is not enough"
-            );
-        }
-        _;
-    }
+    // modifier checkBotHolder(uint256 auctionId) {
+    //     if (onlyBotHolderP[auctionId]) {
+    //         require(
+    //             IERC20(getBotToken()).balanceOf(msg.sender) >=
+    //                 getMinValueOfBotHolder(),
+    //             "BOT is not enough"
+    //         );
+    //     }
+    //     _;
+    // }
     modifier isAuctionClosed(uint256 auctionId) {
         require(auctions[auctionId].auctionEndDate <= block.timestamp, "this auction is not closed");
         _;

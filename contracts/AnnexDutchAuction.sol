@@ -79,8 +79,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     event Bid(
         uint256 indexed auctionId,
         address indexed sender,
-        uint256 amount0,
-        uint256 amount1
+        uint256 _minBuyAmounts,
+        uint256 _sellAmounts
     );
     event Claimed(
         uint256 indexed auctionId,
@@ -173,8 +173,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     }
     function placeSellOrders(
         uint256 auctionId,
-        uint256 amount0,
-        uint256 amount1
+        uint256 _minBuyAmounts,
+        uint256 _sellAmounts
     )
         external
         payable
@@ -190,11 +190,11 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         }
         AuctionData memory auction = auctions[auctionId];
         require(auction.auctionStartDate <= block.timestamp , "auction not open");
-        require(amount0 != 0, "the value of amount0 is zero");
-        require(amount1 != 0, "the value of amount1 is zero");
+        require(_minBuyAmounts != 0, "the value of _minBuyAmounts is zero");
+        require(_sellAmounts != 0, "the value of _sellAmounts is zero");
         require(auction._auctionedSellAmount > amountSwap0P[auctionId], "swap amount is zero");
         uint256 curPrice = currentPrice(auctionId);
-        uint256 bidPrice = amount1.mul(1 ether).div(amount0);
+        uint256 bidPrice = _sellAmounts.mul(1 ether).div(_minBuyAmounts);
         require(
             bidPrice >= curPrice,
             "the bid price is lower than the current price"
@@ -204,12 +204,12 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         }
         address _biddingToken = auction._biddingToken;
         if (_biddingToken == address(0)) {
-            require(amount1 == msg.value, "invalid ETH amount");
+            require(_sellAmounts == msg.value, "invalid ETH amount");
         } else {
-            IERC20(_biddingToken).safeTransferFrom(sender, address(this), amount1);
+            IERC20(_biddingToken).safeTransferFrom(sender, address(this), _sellAmounts);
         }
-        _swap(sender, auctionId, amount0, amount1);
-        emit Bid(auctionId, sender, amount0, amount1);
+        _swap(sender, auctionId, _minBuyAmounts, _sellAmounts);
+        emit Bid(auctionId, sender, _minBuyAmounts, _sellAmounts);
     }
     function creatorClaim(uint256 auctionId)
         external
@@ -233,7 +233,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         if (amount1 > 0) {
             if (auction._biddingToken == address(0)) {
                 // uint256 txFee = amount1.mul(getTxFeeRatio()).div(1 ether);
-                uint256 _actualAmount1 = amount1.sub(txFee);
+                // uint256 _actualAmount1 = amount1.sub(txFee);
+                uint256 _actualAmount1 = amount1;
                 if (_actualAmount1 > 0) {
                     auction.creator.transfer(_actualAmount1);
                 }
