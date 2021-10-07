@@ -27,8 +27,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     bytes32 internal constant BotToken = bytes32("BotToken");
     bytes32 internal constant StakeContract = bytes32("StakeContract");
     struct AuctionReq {
-        string name;
-        address payable creator;
+        // string name;
+        // address payable creator;
         address _auctioningToken;
         address _biddingToken;
         uint256 _auctionedSellAmount;
@@ -42,7 +42,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         AuctionAbout about;
     }
     struct AuctionData {
-        string name;
+        // string name;
         address payable creator;
         address _auctioningToken;
         address _biddingToken;
@@ -135,19 +135,19 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         require(auctionReq.amountMax1 > auctionReq.amountMin1,"amountMax1 should larger than amountMin1");
         // require(auctionReq.auctionStartDate <= auctionReq.auctionEndDate && auctionReq.auctionEndDate.sub(auctionReq.auctionStartDate) < 7 days, "invalid closed");
         require(auctionReq.times != 0, "the value of times is zero");
-        require(bytes(auctionReq.name).length <= 15,"the length of name is too long");
+        // require(bytes(auctionReq.name).length <= 15,"the length of name is too long");
         uint256 auctionId = auctions.length;
         IERC20 __auctioningToken = IERC20(auctionReq._auctioningToken);
         uint256 _auctioningTokenBalanceBefore = __auctioningToken.balanceOf(address(this));
-        __auctioningToken.safeTransferFrom(auctionReq.creator,address(this),auctionReq._auctionedSellAmount);
+        __auctioningToken.safeTransferFrom(msg.sender,address(this),auctionReq._auctionedSellAmount);
         require(__auctioningToken.balanceOf(address(this)).sub(_auctioningTokenBalanceBefore) == auctionReq._auctionedSellAmount,"not support deflationary token");
         if (auctionReq.enableWhiteList) {
             require(whitelist_.length > 0, "no whitelist imported");
             _addWhitelist(auctionId, whitelist_);
         }
         AuctionData memory auction;
-        auction.name = auctionReq.name;
-        auction.creator = auctionReq.creator;
+        // auction.name = auctionReq.name;
+        auction.creator = msg.sender;
         auction._auctioningToken = auctionReq._auctioningToken;
         auction._biddingToken = auctionReq._biddingToken;
         auction._auctionedSellAmount = auctionReq._auctionedSellAmount;
@@ -162,7 +162,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         if (auctionReq.onlyBot) {
             onlyBotHolderP[auctionId] = auctionReq.onlyBot;
         }
-        myCreatedP[auctionReq.creator] = auctions.length;
+        myCreatedP[msg.sender] = auctions.length;
         emit Created(auctionId, msg.sender, auction);
 
         string[6] memory socials = [auctionReq.about.website,auctionReq.about.description,auctionReq.about.telegram,auctionReq.about.discord,auctionReq.about.medium,auctionReq.about.twitter];
