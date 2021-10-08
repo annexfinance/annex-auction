@@ -2,9 +2,9 @@
 
 pragma solidity ^0.6.0;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Configurable is OwnableUpgradeSafe {
+contract Configurable is Ownable {
 
     mapping (bytes32 => uint) internal config;
     
