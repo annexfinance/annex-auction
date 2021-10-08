@@ -3,17 +3,16 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
-// import "./Governable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IDocuments.sol";
 import "./interfaces/IAnnexStake.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AnnexDutchAuction is ReentrancyGuardUpgradeSafe, Ownable {
+contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
     mapping (bytes32 => uint) internal config;
     IDocuments public documents; // for storing documents
@@ -122,9 +121,13 @@ contract AnnexDutchAuction is ReentrancyGuardUpgradeSafe, Ownable {
     // auction auctionId => account => whether or not allow swap
     mapping(uint => mapping(address => bool)) public whitelistP;
 
-    event Created(uint auctionIded auctionId, address auctionIded sender, Auction auction);
-    event Bid(uint auctionIded auctionId, address auctionIded sender, uint _minBuyAmounts, uint _sellAmounts);
-    event Claimed(uint auctionIded auctionId, address auctionIded sender, uint unFilled_minBuyAmounts);
+    event Created(uint indexed auctionId, address indexed sender, Auction auction);
+    event Bid(uint indexed auctionId, address indexed sender, uint _minBuyAmounts, uint _sellAmounts);
+    event Claimed(uint indexed auctionId, address indexed sender, uint unFilled_minBuyAmounts);
+    event AuctionDetails(
+        uint256 indexed auctionId,
+        string[6] social
+    );
 
     // function initialize() public initializer {
     //     super.__Ownable_init();
@@ -212,12 +215,11 @@ contract AnnexDutchAuction is ReentrancyGuardUpgradeSafe, Ownable {
         * socials[4] = medium link 
         * socials[5] = twitter link 
         **/
-        string[6] memory socials = [auctionReq.about.website,auctionReq.about.description,auctionReq.about.telegram,auctionReq.about.discord,auctionReq.about.medium,auction.about.twitter];
+        string[6] memory socials = [auctionReq.about.website,auctionReq.about.description,auctionReq.about.telegram,auctionReq.about.discord,auctionReq.about.medium,auctionReq.about.twitter];
         emit AuctionDetails(
             auctionId,
             socials
         );
-        return auctionId;
 
     }
 
