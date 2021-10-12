@@ -121,9 +121,20 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     // auction auctionId => account => whether or not allow swap
     mapping(uint => mapping(address => bool)) public whitelistP;
 
-    event Created(uint indexed auctionId, address indexed sender, Auction auction);
-    event Bid(uint indexed auctionId, address indexed sender, uint _minBuyAmounts, uint _sellAmounts);
-    event Claimed(uint indexed auctionId, address indexed sender, uint unFilled_minBuyAmounts);
+    event NewAuction(
+        uint256 indexed auctionId,
+        IERC20 indexed _auctioningToken,
+        IERC20 indexed _biddingToken,
+        uint256 auctionStartDate,
+        uint256 auctionEndDate,
+        address auctioner_address,
+        uint96 _auctionedSellAmount,
+        uint96 amountMax1,
+        uint256 amountMin1
+    );
+
+    event NewSellOrder(uint indexed auctionId, address indexed sender, uint _minBuyAmounts, uint _sellAmounts);
+    event ClaimedFromOrder(uint indexed auctionId, address indexed sender, uint unFilled_minBuyAmounts);
     event AuctionDetails(
         uint256 indexed auctionId,
         string[6] social
@@ -205,7 +216,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
         myCreatedP[msg.sender] = auctions.length;
 
-        emit Created(auctionId, msg.sender, auction);
+        emit NewAuction(auctionId,auctionReq._auctioningToken,auctionReq._biddingToken,auctionReq.auctionStartDate,auctionReq.auctionEndDate,msg.sender,auctionReq._auctionedSellAmount,auctionReq.amountMax1,auctionReq.amountMin1);
 
         /**
         * socials[0] = webiste link 
@@ -265,7 +276,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
         _swap(sender, auctionId, _minBuyAmounts, _sellAmounts);
 
-        emit Bid(auctionId, sender, _minBuyAmounts, _sellAmounts);
+        emit NewSellOrder(auctionId, sender, _minBuyAmounts, _sellAmounts);
     }
 
     function creatorClaim(uint auctionId) external
@@ -307,7 +318,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
             }
         }
 
-        emit Claimed(auctionId, creator, unFilled_minBuyAmounts);
+    
+        emit ClaimedFromOrder(auctionId, creator, unFilled_minBuyAmounts);
     }
 
     function bidderClaim(uint auctionId) external
@@ -543,7 +555,6 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     function getConfig(bytes32 key, address addr) public view returns (uint) {
         return config[bytes32(uint(key) ^ uint(addr))];
     }
-
     function _setConfig(bytes32 key, uint value) internal {
         if(config[key] != value)
             config[key] = value;
@@ -554,7 +565,6 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     function _setConfig(bytes32 key, address addr, uint value) internal {
         _setConfig(bytes32(uint(key) ^ uint(addr)), value);
     }
-    
     function setConfig(bytes32 key, uint value) external onlyOwner {
         _setConfig(key, value);
     }

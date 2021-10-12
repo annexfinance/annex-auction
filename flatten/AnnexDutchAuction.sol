@@ -2,19 +2,6 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
 library SafeMath {
     /**
      * @dev Returns the addition of two unsigned integers, with an overflow flag.
@@ -213,9 +200,6 @@ library SafeMath {
     }
 }
 
-/**
- * @dev Collection of functions related to the address type
- */
 library Address {
     /**
      * @dev Returns true if `account` is a contract.
@@ -399,9 +383,6 @@ library Address {
     }
 }
 
-/**
- * @dev Interface of the ERC20 standard as defined in the EIP.
- */
 interface IERC20 {
     /**
      * @dev Returns the amount of tokens in existence.
@@ -473,15 +454,6 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-/**
- * @title SafeERC20
- * @dev Wrappers around ERC20 operations that throw on failure (when the token
- * contract returns false). Tokens that return no value (and instead revert or
- * throw on failure) are also supported, non-reverting calls are assumed to be
- * successful.
- * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,
- * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
- */
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
@@ -541,22 +513,6 @@ library SafeERC20 {
     }
 }
 
-/**
- * @dev Contract module that helps prevent reentrant calls to a function.
- *
- * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier
- * available, which can be applied to functions to make sure there are no nested
- * (reentrant) calls to them.
- *
- * Note that because there is a single `nonReentrant` guard, functions marked as
- * `nonReentrant` may not call one another. This can be worked around by making
- * those functions `private`, and then adding `external` `nonReentrant` entry
- * points to them.
- *
- * TIP: If you would like to learn more about reentrancy and alternative ways
- * to protect against it, check out our blog post
- * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
- */
 abstract contract ReentrancyGuard {
     // Booleans are more expensive than uint256 or any type that takes up a full
     // word because each write operation emits an extra SLOAD to first read the
@@ -625,16 +581,6 @@ interface IAnnexStake {
     function depositReward() external payable;
 }
 
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
         return msg.sender;
@@ -646,18 +592,6 @@ abstract contract Context {
     }
 }
 
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
 abstract contract Ownable is Context {
     address private _owner;
 
@@ -710,6 +644,62 @@ abstract contract Ownable is Context {
     }
 }
 
+library IdToAddressBiMap {
+    struct Data {
+        mapping(uint64 => address) idToAddress;
+        mapping(address => uint64) addressToId;
+    }
+
+    function hasId(Data storage self, uint64 id) internal view returns (bool) {
+        return self.idToAddress[id + 1] != address(0);
+    }
+
+    function hasAddress(Data storage self, address addr)
+        internal
+        view
+        returns (bool)
+    {
+        return self.addressToId[addr] != 0;
+    }
+
+    function getAddressAt(Data storage self, uint64 id)
+        internal
+        view
+        returns (address)
+    {
+        require(hasId(self, id), "INVALID_ID");
+        return self.idToAddress[id + 1];
+    }
+
+    function getId(Data storage self, address addr)
+        internal
+        view
+        returns (uint64)
+    {
+        require(hasAddress(self, addr), "INVALID_ADDRESS");
+        return self.addressToId[addr] - 1;
+    }
+
+    function insert(
+        Data storage self,
+        uint64 id,
+        address addr
+    ) internal returns (bool) {
+        require(addr != address(0), "ERROR_ZERO");
+        require(id != uint64(-1), "ERROR_64");
+        // Ensure bijectivity of the mappings
+        if (
+            self.addressToId[addr] != 0 ||
+            self.idToAddress[id + 1] != address(0)
+        ) {
+            return false;
+        }
+        self.idToAddress[id + 1] = addr;
+        self.addressToId[addr] = id + 1;
+        return true;
+    }
+}
+
 contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
     mapping (bytes32 => uint) internal config;
@@ -717,6 +707,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     IERC20 public annexToken;
     address public treasury;
     uint256 public threshold = 100000 ether; // 100000 ANN
+    using IdToAddressBiMap for IdToAddressBiMap.Data;
 
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -795,6 +786,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
     Auction[] public auctions;
 
+    IdToAddressBiMap.Data private registeredUsers;
+
     // auction auctionId => amount of sell token has been swap
     mapping(uint => uint) public amountSwap0P;
     // auction auctionId => amount of ETH has been swap
@@ -819,9 +812,9 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     // auction auctionId => account => whether or not allow swap
     mapping(uint => mapping(address => bool)) public whitelistP;
 
-    event Created(uint indexed auctionId, address indexed sender, Auction auction);
-    event Bid(uint indexed auctionId, address indexed sender, uint _minBuyAmounts, uint _sellAmounts);
-    event Claimed(uint indexed auctionId, address indexed sender, uint unFilled_minBuyAmounts);
+    event NewAuction(uint indexed auctionId, address indexed sender, Auction auction);
+    event NewSellOrder(uint indexed auctionId, address indexed sender, uint _minBuyAmounts, uint _sellAmounts);
+    event ClaimedFromOrder(uint indexed auctionId, address indexed sender, uint unFilled_minBuyAmounts);
     event AuctionDetails(
         uint256 indexed auctionId,
         string[6] social
@@ -903,7 +896,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
         myCreatedP[msg.sender] = auctions.length;
 
-        emit Created(auctionId, msg.sender, auction);
+        emit NewAuction(auctionId, msg.sender, auction);
 
         /**
         * socials[0] = webiste link 
@@ -963,7 +956,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
         _swap(sender, auctionId, _minBuyAmounts, _sellAmounts);
 
-        emit Bid(auctionId, sender, _minBuyAmounts, _sellAmounts);
+        emit NewSellOrder(auctionId, sender, _minBuyAmounts, _sellAmounts);
     }
 
     function creatorClaim(uint auctionId) external
@@ -1005,7 +998,8 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
             }
         }
 
-        emit Claimed(auctionId, creator, unFilled_minBuyAmounts);
+    
+        emit ClaimedFromOrder(auctionId, creator, unFilled_minBuyAmounts);
     }
 
     function bidderClaim(uint auctionId) external
@@ -1241,7 +1235,6 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     function getConfig(bytes32 key, address addr) public view returns (uint) {
         return config[bytes32(uint(key) ^ uint(addr))];
     }
-
     function _setConfig(bytes32 key, uint value) internal {
         if(config[key] != value)
             config[key] = value;
@@ -1252,7 +1245,6 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     function _setConfig(bytes32 key, address addr, uint value) internal {
         _setConfig(bytes32(uint(key) ^ uint(addr)), value);
     }
-    
     function setConfig(bytes32 key, uint value) external onlyOwner {
         _setConfig(key, value);
     }
@@ -1262,4 +1254,18 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     function setConfig(bytes32 key, address addr, uint value) public onlyOwner {
         _setConfig(bytes32(uint(key) ^ uint(addr)), value);
     }
+
+    //--------------------------------------------------------
+    // Get User
+    //--------------------------------------------------------
+
+    function getUserId(address user) public returns (uint64 userId) {
+        if (registeredUsers.hasAddress(user)) {
+            userId = registeredUsers.getId(user);
+        } else {
+            userId = registerUser(user);
+            emit NewUser(userId, user);
+        }
+    }
+
 }
