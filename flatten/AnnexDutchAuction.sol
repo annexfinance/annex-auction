@@ -644,62 +644,6 @@ abstract contract Ownable is Context {
     }
 }
 
-library IdToAddressBiMap {
-    struct Data {
-        mapping(uint64 => address) idToAddress;
-        mapping(address => uint64) addressToId;
-    }
-
-    function hasId(Data storage self, uint64 id) internal view returns (bool) {
-        return self.idToAddress[id + 1] != address(0);
-    }
-
-    function hasAddress(Data storage self, address addr)
-        internal
-        view
-        returns (bool)
-    {
-        return self.addressToId[addr] != 0;
-    }
-
-    function getAddressAt(Data storage self, uint64 id)
-        internal
-        view
-        returns (address)
-    {
-        require(hasId(self, id), "INVALID_ID");
-        return self.idToAddress[id + 1];
-    }
-
-    function getId(Data storage self, address addr)
-        internal
-        view
-        returns (uint64)
-    {
-        require(hasAddress(self, addr), "INVALID_ADDRESS");
-        return self.addressToId[addr] - 1;
-    }
-
-    function insert(
-        Data storage self,
-        uint64 id,
-        address addr
-    ) internal returns (bool) {
-        require(addr != address(0), "ERROR_ZERO");
-        require(id != uint64(-1), "ERROR_64");
-        // Ensure bijectivity of the mappings
-        if (
-            self.addressToId[addr] != 0 ||
-            self.idToAddress[id + 1] != address(0)
-        ) {
-            return false;
-        }
-        self.idToAddress[id + 1] = addr;
-        self.addressToId[addr] = id + 1;
-        return true;
-    }
-}
-
 contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
     mapping (bytes32 => uint) internal config;
@@ -707,7 +651,6 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     IERC20 public annexToken;
     address public treasury;
     uint256 public threshold = 100000 ether; // 100000 ANN
-    using IdToAddressBiMap for IdToAddressBiMap.Data;
 
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -786,8 +729,6 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
     Auction[] public auctions;
 
-    IdToAddressBiMap.Data private registeredUsers;
-
     // auction auctionId => amount of sell token has been swap
     mapping(uint => uint) public amountSwap0P;
     // auction auctionId => amount of ETH has been swap
@@ -812,7 +753,18 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     // auction auctionId => account => whether or not allow swap
     mapping(uint => mapping(address => bool)) public whitelistP;
 
-    event NewAuction(uint indexed auctionId, address indexed sender, Auction auction);
+    event NewAuction(
+        uint256 indexed auctionId,
+        IERC20 indexed _auctioningToken,
+        IERC20 indexed _biddingToken,
+        uint256 auctionStartDate,
+        uint256 auctionEndDate,
+        address auctioner_address,
+        uint96 _auctionedSellAmount,
+        uint96 amountMax1,
+        uint256 amountMin1
+    );
+
     event NewSellOrder(uint indexed auctionId, address indexed sender, uint _minBuyAmounts, uint _sellAmounts);
     event ClaimedFromOrder(uint indexed auctionId, address indexed sender, uint unFilled_minBuyAmounts);
     event AuctionDetails(
@@ -896,7 +848,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
         myCreatedP[msg.sender] = auctions.length;
 
-        emit NewAuction(auctionId, msg.sender, auction);
+        emit NewAuction(auctionId,auctionReq._auctioningToken,auctionReq._biddingToken,auctionReq.auctionStartDate,auctionReq.auctionEndDate,msg.sender,auctionReq._auctionedSellAmount,auctionReq.amountMax1,auctionReq.amountMin1);
 
         /**
         * socials[0] = webiste link 
@@ -1254,18 +1206,4 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
     function setConfig(bytes32 key, address addr, uint value) public onlyOwner {
         _setConfig(bytes32(uint(key) ^ uint(addr)), value);
     }
-
-    //--------------------------------------------------------
-    // Get User
-    //--------------------------------------------------------
-
-    function getUserId(address user) public returns (uint64 userId) {
-        if (registeredUsers.hasAddress(user)) {
-            userId = registeredUsers.getId(user);
-        } else {
-            userId = registerUser(user);
-            emit NewUser(userId, user);
-        }
-    }
-
 }

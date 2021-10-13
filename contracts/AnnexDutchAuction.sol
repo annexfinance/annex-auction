@@ -123,13 +123,13 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
 
     event NewAuction(
         uint256 indexed auctionId,
-        IERC20 indexed _auctioningToken,
-        IERC20 indexed _biddingToken,
+        address _auctioningToken,
+        address _biddingToken,
         uint256 auctionStartDate,
         uint256 auctionEndDate,
         address auctioner_address,
-        uint96 _auctionedSellAmount,
-        uint96 amountMax1,
+        uint256 _auctionedSellAmount,
+        uint256 amountMax1,
         uint256 amountMin1
     );
 
