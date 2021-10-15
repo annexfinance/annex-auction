@@ -9,10 +9,18 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
-import "./Governable.sol";
 import "./interfaces/IAnnexStake.sol";
+import "./interfaces/IDocuments.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AnnexFixedSwap is Configurable, ReentrancyGuardUpgradeSafe {
+contract AnnexFixedSwap is ReentrancyGuardUpgradeSafe, Ownable {
+
+    mapping (bytes32 => uint) internal config;
+    IDocuments public documents; // for storing documents
+    IERC20 public annexToken;
+    address public treasury;
+    uint256 public threshold = 100000 ether; // 100000 ANN
+
     using SafeMath for uint;
     using SafeERC20 for IERC20;
     using ECDSA for bytes32;
@@ -23,173 +31,228 @@ contract AnnexFixedSwap is Configurable, ReentrancyGuardUpgradeSafe {
     bytes32 internal constant BotToken              = bytes32("BotToken");
     bytes32 internal constant StakeContract         = bytes32("StakeContract");
 
-    struct CreateReq {
-        // pool name
-        string name;
+    struct AuctionReq {
+        // auction name
+        // string name;
         // address of sell token
-        address token0;
+        address _auctioningToken;
         // address of buy token
-        address token1;
-        // total amount of token0
+        address _biddingToken;
+        // total amount of _auctioningToken
         uint amountTotal0;
-        // total amount of token1
+        // total amount of _biddingToken
         uint amountTotal1;
-        // the timestamp in seconds the pool will open
-        uint openAt;
-        // the timestamp in seconds the pool will be closed
-        uint closeAt;
-        // the delay timestamp in seconds when buyers can claim after pool filled
+        // the timestamp in seconds the auction will open
+        uint auctionStartDate;
+        // the timestamp in seconds the auction will be closed
+        uint auctionEndDate;
+        // the delay timestamp in seconds when buyers can claim after auction filled
         uint claimAt;
         uint maxAmount1PerWallet;
         bool onlyBot;
         bool enableWhiteList;
     }
 
-    struct Pool {
-        // pool name
-        string name;
-        // creator of the pool
+    struct Auction {
+        // auction name
+        // string name;
+        // creator of the auction
         address payable creator;
         // address of sell token
-        address token0;
+        address _auctioningToken;
         // address of buy token
-        address token1;
-        // total amount of token0
+        address _biddingToken;
+        // total amount of _auctioningToken
         uint amountTotal0;
-        // total amount of token1
+        // total amount of _biddingToken
         uint amountTotal1;
-        // the timestamp in seconds the pool will open
-        uint openAt;
-        // the timestamp in seconds the pool will be closed
-        uint closeAt;
-        // the delay timestamp in seconds when buyers can claim after pool filled
+        // the timestamp in seconds the auction will open
+        uint auctionStartDate;
+        // the timestamp in seconds the auction will be closed
+        uint auctionEndDate;
+        // the delay timestamp in seconds when buyers can claim after auction filled
         uint claimAt;
         // whether or not whitelist is enable
         bool enableWhiteList;
     }
 
-    Pool[] public pools;
+    struct AuctionAbout {
+        string website;
+        string description;
+        string telegram;
+        string discord;
+        string medium;
+        string twitter;
+    }
 
-    // pool index => the timestamp which the pool filled at
+    Auction[] public auctions;
+
+    // auction auctionId => the timestamp which the auction filled at
     mapping(uint => uint) public filledAtP;
-    // pool index => swap amount of token0
+    // auction auctionId => swap amount of _auctioningToken
     mapping(uint => uint) public amountSwap0P;
-    // pool index => swap amount of token1
+    // auction auctionId => swap amount of _biddingToken
     mapping(uint => uint) public amountSwap1P;
-    // pool index => the swap pool only allow BOT holder to take part in
+    // auction auctionId => the swap auction only allow BOT holder to take part in
     mapping(uint => bool) public onlyBotHolderP;
-    // pool index => maximum swap amount1 per wallet, if the value is not set, the default value is zero
+    // auction auctionId => maximum swap amount1 per wallet, if the value is not set, the default value is zero
     mapping(uint => uint) public maxAmount1PerWalletP;
-    // team address => pool index => whether or not creator's pool has been claimed
+    // team address => auction auctionId => whether or not creator's auction has been claimed
     mapping(address => mapping(uint => bool)) public creatorClaimed;
-    // user address => pool index => swapped amount of token0
+    // user address => auction auctionId => swapped amount of _auctioningToken
     mapping(address => mapping(uint => uint)) public myAmountSwapped0;
-    // user address => pool index => swapped amount of token1
+    // user address => auction auctionId => swapped amount of _biddingToken
     mapping(address => mapping(uint => uint)) public myAmountSwapped1;
-    // user address => pool index => whether or not my pool has been claimed
+    // user address => auction auctionId => whether or not my auction has been claimed
     mapping(address => mapping(uint => bool)) public myClaimed;
 
-    // pool index => account => whether or not in white list
+    // auction auctionId => account => whether or not in white list
     mapping(uint => mapping(address => bool)) public whitelistP;
-    // pool index => transaction fee
+    // auction auctionId => transaction fee
     mapping(uint => uint) public txFeeP;
 
-    event Created(uint indexed index, address indexed sender, Pool pool);
-    event Swapped(uint indexed index, address indexed sender, uint amount0, uint amount1, uint txFee);
-    event Claimed(uint indexed index, address indexed sender, uint amount0, uint txFee);
-    event UserClaimed(uint indexed index, address indexed sender, uint amount0);
+    event NewAuction(
+        uint256 indexed auctionId,
+        address _auctioningToken,
+        address _biddingToken,
+        uint256 auctionStartDate,
+        uint256 auctionEndDate,
+        address auctioner_address,
+        uint256 _auctionedSellAmount,
+        uint256 amountMax1,
+        uint256 amountMin1,
+        uint claimAt,
+        uint maxAmount1PerWallet
+    );
+    event NewSellOrder(uint indexed auctionId, address indexed sender, uint amount0, uint amount1, uint txFee);
+    event Claimed(uint indexed auctionId, address indexed sender, uint amount0, uint txFee);
+    event UserClaimed(uint indexed auctionId, address indexed sender, uint amount0);
+    event AuctionDetails(
+        uint256 indexed auctionId,
+        string[6] social
+    );
 
-    function initialize() public initializer {
-        super.__Ownable_init();
-        super.__ReentrancyGuard_init();
+    // function initialize() public initializer {
+    //     super.__Ownable_init();
+    //     super.__ReentrancyGuard_init();
 
-        config[TxFeeRatio] = 0.005 ether; // 0.5%
-        config[MinValueOfBotHolder] = 60 ether;
+    //     config[TxFeeRatio] = 0.005 ether; // 0.5%
+    //     config[MinValueOfBotHolder] = 60 ether;
 
-        config[BotToken] = uint(0xA9B1Eb5908CfC3cdf91F9B8B3a74108598009096); // AUCTION
-        config[StakeContract] = uint(0x98945BC69A554F8b129b09aC8AfDc2cc2431c48E);
-    }
+    //     config[BotToken] = uint(0xA9B1Eb5908CfC3cdf91F9B8B3a74108598009096); // AUCTION
+    //     config[StakeContract] = uint(0x98945BC69A554F8b129b09aC8AfDc2cc2431c48E);
+    // }
 
-    function initialize_rinkeby() public {
-        initialize();
+    // function initialize_bsc() public {
+    //     initialize();
 
-        config[BotToken] = uint(0x5E26FA0FE067d28aae8aFf2fB85Ac2E693BD9EfA); // AUCTION
-        config[StakeContract] = uint(0xa77A9FcbA2Ae5599e0054369d1655D186020ECE1);
-    }
+    //     config[BotToken] = uint(0x1188d953aFC697C031851169EEf640F23ac8529C); // AUCTION
+    //     config[StakeContract] = uint(0x1dd665ba1591756aa87157F082F175bDcA9fB91a);
+    // }
 
-    function initialize_bsc() public {
-        initialize();
+    function initiateAuction(AuctionReq memory auctionReq, address[] memory whitelist_) external nonReentrant {
 
-        config[BotToken] = uint(0x1188d953aFC697C031851169EEf640F23ac8529C); // AUCTION
-        config[StakeContract] = uint(0x1dd665ba1591756aa87157F082F175bDcA9fB91a);
-    }
-
-    function initiateAuction(CreateReq memory poolReq, address[] memory whitelist_) external nonReentrant {
-        uint index = pools.length;
-        require(tx.origin == msg.sender, "disallow contract caller");
-        require(poolReq.amountTotal0 != 0, "invalid amountTotal0");
-        require(poolReq.amountTotal1 != 0, "invalid amountTotal1");
-        require(poolReq.openAt >= now, "invalid openAt");
-        require(poolReq.closeAt > poolReq.openAt, "invalid closeAt");
-        require(poolReq.claimAt == 0 || poolReq.claimAt >= poolReq.closeAt, "invalid closeAt");
-        require(bytes(poolReq.name).length <= 15, "length of name is too long");
-
-        if (poolReq.maxAmount1PerWallet != 0) {
-            maxAmount1PerWalletP[index] = poolReq.maxAmount1PerWallet;
-        }
-        if (poolReq.onlyBot) {
-            onlyBotHolderP[index] = poolReq.onlyBot;
-        }
-
-        // transfer amount of token0 to this contract
-        IERC20  _token0 = IERC20(poolReq.token0);
-        uint token0BalanceBefore = _token0.balanceOf(address(this));
-        _token0.safeTransferFrom(msg.sender, address(this), poolReq.amountTotal0);
+        // Auctioner can init an auction if he has 100 Ann
         require(
-            _token0.balanceOf(address(this)).sub(token0BalanceBefore) == poolReq.amountTotal0,
+            annexToken.balanceOf(msg.sender) >= threshold,
+            "NOT_ENOUGH_ANN"
+        );
+        if (threshold > 0) {
+            annexToken.safeTransferFrom(msg.sender, treasury, threshold);
+        }
+
+        uint auctionId = auctions.length;
+        require(tx.origin == msg.sender, "disallow contract caller");
+        require(auctionReq.amountTotal0 != 0, "invalid amountTotal0");
+        require(auctionReq.amountTotal1 != 0, "invalid amountTotal1");
+        require(auctionReq.auctionStartDate >= now, "invalid auctionStartDate");
+        require(auctionReq.auctionEndDate > auctionReq.auctionStartDate, "invalid auctionEndDate");
+        require(auctionReq.claimAt == 0 || auctionReq.claimAt >= auctionReq.auctionEndDate, "invalid auctionEndDate");
+        // require(bytes(auctionReq.name).length <= 15, "length of name is too long");
+
+        if (auctionReq.maxAmount1PerWallet != 0) {
+            maxAmount1PerWalletP[auctionId] = auctionReq.maxAmount1PerWallet;
+        }
+        if (auctionReq.onlyBot) {
+            onlyBotHolderP[auctionId] = auctionReq.onlyBot;
+        }
+
+        // transfer amount of _auctioningToken to this contract
+        IERC20  __auctioningToken = IERC20(auctionReq._auctioningToken);
+        uint _auctioningTokenBalanceBefore = __auctioningToken.balanceOf(address(this));
+        __auctioningToken.safeTransferFrom(msg.sender, address(this), auctionReq.amountTotal0);
+        require(
+            __auctioningToken.balanceOf(address(this)).sub(_auctioningTokenBalanceBefore) == auctionReq.amountTotal0,
             "not support deflationary token"
         );
 
-        if (poolReq.enableWhiteList) {
+        if (auctionReq.enableWhiteList) {
             require(whitelist_.length > 0, "no whitelist imported");
-            _addWhitelist(index, whitelist_);
+            _addWhitelist(auctionId, whitelist_);
         }
 
-        Pool memory pool;
-        pool.name = poolReq.name;
-        pool.creator = msg.sender;
-        pool.token0 = poolReq.token0;
-        pool.token1 = poolReq.token1;
-        pool.amountTotal0 = poolReq.amountTotal0;
-        pool.amountTotal1 = poolReq.amountTotal1;
-        pool.openAt = poolReq.openAt;
-        pool.closeAt = poolReq.closeAt;
-        pool.claimAt = poolReq.claimAt;
-        pool.enableWhiteList = poolReq.enableWhiteList;
-        pools.push(pool);
+        Auction memory auction;
+        // auction.name = auctionReq.name;
+        auction.creator = msg.sender;
+        auction._auctioningToken = auctionReq._auctioningToken;
+        auction._biddingToken = auctionReq._biddingToken;
+        auction.amountTotal0 = auctionReq.amountTotal0;
+        auction.amountTotal1 = auctionReq.amountTotal1;
+        auction.auctionStartDate = auctionReq.auctionStartDate;
+        auction.auctionEndDate = auctionReq.auctionEndDate;
+        auction.claimAt = auctionReq.claimAt;
+        auction.enableWhiteList = auctionReq.enableWhiteList;
+        auctions.push(auction);
 
-        emit Created(index, msg.sender, pool);
+        emit NewAuction(
+            auctionId,
+            auctionReq._auctioningToken,
+            auctionReq._biddingToken,
+            auctionReq.auctionStartDate,
+            auctionReq.auctionEndDate,
+            msg.sender,
+            auctionReq.amountTotal0,
+            auctionReq.amountTotal0,
+            auctionReq.amountTotal1,
+            auctionReq.claimAt,
+            auctionReq.maxAmount1PerWallet
+        );
+
+        /**
+        * socials[0] = webiste link 
+        * socials[1] = description 
+        * socials[2] = telegram link 
+        * socials[3] = discord link 
+        * socials[4] = medium link 
+        * socials[5] = twitter link 
+        **/
+        string[6] memory socials = [auctionReq.about.website,auctionReq.about.description,auctionReq.about.telegram,auctionReq.about.discord,auctionReq.about.medium,auctionReq.about.twitter];
+        emit AuctionDetails(
+            auctionId,
+            socials
+        );
+
     }
 
-    function swap(uint index, uint amount1) external payable
+    function swap(uint auctionId, uint amount1) external payable
         nonReentrant
-        isPoolExist(index)
-        isPoolNotClosed(index)
-        checkBotHolder(index)
+        isAuctionExist(auctionId)
+        isAuctionNotClosed(auctionId)
+        checkBotHolder(auctionId)
     {
         address payable sender = msg.sender;
         require(tx.origin == msg.sender, "disallow contract caller");
-        Pool memory pool = pools[index];
+        Auction memory auction = auctions[auctionId];
 
-        if (pool.enableWhiteList) {
-            require(whitelistP[index][sender], "sender not in whitelist");
+        if (auction.enableWhiteList) {
+            require(whitelistP[auctionId][sender], "sender not in whitelist");
         }
-        require(pool.openAt <= now, "pool not open");
-        require(pool.amountTotal1 > amountSwap1P[index], "swap amount is zero");
+        require(auction.auctionStartDate <= now, "auction not open");
+        require(auction.amountTotal1 > amountSwap1P[auctionId], "swap amount is zero");
 
         // check if amount1 is exceeded
         uint excessAmount1 = 0;
-        uint _amount1 = pool.amountTotal1.sub(amountSwap1P[index]);
+        uint _amount1 = auction.amountTotal1.sub(amountSwap1P[auctionId]);
         if (_amount1 < amount1) {
             excessAmount1 = amount1.sub(_amount1);
         } else {
@@ -197,127 +260,127 @@ contract AnnexFixedSwap is Configurable, ReentrancyGuardUpgradeSafe {
         }
 
         // check if amount0 is exceeded
-        uint amount0 = _amount1.mul(pool.amountTotal0).div(pool.amountTotal1);
-        uint _amount0 = pool.amountTotal0.sub(amountSwap0P[index]);
+        uint amount0 = _amount1.mul(auction.amountTotal0).div(auction.amountTotal1);
+        uint _amount0 = auction.amountTotal0.sub(amountSwap0P[auctionId]);
         if (_amount0 > amount0) {
             _amount0 = amount0;
         }
 
-        amountSwap0P[index] = amountSwap0P[index].add(_amount0);
-        amountSwap1P[index] = amountSwap1P[index].add(_amount1);
-        myAmountSwapped0[sender][index] = myAmountSwapped0[sender][index].add(_amount0);
-        // check if swapped amount of token1 is exceeded maximum allowance
-        if (maxAmount1PerWalletP[index] != 0) {
+        amountSwap0P[auctionId] = amountSwap0P[auctionId].add(_amount0);
+        amountSwap1P[auctionId] = amountSwap1P[auctionId].add(_amount1);
+        myAmountSwapped0[sender][auctionId] = myAmountSwapped0[sender][auctionId].add(_amount0);
+        // check if swapped amount of _biddingToken is exceeded maximum allowance
+        if (maxAmount1PerWalletP[auctionId] != 0) {
             require(
-                myAmountSwapped1[sender][index].add(_amount1) <= maxAmount1PerWalletP[index],
-                "swapped amount of token1 is exceeded maximum allowance"
+                myAmountSwapped1[sender][auctionId].add(_amount1) <= maxAmount1PerWalletP[auctionId],
+                "swapped amount of _biddingToken is exceeded maximum allowance"
             );
-            myAmountSwapped1[sender][index] = myAmountSwapped1[sender][index].add(_amount1);
+            myAmountSwapped1[sender][auctionId] = myAmountSwapped1[sender][auctionId].add(_amount1);
         }
 
-        if (pool.amountTotal1 == amountSwap1P[index]) {
-            filledAtP[index] = now;
+        if (auction.amountTotal1 == amountSwap1P[auctionId]) {
+            filledAtP[auctionId] = now;
         }
 
-        // transfer amount of token1 to this contract
-        if (pool.token1 == address(0)) {
+        // transfer amount of _biddingToken to this contract
+        if (auction._biddingToken == address(0)) {
             require(msg.value == amount1, "invalid amount of ETH");
         } else {
-            IERC20(pool.token1).safeTransferFrom(sender, address(this), amount1);
+            IERC20(auction._biddingToken).safeTransferFrom(sender, address(this), amount1);
         }
 
-        if (pool.claimAt == 0) {
+        if (auction.claimAt == 0) {
             if (_amount0 > 0) {
-                // send token0 to sender
-                IERC20(pool.token0).safeTransfer(sender, _amount0);
+                // send _auctioningToken to sender
+                IERC20(auction._auctioningToken).safeTransfer(sender, _amount0);
             }
         }
         if (excessAmount1 > 0) {
-            // send excess amount of token1 back to sender
-            if (pool.token1 == address(0)) {
+            // send excess amount of _biddingToken back to sender
+            if (auction._biddingToken == address(0)) {
                 sender.transfer(excessAmount1);
             } else {
-                IERC20(pool.token1).safeTransfer(sender, excessAmount1);
+                IERC20(auction._biddingToken).safeTransfer(sender, excessAmount1);
             }
         }
 
-        // send token1 to creator
+        // send _biddingToken to creator
         uint256 txFee = 0;
         uint256 _actualAmount1 = _amount1;
-        if (pool.token1 == address(0)) {
+        if (auction._biddingToken == address(0)) {
             txFee = _amount1.mul(getTxFeeRatio()).div(1 ether);
-            txFeeP[index] += txFee;
+            txFeeP[auctionId] += txFee;
             _actualAmount1 = _amount1.sub(txFee);
-            pool.creator.transfer(_actualAmount1);
+            auction.creator.transfer(_actualAmount1);
         } else {
-            IERC20(pool.token1).safeTransfer(pool.creator, _actualAmount1);
+            IERC20(auction._biddingToken).safeTransfer(auction.creator, _actualAmount1);
         }
 
-        emit Swapped(index, sender, _amount0, _actualAmount1, txFee);
+        emit NewSellOrder(auctionId, sender, _amount0, _actualAmount1, txFee);
     }
 
-    function creatorClaim(uint index) external
+    function creatorClaim(uint auctionId) external
         nonReentrant
-        isPoolExist(index)
-        isPoolClosed(index)
+        isAuctionExist(auctionId)
+        isAuctionClosed(auctionId)
     {
-        Pool memory pool = pools[index];
-        require(!creatorClaimed[pool.creator][index], "claimed");
-        creatorClaimed[pool.creator][index] = true;
+        Auction memory auction = auctions[auctionId];
+        require(!creatorClaimed[auction.creator][auctionId], "claimed");
+        creatorClaimed[auction.creator][auctionId] = true;
 
-        if (txFeeP[index] > 0) {
-            if (pool.token1 == address(0)) {
+        if (txFeeP[auctionId] > 0) {
+            if (auction._biddingToken == address(0)) {
                 // deposit transaction fee to staking contract
-                IAnnexStake(getStakeContract()).depositReward{value: txFeeP[index]}();
+                IAnnexStake(getStakeContract()).depositReward{value: txFeeP[auctionId]}();
             } else {
-                IERC20(pool.token1).safeTransfer(getStakeContract(), txFeeP[index]);
+                IERC20(auction._biddingToken).safeTransfer(getStakeContract(), txFeeP[auctionId]);
             }
         }
 
-        uint unSwapAmount0 = pool.amountTotal0 - amountSwap0P[index];
+        uint unSwapAmount0 = auction.amountTotal0 - amountSwap0P[auctionId];
         if (unSwapAmount0 > 0) {
-            IERC20(pool.token0).safeTransfer(pool.creator, unSwapAmount0);
+            IERC20(auction._auctioningToken).safeTransfer(auction.creator, unSwapAmount0);
         }
 
-        emit Claimed(index, msg.sender, unSwapAmount0, txFeeP[index]);
+        emit Claimed(auctionId, msg.sender, unSwapAmount0, txFeeP[auctionId]);
     }
 
-    function userClaim(uint index) external
+    function userClaim(uint auctionId) external
         nonReentrant
-        isPoolExist(index)
-        isClaimReady(index)
+        isAuctionExist(auctionId)
+        isClaimReady(auctionId)
     {
-        Pool memory pool = pools[index];
+        Auction memory auction = auctions[auctionId];
         address sender = msg.sender;
-        require(!myClaimed[sender][index], "claimed");
-        myClaimed[sender][index] = true;
-        if (myAmountSwapped0[sender][index] > 0) {
-            // send token0 to sender
-            IERC20(pool.token0).safeTransfer(msg.sender, myAmountSwapped0[sender][index]);
+        require(!myClaimed[sender][auctionId], "claimed");
+        myClaimed[sender][auctionId] = true;
+        if (myAmountSwapped0[sender][auctionId] > 0) {
+            // send _auctioningToken to sender
+            IERC20(auction._auctioningToken).safeTransfer(msg.sender, myAmountSwapped0[sender][auctionId]);
         }
-        emit UserClaimed(index, sender, myAmountSwapped0[sender][index]);
+        emit UserClaimed(auctionId, sender, myAmountSwapped0[sender][auctionId]);
     }
 
-    function _addWhitelist(uint index, address[] memory whitelist_) private {
+    function _addWhitelist(uint auctionId, address[] memory whitelist_) private {
         for (uint i = 0; i < whitelist_.length; i++) {
-            whitelistP[index][whitelist_[i]] = true;
+            whitelistP[auctionId][whitelist_[i]] = true;
         }
     }
 
-    function addWhitelist(uint index, address[] memory whitelist_) external {
-        require(owner() == msg.sender || pools[index].creator == msg.sender, "no permission");
-        _addWhitelist(index, whitelist_);
+    function addWhitelist(uint auctionId, address[] memory whitelist_) external {
+        require(owner() == msg.sender || auctions[auctionId].creator == msg.sender, "no permission");
+        _addWhitelist(auctionId, whitelist_);
     }
 
-    function removeWhitelist(uint index, address[] memory whitelist_) external {
-        require(owner() == msg.sender || pools[index].creator == msg.sender, "no permission");
+    function removeWhitelist(uint auctionId, address[] memory whitelist_) external {
+        require(owner() == msg.sender || auctions[auctionId].creator == msg.sender, "no permission");
         for (uint i = 0; i < whitelist_.length; i++) {
-            delete whitelistP[index][whitelist_[i]];
+            delete whitelistP[auctionId][whitelist_[i]];
         }
     }
 
-    function getPoolCount() public view returns (uint) {
-        return pools.length;
+    function getAuctionCount() public view returns (uint) {
+        return auctions.length;
     }
 
     function getTxFeeRatio() public view returns (uint) {
@@ -336,34 +399,126 @@ contract AnnexFixedSwap is Configurable, ReentrancyGuardUpgradeSafe {
         return address(config[StakeContract]);
     }
 
-    modifier isPoolClosed(uint index) {
-        require(pools[index].closeAt <= now, "this pool is not closed");
+    modifier isAuctionClosed(uint auctionId) {
+        require(auctions[auctionId].auctionEndDate <= now, "this auction is not closed");
         _;
     }
 
-    modifier isPoolNotClosed(uint index) {
-        require(pools[index].closeAt > now, "this pool is closed");
+    modifier isAuctionNotClosed(uint auctionId) {
+        require(auctions[auctionId].auctionEndDate > now, "this auction is closed");
         _;
     }
 
-    modifier isClaimReady(uint index) {
-        require(pools[index].claimAt != 0, "invalid claim");
-        require(pools[index].claimAt <= now, "claim not ready");
+    modifier isClaimReady(uint auctionId) {
+        require(auctions[auctionId].claimAt != 0, "invalid claim");
+        require(auctions[auctionId].claimAt <= now, "claim not ready");
         _;
     }
 
-    modifier isPoolExist(uint index) {
-        require(index < pools.length, "this pool does not exist");
+    modifier isAuctionExist(uint auctionId) {
+        require(auctionId < auctions.length, "this auction does not exist");
         _;
     }
 
-    modifier checkBotHolder(uint index) {
-        if (onlyBotHolderP[index]) {
+    modifier checkBotHolder(uint auctionId) {
+        if (onlyBotHolderP[auctionId]) {
             require(
                 IERC20(getBotToken()).balanceOf(msg.sender) >= getMinValueOfBotHolder(),
                 "Auction is not enough"
             );
         }
         _;
+    }
+
+    //--------------------------------------------------------
+    // Getter & Setters
+    //--------------------------------------------------------
+
+    function setThreshold(uint256 _threshold) external onlyOwner {
+        threshold = _threshold;
+    }
+
+    function setAnnexAddress(address _annexToken) external onlyOwner {
+        annexToken = IERC20(_annexToken);
+    }
+
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
+    }
+
+    function setDocumentAddress(address _document) external onlyOwner {
+        documents = IDocuments(_document);
+    }
+
+    //--------------------------------------------------------
+    // Documents
+    //--------------------------------------------------------
+
+    function setDocument(string calldata _name, string calldata _data)
+        external
+        onlyOwner()
+    {
+        documents._setDocument(_name, _data);
+    }
+
+    function getDocumentCount() external view returns (uint256) {
+        return documents.getDocumentCount();
+    }
+
+    function getAllDocuments() external view returns (bytes memory) {
+        return documents.getAllDocuments();
+    }
+
+    function getDocumentName(uint256 _auctionId)
+        external
+        view
+        returns (string memory)
+    {
+        return documents.getDocumentName(_auctionId);
+    }
+
+    function getDocument(string calldata _name)
+        external
+        view
+        returns (string memory, uint256)
+    {
+        return documents.getDocument(_name);
+    }
+
+    function removeDocument(string calldata _name) external {
+        documents._removeDocument(_name);
+    }
+
+    //--------------------------------------------------------
+    // Configurable
+    //--------------------------------------------------------
+
+    function getConfig(bytes32 key) public view returns (uint) {
+        return config[key];
+    }
+    function getConfig(bytes32 key, uint auctionId) public view returns (uint) {
+        return config[bytes32(uint(key) ^ auctionId)];
+    }
+    function getConfig(bytes32 key, address addr) public view returns (uint) {
+        return config[bytes32(uint(key) ^ uint(addr))];
+    }
+    function _setConfig(bytes32 key, uint value) internal {
+        if(config[key] != value)
+            config[key] = value;
+    }
+    function _setConfig(bytes32 key, uint auctionId, uint value) internal {
+        _setConfig(bytes32(uint(key) ^ auctionId), value);
+    }
+    function _setConfig(bytes32 key, address addr, uint value) internal {
+        _setConfig(bytes32(uint(key) ^ uint(addr)), value);
+    }
+    function setConfig(bytes32 key, uint value) external onlyOwner {
+        _setConfig(key, value);
+    }
+    function setConfig(bytes32 key, uint auctionId, uint value) external onlyOwner {
+        _setConfig(bytes32(uint(key) ^ auctionId), value);
+    }
+    function setConfig(bytes32 key, address addr, uint value) public onlyOwner {
+        _setConfig(bytes32(uint(key) ^ uint(addr)), value);
     }
 }
