@@ -3,17 +3,17 @@
 pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/Address.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "./interfaces/IAnnexStake.sol";
 import "./interfaces/IDocuments.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AnnexFixedSwap is ReentrancyGuardUpgradeSafe, Ownable {
+contract AnnexFixedSwap is ReentrancyGuard, Ownable {
 
     mapping (bytes32 => uint) internal config;
     IDocuments public documents; // for storing documents
@@ -51,6 +51,8 @@ contract AnnexFixedSwap is ReentrancyGuardUpgradeSafe, Ownable {
         uint maxAmount1PerWallet;
         bool onlyBot;
         bool enableWhiteList;
+        // About Info in request
+        AuctionAbout about;
     }
 
     struct Auction {
@@ -121,8 +123,7 @@ contract AnnexFixedSwap is ReentrancyGuardUpgradeSafe, Ownable {
         uint256 _auctionedSellAmount,
         uint256 amountMax1,
         uint256 amountMin1,
-        uint claimAt,
-        uint maxAmount1PerWallet
+        uint claimAt
     );
     event NewSellOrder(uint indexed auctionId, address indexed sender, uint amount0, uint amount1, uint txFee);
     event Claimed(uint indexed auctionId, address indexed sender, uint amount0, uint txFee);
@@ -214,8 +215,7 @@ contract AnnexFixedSwap is ReentrancyGuardUpgradeSafe, Ownable {
             auctionReq.amountTotal0,
             auctionReq.amountTotal0,
             auctionReq.amountTotal1,
-            auctionReq.claimAt,
-            auctionReq.maxAmount1PerWallet
+            auctionReq.claimAt
         );
 
         /**

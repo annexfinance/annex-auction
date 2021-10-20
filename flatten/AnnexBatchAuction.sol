@@ -1,12 +1,7 @@
-// File: @openzeppelin/contracts/token/ERC20/IERC20.sol
-
 // SPDX-License-Identifier: MIT
+pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Interface of the ERC20 standard as defined in the EIP.
- */
 interface IERC20 {
     /**
      * @dev Returns the amount of tokens in existence.
@@ -78,25 +73,6 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-// File: @openzeppelin/contracts/math/SafeMath.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Wrappers over Solidity's arithmetic operations with added overflow
- * checks.
- *
- * Arithmetic operations in Solidity wrap on overflow. This can easily result
- * in bugs, because programmers usually assume that an overflow raises an
- * error, which is the standard behavior in high level programming languages.
- * `SafeMath` restores this intuition by reverting the transaction when an
- * operation overflows.
- *
- * Using this library instead of the unchecked operations eliminates an entire
- * class of bugs, so it's recommended to use it always.
- */
 library SafeMath {
     /**
      * @dev Returns the addition of two unsigned integers, with an overflow flag.
@@ -295,15 +271,6 @@ library SafeMath {
     }
 }
 
-// File: @openzeppelin/contracts/utils/Address.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.2 <0.8.0;
-
-/**
- * @dev Collection of functions related to the address type
- */
 library Address {
     /**
      * @dev Returns true if `account` is a contract.
@@ -487,24 +454,6 @@ library Address {
     }
 }
 
-// File: @openzeppelin/contracts/token/ERC20/SafeERC20.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-
-
-
-/**
- * @title SafeERC20
- * @dev Wrappers around ERC20 operations that throw on failure (when the token
- * contract returns false). Tokens that return no value (and instead revert or
- * throw on failure) are also supported, non-reverting calls are assumed to be
- * successful.
- * To use this library you can add a `using SafeERC20 for IERC20;` statement to your contract,
- * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
- */
 library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
@@ -564,22 +513,6 @@ library SafeERC20 {
     }
 }
 
-// File: @openzeppelin/contracts/utils/Context.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/*
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with GSN meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
         return msg.sender;
@@ -591,24 +524,6 @@ abstract contract Context {
     }
 }
 
-// File: @openzeppelin/contracts/access/Ownable.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
 abstract contract Ownable is Context {
     address private _owner;
 
@@ -661,15 +576,6 @@ abstract contract Ownable is Context {
     }
 }
 
-// File: @openzeppelin/contracts/math/Math.sol
-
-// SPDX-License-Identifier: MIT
-
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Standard math utilities missing in the Solidity language.
- */
 library Math {
     /**
      * @dev Returns the largest of two numbers.
@@ -694,23 +600,6 @@ library Math {
         return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
     }
 }
-
-// File: contracts/libraries/IterableOrderedOrderSet.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.8;
-
-
-/**
-    ERROR_ZERO : Inserting zero is not supported
-    INVALID_ELE : Inserting element is not valid
-    ERROR_SAME_ORDER : user is not allowed to place same order twice
-    EMPTY_SET : Trying to get first from empty set
-    ERROR_NEXT : Trying to get next of last element
-    NON_EXISTENT : Trying to get next of non-existent element
-
-    
-**/
 
 library IterableOrderedOrderSet {
     using SafeMath for uint96;
@@ -952,11 +841,6 @@ library IterableOrderedOrderSet {
     }
 }
 
-// File: contracts/interfaces/AllowListVerifier.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.8;
-
 library AllowListVerifierHelper {
     /// @dev Value returned by a call to `isAllowed` if the check
     /// was successful. The value is defined as:
@@ -964,9 +848,6 @@ library AllowListVerifierHelper {
     bytes4 internal constant MAGICVALUE = 0x19a05a7e;
 }
 
-///
-/// @dev Standardized interface for an allowList manager for annexAuction
-/// The interface was inspired by EIP-1271
 interface AllowListVerifier {
     /// @dev Should return whether the a specific user has access to an auction
     /// by returning the magic value from AllowListVerifierHelper
@@ -976,24 +857,6 @@ interface AllowListVerifier {
         bytes calldata callData
     ) external view returns (bytes4);
 }
-
-// File: contracts/libraries/IdToAddressBiMap.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Contract does not have test coverage, as it was nearly copied from:
-// https://github.com/gnosis/solidity-data-structures/blob/master/contracts/libraries/IdToAddressBiMap.sol
-// The only change is uint16 -> uint64
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/** 
-    INVALID_ID: Must have ID to get Address
-    INVALID_ADDRESS: Must have Address to get ID
-    ERROR_ZERO : Cannot insert zero address
-    ERROR_64 : Cannot insert max uint64
-**/
 
 library IdToAddressBiMap {
     struct Data {
@@ -1051,17 +914,6 @@ library IdToAddressBiMap {
     }
 }
 
-// File: contracts/libraries/SafeCast.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.8.0;
-
-/**
- * @dev Wrappers over Solidity's uintXX/intXX casting operators with added overflow
- * checks.
- *
- * Logic was copied and modified from here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/SafeCast.sol
- */
 library SafeCast {
     function toUint96(uint256 value) internal pure returns (uint96) {
         require(value < 2**96, "SafeCast: value doesn't fit in 96 bits");
@@ -1073,12 +925,6 @@ library SafeCast {
         return uint64(value);
     }
 }
-
-// File: contracts/interfaces/IDocuments.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
 
 interface IDocuments {
     function _removeDocument(string calldata _name) external;
@@ -1100,365 +946,6 @@ interface IDocuments {
         view
         returns (string memory, uint256);
 }
-
-// File: contracts/interfaces/IPancakeswapV2Pair.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.5.0;
-
-interface IPancakeswapV2Pair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
-
-    function name() external pure returns (string memory);
-
-    function symbol() external pure returns (string memory);
-
-    function decimals() external pure returns (uint8);
-
-    function totalSupply() external view returns (uint);
-
-    function balanceOf(address owner) external view returns (uint);
-
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-
-    function transfer(address to, uint value) external returns (bool);
-
-    function transferFrom(
-        address from,
-        address to,
-        uint value
-    ) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-
-    function nonces(address owner) external view returns (uint);
-
-    function permit(
-        address owner,
-        address spender,
-        uint value,
-        uint deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-
-    event Mint(address indexed sender, uint amount0, uint amount1);
-    event Burn(
-        address indexed sender,
-        uint amount0,
-        uint amount1,
-        address indexed to
-    );
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-    event Sync(uint112 reserve0, uint112 reserve1);
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-
-    function factory() external view returns (address);
-
-    function token0() external view returns (address);
-
-    function token1() external view returns (address);
-
-    function getReserves()
-        external
-        view
-        returns (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint32 blockTimestampLast
-        );
-
-    function price0CumulativeLast() external view returns (uint);
-
-    function price1CumulativeLast() external view returns (uint);
-
-    function kLast() external view returns (uint);
-
-    function mint(address to) external returns (uint liquidity);
-
-    function burn(address to) external returns (uint amount0, uint amount1);
-
-    function swap(
-        uint amount0Out,
-        uint amount1Out,
-        address to,
-        bytes calldata data
-    ) external;
-
-    function skim(address to) external;
-
-    function sync() external;
-
-    function initialize(address, address) external;
-}
-
-// File: contracts/interfaces/IPancakeswapV2Factory.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.5.0;
-
-interface IPancakeswapV2Factory {
-    event PairCreated(
-        address indexed token0,
-        address indexed token1,
-        address pair,
-        uint
-    );
-
-    function feeTo() external view returns (address);
-
-    function feeToSetter() external view returns (address);
-
-    function getPair(address tokenA, address tokenB)
-        external
-        view
-        returns (address pair);
-
-    function allPairs(uint) external view returns (address pair);
-
-    function allPairsLength() external view returns (uint);
-
-    function createPair(address tokenA, address tokenB)
-        external
-        returns (address pair);
-
-    function setFeeTo(address) external;
-
-    function setFeeToSetter(address) external;
-}
-
-// File: contracts/interfaces/IPancakeswapV2Router02.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.2;
-
-interface IPancakeswapV2Router01 {
-    function factory() external pure returns (address);
-
-    function WETH() external pure returns (address);
-
-    function addLiquidity(
-        address tokenA,
-        address tokenB,
-        uint amountADesired,
-        uint amountBDesired,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    )
-        external
-        returns (
-            uint amountA,
-            uint amountB,
-            uint liquidity
-        );
-
-    function addLiquidityETH(
-        address token,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    )
-        external
-        payable
-        returns (
-            uint amountToken,
-            uint amountETH,
-            uint liquidity
-        );
-
-    function removeLiquidity(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB);
-
-    function removeLiquidityETH(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountToken, uint amountETH);
-
-    function removeLiquidityWithPermit(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline,
-        bool approveMax,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external returns (uint amountA, uint amountB);
-
-    function removeLiquidityETHWithPermit(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external returns (uint amountToken, uint amountETH);
-
-    function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-
-    function swapTokensForExactTokens(
-        uint amountOut,
-        uint amountInMax,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-
-    function swapExactETHForTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable returns (uint[] memory amounts);
-
-    function swapTokensForExactETH(
-        uint amountOut,
-        uint amountInMax,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-
-    function swapExactTokensForETH(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-
-    function swapETHForExactTokens(
-        uint amountOut,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable returns (uint[] memory amounts);
-
-    function quote(
-        uint amountA,
-        uint reserveA,
-        uint reserveB
-    ) external pure returns (uint amountB);
-
-    function getAmountOut(
-        uint amountIn,
-        uint reserveIn,
-        uint reserveOut
-    ) external pure returns (uint amountOut);
-
-    function getAmountIn(
-        uint amountOut,
-        uint reserveIn,
-        uint reserveOut
-    ) external pure returns (uint amountIn);
-
-    function getAmountsOut(uint amountIn, address[] calldata path)
-        external
-        view
-        returns (uint[] memory amounts);
-
-    function getAmountsIn(uint amountOut, address[] calldata path)
-        external
-        view
-        returns (uint[] memory amounts);
-}
-
-interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
-    function removeLiquidityETHSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountETH);
-
-    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external returns (uint amountETH);
-
-    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-
-    function swapExactETHForTokensSupportingFeeOnTransferTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable;
-
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-}
-
-// File: hardhat/console.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity >= 0.4.22 <0.9.0;
 
 library console {
 	address constant CONSOLE_ADDRESS = address(0x000000000000000000636F6e736F6c652e6c6f67);
@@ -2989,28 +2476,6 @@ library console {
 	}
 
 }
-
-// File: contracts/AnnexBatchAuction.sol
-
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
-pragma experimental ABIEncoderV2;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import "hardhat/console.sol";
 /**
 Errors details
     ERROR_ORDER_PLACEMENT = no longer in order placement phase
@@ -3072,8 +2537,8 @@ contract AnnexBatchAuction is Ownable {
         uint96 _auctionedSellAmount;
         uint96 _minBuyAmount;
         bool isAtomicClosureAllowed;
+        // uint8 router;
         bytes accessManagerContractData;
-        uint8 router;
         AuctionAbout about;
     }
 
@@ -3119,12 +2584,12 @@ contract AnnexBatchAuction is Ownable {
     mapping(uint256 => uint256) public startingDate; // starting date
     // auctionId => IPancakeswapV2Pair (liquidity pool)
     //address of pancakeswap liquidity pools of pairs auctioningToken-biddingToken
-    mapping(uint256 => address) public liquidityPools;
-    mapping(uint256 => uint256) public poolLiquidities;
+    // mapping(uint256 => address) public liquidityPools;
+    // mapping(uint256 => uint256) public poolLiquidities;
     // auctionId => pancakeswapV2Router address
-    mapping(uint256 => address) public pancakeswapV2Router;
+    // mapping(uint256 => address) public pancakeswapV2Router;
     // address for PancakeswapV2Router02
-    address[] public routers;
+    // address[] public routers;
 
     mapping(uint256 => uint256) public totalBiddingTokens;
 
@@ -3200,12 +2665,12 @@ contract AnnexBatchAuction is Ownable {
         uint96 buyAmount,
         uint96 sellAmount
     );
-    event ClaimedLPFromOrder(
-        uint256 indexed auctionId,
-        uint64 userId,
-        uint256 sumBiddingTokenAmount,
-        uint256 lps
-    );
+    // event ClaimedLPFromOrder(
+    //     uint256 indexed auctionId,
+    //     uint64 userId,
+    //     uint256 sumBiddingTokenAmount,
+    //     uint256 lps
+    // );
 
     event NewUser(uint64 indexed userId, address indexed userAddress);
     event NewAuction(
@@ -3227,15 +2692,15 @@ contract AnnexBatchAuction is Ownable {
         bytes32 clearingPriceOrder
     );
     event UserRegistration(address indexed user, uint64 userId);
-    event AddRouters(address[] indexed routers);
-    event AddLiquidity(uint256 indexed auctionId, uint256 liquidity);
+    // event AddRouters(address[] indexed routers);
+    // event AddLiquidity(uint256 indexed auctionId, uint256 liquidity);
 
-    event CalculatedLP(
-        uint256 indexed auctionId,
-        uint256 biddingTokenAmount,
-        uint256 totalBiddingTokenAmount,
-        uint256 totalLP
-    );
+    // event CalculatedLP(
+    //     uint256 indexed auctionId,
+    //     uint256 biddingTokenAmount,
+    //     uint256 totalBiddingTokenAmount,
+    //     uint256 totalLP
+    // );
 
     event Bidder(
         uint256 indexed auctionId,
@@ -3332,7 +2797,7 @@ contract AnnexBatchAuction is Ownable {
                 false,
                 auction.isAtomicClosureAllowed
             );
-            pancakeswapV2Router[auctionCounter] = routers[auction.router];
+            // pancakeswapV2Router[auctionCounter] = routers[auction.router];
 
             startingDate[auctionCounter] = auction.auctionStartDate;
             auctionAccessManager[auctionCounter] = auction
@@ -3427,6 +2892,7 @@ contract AnnexBatchAuction is Ownable {
                 );
             }
         }
+
         {
             (
                 ,
@@ -3687,6 +3153,7 @@ contract AnnexBatchAuction is Ownable {
                 .toUint96();
             }
         }
+        
         clearingPriceOrders[auctionId] = clearingOrder;
         if (auctionData[auctionId].minFundingThreshold > currentBidSum) {
             auctionData[auctionId].minFundingThresholdNotReached = true;
@@ -3724,9 +3191,8 @@ contract AnnexBatchAuction is Ownable {
         public
         atStageFinished(auctionId)
         returns (
-            uint256 sumBiddingTokenAmount,
-            uint256 rSumBiddingTokenAmount,
-            uint256 lpTokens
+            uint256 sumAuctioningTokenAmount,
+            uint256 sumBiddingTokenAmount
         )
     {
         for (uint256 i = 0; i < orders.length; i++) {
@@ -3735,13 +3201,15 @@ contract AnnexBatchAuction is Ownable {
             require(sellOrders[auctionId].remove(orders[i]), "NOT_CLAIMABLE");
         }
         AuctionData memory auction = auctionData[auctionId];
+
         bytes32 clearingPriceOrder = clearingPriceOrders[auctionId];
-        // (, uint96 priceNumerator, uint96 priceDenominator) = clearingPriceOrder
-        // .decodeOrder();
+        (, uint96 priceNumerator, uint96 priceDenominator) = clearingPriceOrder
+        .decodeOrder();
 
         (uint64 userId, , ) = orders[0].decodeOrder();
         bool minFundingThresholdNotReached = auction
         .minFundingThresholdNotReached;
+
         for (uint256 i = 0; i < orders.length; i++) {
             (uint64 userIdOrder, uint96 buyAmount, uint96 sellAmount) = orders[
                 i
@@ -3750,19 +3218,22 @@ contract AnnexBatchAuction is Ownable {
             require(userIdOrder == userId, "SAME_USER_CAN_CLAIM");
             if (minFundingThresholdNotReached) {
                 //[10]
-                rSumBiddingTokenAmount = rSumBiddingTokenAmount.add(sellAmount);
+                sumBiddingTokenAmount = sumBiddingTokenAmount.add(sellAmount);
             } else {
                 //[23]
                 if (orders[i] == clearingPriceOrder) {
                     //[25]
                     {
-                        sumBiddingTokenAmount = sumBiddingTokenAmount.add(
-                            sellAmount
-                        );
+                       sumAuctioningTokenAmount = sumAuctioningTokenAmount.add(
+                        auction
+                            .volumeClearingPriceOrder
+                            .mul(priceNumerator)
+                            .div(priceDenominator)
+                    );
+                    sumBiddingTokenAmount = sumBiddingTokenAmount.add(
+                        sellAmount.sub(auction.volumeClearingPriceOrder)
+                    );
 
-                        rSumBiddingTokenAmount = rSumBiddingTokenAmount.add(
-                            sellAmount.sub(auction.volumeClearingPriceOrder)
-                        );
                     }
                     emit Bidder(
                         auctionId,
@@ -3778,9 +3249,9 @@ contract AnnexBatchAuction is Ownable {
                         // Don't need to calculate sumAuctioningTokenAmount because we are not sending auctioning tokens to
                         // the bidder so here we will calculate sumBiddingTokenAmount and conside this order as a successful order
                         {
-                            sumBiddingTokenAmount = sumBiddingTokenAmount.add(
-                                sellAmount
-                            );
+                            sumAuctioningTokenAmount = sumAuctioningTokenAmount.add(
+                            sellAmount.mul(priceNumerator).div(priceDenominator)
+                        );
                         }
                         emit Bidder(
                             auctionId,
@@ -3794,9 +3265,9 @@ contract AnnexBatchAuction is Ownable {
                         // In case of unsuccessful order we will calculate totalBiddingToken
                         //amount to return it to the bidder.
                         {
-                            rSumBiddingTokenAmount = rSumBiddingTokenAmount.add(
-                                sellAmount
-                            );
+                            sumBiddingTokenAmount = sumBiddingTokenAmount.add(
+                            sellAmount
+                        );
                         }
                         emit Bidder(
                             auctionId,
@@ -3811,29 +3282,36 @@ contract AnnexBatchAuction is Ownable {
             emit ClaimedFromOrder(auctionId, userId, buyAmount, sellAmount);
         }
 
+        sendOutTokens(
+            auctionId,
+            sumAuctioningTokenAmount,
+            sumBiddingTokenAmount,
+            userId
+        ); //[3]
+
         // here we will calculate user lp tokens using his bidding tokens
         // if minimum funding threshold is not reached then we will simply
         //send back his bidding tokens otherwise we will send his lp tokens.
         if (minFundingThresholdNotReached) {
-            sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
-        }
-        if (!minFundingThresholdNotReached) {
-            if (rSumBiddingTokenAmount > 0) {
-                sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
-            }
-            if (sumBiddingTokenAmount > 0) {
-                lpTokens = getLPAmount(auctionId, sumBiddingTokenAmount);
-                IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
-                    registeredUsers.getAddressAt(userId),
-                    lpTokens
-                );
-                emit ClaimedLPFromOrder(
-                    auctionId,
-                    userId,
-                    sumBiddingTokenAmount,
-                    lpTokens
-                );
-            }
+        //     sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
+        // }
+        // if (!minFundingThresholdNotReached) {
+        //     if (rSumBiddingTokenAmount > 0) {
+        //         sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
+        //     }
+        //     if (sumBiddingTokenAmount > 0) {
+        //         lpTokens = getLPAmount(auctionId, sumBiddingTokenAmount);
+        //         IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
+        //             registeredUsers.getAddressAt(userId),
+        //             lpTokens
+        //         );
+        //         emit ClaimedLPFromOrder(
+        //             auctionId,
+        //             userId,
+        //             sumBiddingTokenAmount,
+        //             lpTokens
+        //         );
+        //     }
         }
     }
 
@@ -3882,16 +3360,24 @@ contract AnnexBatchAuction is Ownable {
 
             // instead of send bidding tokens to the auctioneer account we will add these bidding tokens
             // to the pool with total auctioned amount of tokens.
-            uint256 liquidity = addLiquidity(
-                auctionId,
-                fillVolumeOfAuctioneerOrder, // just add the sold amount of auctioning tokens to the pool
-                biddingTokenAmount
-            );
-            poolLiquidities[auctionId] = liquidity;
-            emit AddLiquidity(auctionId, liquidity);
-            sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
+            // uint256 liquidity = addLiquidity(
+            //     auctionId,
+            //     fillVolumeOfAuctioneerOrder, // just add the sold amount of auctioning tokens to the pool
+            //     biddingTokenAmount
+            // );
+            // poolLiquidities[auctionId] = liquidity;
+            // emit AddLiquidity(auctionId, liquidity);
+            // sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
+
             // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
             sendOutTokens(
+                auctionId,
+                auctioningTokenAmount,
+                biddingTokenAmount,
+                auctioneerId
+                
+            ); //[5]
+             sendOutTokens(
                 auctionId,
                 feeAmount.mul(fillVolumeOfAuctioneerOrder).div(
                     fullAuctionedAmount
@@ -3900,102 +3386,6 @@ contract AnnexBatchAuction is Ownable {
                 feeReceiverUserId
             ); //[7]
         }
-    }
-
-    function getLPAmount(uint256 auctionId, uint256 biddingTokenAmount) internal view returns (uint256){
-        require(startingDate[auctionId] != 0, "NOT_EXIST");
-        if(totalBiddingTokens[auctionId] == 0)
-            return 0;
-        if(liquidityPools[auctionId] == address(0))
-            return 0;
-        return
-            biddingTokenAmount
-                .mul(poolLiquidities[auctionId].div(2))
-                .div(totalBiddingTokens[auctionId]);
-    }
-
-    function calculateLPTokens(uint256 auctionId, uint64 userId, bytes32 order)
-        public
-        view
-        returns (uint256)
-    {
-        require(startingDate[auctionId] != 0, "NOT_EXIST");
-        if(totalBiddingTokens[auctionId] == 0)
-            return 0;
-        if(liquidityPools[auctionId] == address(0))
-            return 0;
-
-        if (!sellOrders[auctionId].contains(order)) {
-            return 0;
-        }
-        
-        AuctionData memory auction = auctionData[auctionId];
-        bytes32 clearingPriceOrder = clearingPriceOrders[auctionId];
-        // (, uint96 priceNumerator, uint96 priceDenominator) = clearingPriceOrder
-        // .decodeOrder();
-
-        // (uint64 userId, , ) = order.decodeOrder();
-        bool minFundingThresholdNotReached = auction.minFundingThresholdNotReached;
-        uint256 sumBiddingTokenAmount = 0;
-        {
-            (uint64 userIdOrder, ,uint96 sellAmount) = order.decodeOrder();
-            require(userIdOrder == userId, "SAME_USER_CAN_CLAIM");
-            if (!minFundingThresholdNotReached) {
-                
-                //[23]
-                if (order == clearingPriceOrder) {
-                    sumBiddingTokenAmount = sellAmount;
-                } else {
-                    if (order.smallerThan(clearingPriceOrder)) {
-                        //[17]
-                        // In case of successful order:
-                        // Don't need to calculate sumAuctioningTokenAmount because we are not sending auctioning tokens to
-                        // the bidder so here we will calculate sumBiddingTokenAmount and conside this order as a successful order
-                        sumBiddingTokenAmount = sellAmount;
-                    }
-                }
-            }
-        }
-        return
-            sumBiddingTokenAmount
-                .mul(poolLiquidities[auctionId].div(2))
-                .div(totalBiddingTokens[auctionId]);
-        
-    }
-
-    function addLiquidity(
-        uint256 auctionId,
-        uint256 auctionTokenAmount,
-        uint256 biddingTokenAmount
-    ) internal returns (uint256 liquidity) {
-        // approve token transfer to cover all possible scenarios
-        AuctionData storage auction = auctionData[auctionId];
-        auction.auctioningToken.approve(
-            address(pancakeswapV2Router[auctionId]),
-            auctionTokenAmount
-        );
-        auction.biddingToken.approve(
-            address(pancakeswapV2Router[auctionId]),
-            biddingTokenAmount
-        );
-        // add the liquidity
-        (, , liquidity) = IPancakeswapV2Router02(pancakeswapV2Router[auctionId])
-        .addLiquidity(
-            address(auction.auctioningToken),
-            address(auction.biddingToken),
-            auctionTokenAmount,
-            biddingTokenAmount,
-            0,
-            0,
-            address(this),
-            block.timestamp + 600
-        );
-        liquidityPools[auctionId] = IPancakeswapV2Factory(
-            IPancakeswapV2Router02(pancakeswapV2Router[auctionId]).factory()
-        ).getPair(
-            address(auction.auctioningToken),
-            address(auction.biddingToken)
-        );
     }
 
     /* send back either auctioning or bidding tokens to the given user.
@@ -4088,37 +3478,38 @@ contract AnnexBatchAuction is Ownable {
         treasury = _treasury;
     }
 
-    function setRouters(address[] memory _routers) external onlyOwner {
-        for (uint8 i = 0; i < _routers.length; i++) {
-            routers.push(_routers[i]);
-        }
-        emit AddRouters(_routers);
-    }
-
     function setDocumentAddress(address _document) external onlyOwner {
         documents = IDocuments(_document);
     }
 
-    function getAuctionInfo(uint256 auctionId)
-        external
-        view
-        atStageFinished(auctionId)
-        returns (
-            uint256 auctioningToken,
-            uint256 biddingToken,
-            uint112 reserve0,
-            uint112 reserve1
-        )
-    {
-        auctioningToken = auctionData[auctionId].auctioningToken.balanceOf(
-            address(this)
-        );
-        biddingToken = auctionData[auctionId].biddingToken.balanceOf(
-            address(this)
-        );
-        (reserve0, reserve1, ) = IPancakeswapV2Pair(liquidityPools[auctionId])
-        .getReserves();
-    }
+    // function setRouters(address[] memory _routers) external onlyOwner {
+    //     for (uint8 i = 0; i < _routers.length; i++) {
+    //         routers.push(_routers[i]);
+    //     }
+    //     emit AddRouters(_routers);
+    // }
+
+
+    // function getAuctionInfo(uint256 auctionId)
+    //     external
+    //     view
+    //     atStageFinished(auctionId)
+    //     returns (
+    //         uint256 auctioningToken,
+    //         uint256 biddingToken,
+    //         uint112 reserve0,
+    //         uint112 reserve1
+    //     )
+    // {
+    //     auctioningToken = auctionData[auctionId].auctioningToken.balanceOf(
+    //         address(this)
+    //     );
+    //     biddingToken = auctionData[auctionId].biddingToken.balanceOf(
+    //         address(this)
+    //     );
+    //     (reserve0, reserve1, ) = IPancakeswapV2Pair(liquidityPools[auctionId])
+    //     .getReserves();
+    // }
 
     // Every successful bid will be the part of lp token price
     // If a bidder will cancel his order it will not effect the

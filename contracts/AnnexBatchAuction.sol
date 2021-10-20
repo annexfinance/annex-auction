@@ -12,9 +12,9 @@ import "./interfaces/AllowListVerifier.sol";
 import "./libraries/IdToAddressBiMap.sol";
 import "./libraries/SafeCast.sol";
 import "./interfaces/IDocuments.sol";
-import "./interfaces/IPancakeswapV2Pair.sol";
-import "./interfaces/IPancakeswapV2Factory.sol";
-import "./interfaces/IPancakeswapV2Router02.sol";
+// import "./interfaces/IPancakeswapV2Pair.sol";
+// import "./interfaces/IPancakeswapV2Factory.sol";
+// import "./interfaces/IPancakeswapV2Router02.sol";
 
 import "hardhat/console.sol";
 /**
