@@ -2476,6 +2476,7 @@ library console {
 	}
 
 }
+
 /**
 Errors details
     ERROR_ORDER_PLACEMENT = no longer in order placement phase
@@ -2727,6 +2728,7 @@ contract AnnexBatchAuction is Ownable {
         );
         // caution: for currently running auctions, the feeReceiverUserId is changing as well.
         feeReceiverUserId = getUserId(newfeeReceiverAddress);
+        emit NewUser(feeReceiverUserId, newfeeReceiverAddress);
         feeNumerator = newFeeNumerator;
     }
 
@@ -2776,6 +2778,7 @@ contract AnnexBatchAuction is Ownable {
         auctionCounter = auctionCounter.add(1);
         sellOrders[auctionCounter].initializeEmptyList();
         uint64 userId = getUserId(msg.sender);
+        emit NewUser(userId, msg.sender);
 
         {
             auctionData[auctionCounter] = AuctionData(
@@ -2909,6 +2912,7 @@ contract AnnexBatchAuction is Ownable {
         }
         uint256 sumOfSellAmounts = 0;
         userId = getUserId(orderSubmitter);
+        emit NewUser(userId, orderSubmitter);
         uint256 minimumBiddingAmountPerOrder = auctionData[auctionId]
         .minimumBiddingAmountPerOrder;
         for (uint256 i = 0; i < _minBuyAmounts.length; i++) {
@@ -2955,6 +2959,7 @@ contract AnnexBatchAuction is Ownable {
         atStageOrderPlacementAndCancelation(auctionId)
     {
         uint64 userId = getUserId(msg.sender);
+        emit NewUser(userId, msg.sender);
         uint256 claimableAmount = 0;
         for (uint256 i = 0; i < _sellOrders.length; i++) {
             // Note: we keep the back pointer of the deleted element so that
@@ -3043,6 +3048,7 @@ contract AnnexBatchAuction is Ownable {
             "ERROR_PALCE_AUTOMATICALLY" //Only one order can be placed atomically
         );
         uint64 userId = getUserId(msg.sender);
+        emit NewUser(userId, msg.sender);
         require(
             auctionData[auctionId].interimOrder.smallerThan(
                 IterableOrderedOrderSet.encodeOrder(
