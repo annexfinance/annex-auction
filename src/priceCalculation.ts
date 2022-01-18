@@ -7,9 +7,8 @@ export interface Price {
 }
 
 export interface ReceivedFunds {
-  sumBiddingTokenAmount: BigNumber;
-  rSumBiddingTokenAmount: BigNumber;
-  sumLiquidityPoolTokens:BigNumber;
+  auctioningTokenAmount: BigNumber;
+  biddingTokenAmount: BigNumber;
 }
 
 export interface OrderResult {
@@ -61,11 +60,10 @@ export function decodeOrder(bytes: string): Order {
   };
 }
 
-export function toReceivedFunds(result: [BigNumber, BigNumber,BigNumber]): ReceivedFunds {
+export function toReceivedFunds(result: [BigNumber, BigNumber]): ReceivedFunds {
   return {
-    sumBiddingTokenAmount: result[0],
-    rSumBiddingTokenAmount: result[1],
-    sumLiquidityPoolTokens:result[2]
+    auctioningTokenAmount: result[0],
+    biddingTokenAmount: result[1],
   };
 }
 
@@ -300,6 +298,36 @@ export async function createTokensAndMintAndApprove(
     await biddingToken
       .connect(user)
       .approve(annexAuction.address, BigNumber.from(10).pow(30));
+
+    await auctioningToken.mint(user.address, BigNumber.from(10).pow(30));
+    await auctioningToken
+    .connect(user)
+    .approve(annexAuction.address, BigNumber.from(10).pow(30));
+
+    await annexToken.mint(user.address, BigNumber.from(1000).pow(18));
+    await annexToken
+    .connect(user)
+    .approve(annexAuction.address, BigNumber.from(1000).pow(18));
+  }
+  return { auctioningToken: auctioningToken, biddingToken: biddingToken,annexToken:annexToken };
+}
+
+export async function createDiffTokensAndMintAndApprove(
+  annexAuction: Contract,
+  users: Wallet[],
+  hre: HardhatRuntimeEnvironment,
+): Promise<{ auctioningToken: Contract; biddingToken: Contract,annexToken:Contract }> {
+  const ERC20 = await hre.ethers.getContractFactory("ERC20Mintable");
+  const USDT = await hre.ethers.getContractFactory("CustomToken");
+  const biddingToken = await USDT.deploy(hre.ethers.utils.parseEther("10000000"));
+  const auctioningToken = await ERC20.deploy("BT", "BT");
+  const annexToken = await ERC20.deploy("BT", "BT");
+
+  for (const user of users) {
+    await biddingToken.mint(user.address, BigNumber.from(10).pow(12));
+    await biddingToken
+      .connect(user)
+      .approve(annexAuction.address, BigNumber.from(10).pow(11));
 
     await auctioningToken.mint(user.address, BigNumber.from(10).pow(30));
     await auctioningToken

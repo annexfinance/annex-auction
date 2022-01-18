@@ -13,5 +13,16 @@ export interface InitiateAuctionInput {
   isAtomicClosureAllowed: boolean;
   allowListManager: BytesLike;
   allowListData: BytesLike;
-  router:BigNumberish
+  router:BigNumberish;
+  about:About;
+
+}
+
+export interface About{ 
+  website: BytesLike;
+  description: BytesLike;
+  telegram: BytesLike;
+  discord: BytesLike;
+  medium: BytesLike;
+  twitter: BytesLike;
 }

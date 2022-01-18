@@ -1,7 +1,7 @@
 import { Contract, BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { InitiateAuctionInput } from "../../src/ts/types";
-import { sendTxAndGetReturnValue } from "./utilities"; 
+import { sendTxAndGetReturnValue } from "./utilities";
 
 type PartialAuctionInput = Partial<InitiateAuctionInput> &
   Pick<InitiateAuctionInput, "auctioningToken" | "biddingToken">;
@@ -23,7 +23,14 @@ async function createAuctionInputWithDefaults(
     parameters.minBuyAmount || ethers.utils.parseEther("1"),
     parameters.isAtomicClosureAllowed || false,
     parameters.allowListData || "0x",
-    parameters.router || 0
+    parameters.about = {
+      website: "https://www.link.com/",
+      description: "My Batch Auction",
+      telegram: "https://telegram.org",
+      discord: "https://discord.org",
+      medium: "https://medium.org",
+      twitter: "https://twitter.org",
+    },
   ];
 }
 
@@ -31,9 +38,9 @@ export async function createAuctionWithDefaults(
   annexAuction: Contract,
   parameters: PartialAuctionInput,
 ): Promise<unknown> {
-  return annexAuction.initiateAuction(
-    [...(await createAuctionInputWithDefaults(parameters))]
-  );
+  return annexAuction.initiateAuction([
+    ...(await createAuctionInputWithDefaults(parameters)),
+  ]);
 }
 
 export async function createAuctionWithDefaultsAndReturnId(
@@ -42,7 +49,7 @@ export async function createAuctionWithDefaultsAndReturnId(
 ): Promise<BigNumber> {
   return sendTxAndGetReturnValue(
     annexAuction,
-    "initiateAuction((address,address,address,uint256,uint256,uint256,uint256,uint256,uint96,uint96,bool,bytes,uint8))",
+    "initiateAuction((address,address,address,uint256,uint256,uint256,uint256,uint256,uint96,uint96,bool,bytes,(string,string,string,string,string,string)))",
     ...(await createAuctionInputWithDefaults(parameters)),
   );
 }

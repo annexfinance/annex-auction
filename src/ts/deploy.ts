@@ -7,8 +7,8 @@ export const contractNames = {
   dutchAuction: "AnnexDutchAuction",
   fixedSwap: "AnnexFixedSwap",
   multiCall: "MultiCall",
-  wbnb:"WBNB",
-  documents:"BatchDocuments",
+  wbnb: "WBNB",
+  documents: "BatchDocuments",
   allowListOffChainManaged: "AllowListOffChainManaged",
   depositAndPlaceOrder: "DepositAndPlaceOrder",
 };
@@ -71,21 +71,23 @@ export async function logResult(
     const transaction = await ethers.provider.getTransaction(
       deployResult.transactionHash!,
     );
-    const receipt = deployResult.receipt!;
-    /* eslint-enable @typescript-eslint/no-non-null-assertion */
-    log(`Deployed contract ${contractName} on network ${networkName}.`);
-    log(` - Address: ${deployResult.address}`);
-    log(` - Transaction hash: ${deployResult.transactionHash}`);
-    log(
-      ` - Gas used: ${receipt.gasUsed} @ ${
-        transaction.gasPrice.toNumber() / 10 ** 9
-      } GWei`,
-    );
-    log(
-      ` - Deployment cost: ${ethers.utils.formatEther(
-        transaction.gasPrice.mul(receipt.gasUsed),
-      )} ETH`,
-    );
+    if (transaction) {
+      // const receipt = deployResult.receipt!;
+      /* eslint-enable @typescript-eslint/no-non-null-assertion */
+      log(`Deployed contract ${contractName} on network ${networkName}.`);
+      log(` - Address: ${deployResult.address}`);
+      log(` - Transaction hash: ${deployResult.transactionHash}`);
+      // log(
+      //   ` - Gas used: ${receipt.gasUsed} @ ${
+      //     transaction.gasPrice.toNumber() / 10 ** 9
+      //   } GWei`,
+      // );
+      // log(
+      //   ` - Deployment cost: ${ethers.utils.formatEther(
+      //     transaction.gasPrice.mul(receipt.gasUsed),
+      //   )} ETH`,
+      // );
+    }
   } else {
     log(
       `Contract ${contractName} was already deployed on network ${networkName}, skipping.`,

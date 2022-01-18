@@ -15,13 +15,11 @@ import { createAuctionWithDefaultsAndReturnId } from "./defaultContractInteracti
 import {
   MAGIC_VALUE_FROM_ALLOW_LIST_VERIFIER_INTERFACE,
   setPrequistes,
-  setupRouter
 } from "./utilities";
 
 describe("AccessManager - integration tests", async () => {
   const [user_1, user_2, treasury] = waffle.provider.getWallets();
   let annexAuction: Contract;
-  let router: Contract;
   let allowListManager: Contract;
   let testDomain: any;
   beforeEach(async () => {
@@ -37,9 +35,6 @@ describe("AccessManager - integration tests", async () => {
     allowListManager = await AllowListManger.deploy();
     const { chainId } = await ethers.provider.getNetwork();
     testDomain = domain(chainId, allowListManager.address);
-
-    router = await (await setupRouter(user_1))._router;
-    annexAuction.setRouters([router.address]);
   });
   describe("AccessManager - placing order in annexAuction with auctioneer signature", async () => {
     it("integration test: places a new order and checks that tokens were transferred - with whitelisting", async () => {
@@ -51,7 +46,7 @@ describe("AccessManager - integration tests", async () => {
         );
       await auctioningToken.mint(user_1.address, BigNumber.from(100).pow(18));
 
-      await setPrequistes(annexAuction, auctioningToken,router, user_1, treasury);
+      await setPrequistes(annexAuction, auctioningToken, user_1, treasury);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
@@ -127,7 +122,7 @@ describe("AccessManager - integration tests", async () => {
           [user_1, user_2],
           hre,
         );
-        await setPrequistes(annexAuction, auctioningToken,router, user_1, treasury);
+        await setPrequistes(annexAuction, auctioningToken, user_1, treasury);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {

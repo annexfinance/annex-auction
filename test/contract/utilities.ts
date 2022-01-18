@@ -1,11 +1,7 @@
-import { BigNumber, Contract,Wallet } from "ethers";
-
+import { BigNumber, Contract, Wallet } from "ethers";
 import { ethers } from "hardhat";
+
 import { encodeOrder, Order } from "../../src/priceCalculation";
-import routerAbi from "./Externals/router.json";
-import {routerBytecode} from "./Externals/router_bytecode";
-import factoryAbi from "./Externals/factory.json";
-import {factoryBytecode} from "./Externals/factory_bytecode";
 
 export const MAGIC_VALUE_FROM_ALLOW_LIST_VERIFIER_INTERFACE = "0x19a05a7e";
 
@@ -31,15 +27,6 @@ export async function claimFromAllOrders(
   }
 }
 
-export async function setupRouter(signer:Wallet):Promise<{_router:Contract,_factory:Contract}>{
-  const PancakeFactory = await ethers.getContractFactory(factoryAbi,factoryBytecode,signer);
-  const _factory = await PancakeFactory.deploy(signer.address);
-  const WBNB = await ethers.getContractFactory("WBNB");
-  const wbnb = await WBNB.deploy();
-  const PancakeRouter = await ethers.getContractFactory(routerAbi,routerBytecode,signer);
-  const _router = await PancakeRouter.deploy(_factory.address,wbnb.address);
-  return {_router,_factory};
-}
 
 export async function increaseTime(duration: number): Promise<void> {
   ethers.provider.send("evm_increaseTime", [duration]);
@@ -57,8 +44,12 @@ export async function sendTxAndGetReturnValue<T>(
   return result;
 }
 
-export async function setPrequistes(contract:Contract,annex:Contract,router:Contract,signer:Wallet,treasury:Wallet):Promise<void>{
+export async function setPrequistes(
+  contract: Contract,
+  annex: Contract,
+  signer: Wallet,
+  treasury: Wallet,
+): Promise<void> {
   await contract.connect(signer).setAnnexAddress(annex.address);
   await contract.connect(signer).setTreasury(treasury.address);
-  await contract.connect(signer).setRouters([router.address]);
 }

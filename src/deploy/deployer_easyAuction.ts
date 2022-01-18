@@ -1,6 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getWETH9Address } from "../tasks/utils";
+
+// import { getWETH9Address } from "../tasks/utils";
 import { contractNames } from "../ts/deploy";
 
 const deployAnnexContract: DeployFunction = async function (
@@ -12,17 +13,23 @@ const deployAnnexContract: DeployFunction = async function (
   const { annexAuction, documents } = contractNames;
   const chainId = await hre.getChainId();
 
-  type GasLimits =  {
-    [key: string]: number
-  }
+  type GasLimits = {
+    [key: string]: number;
+  };
 
   const gasLimits: GasLimits = {
     "3": 30029267, // ropsten
     "42": 12499988, // kovan
     "4": 10000068, // rinkeby
-    "97": 30000000, // bsc testnet
+    "97": 300000, // bsc testnet
   };
-
+  console.log("deployg log: ", {
+    from: deployer,
+    gasLimit: gasLimits[chainId],
+    args: [],
+    log: true,
+    deterministicDeployment: false,
+  });
   await deploy(documents, {
     from: deployer,
     gasLimit: gasLimits[chainId],
