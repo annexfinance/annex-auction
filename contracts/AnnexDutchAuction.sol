@@ -73,7 +73,7 @@ contract AnnexDutchAuction is ReentrancyGuard, Ownable {
         uint amountMax1;
         // minimum amount of ETH that creator want to swap
         uint amountMin1;
-//        uint amountReserve1;
+        // uint amountReserve1;
         // how many times a bid will decrease it's price
         uint times;
         // the duration in seconds the auction will be closed

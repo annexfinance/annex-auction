@@ -2926,16 +2926,24 @@ contract AnnexBatchAuction is Ownable {
                 _sellAmounts[i] > minimumBiddingAmountPerOrder,
                 "TOO_SMALL" // order too small
             );
-            if (
-                sellOrders[auctionId].insert(
+            require(sellOrders[auctionId].insert(
                     IterableOrderedOrderSet.encodeOrder(
                         userId,
                         _minBuyAmounts[i],
                         _sellAmounts[i]
                     ),
                     _prevSellOrders[i]
-                )
-            ) {
+                ),"Order Already Exists");
+            // if (
+            //     sellOrders[auctionId].insert(
+            //         IterableOrderedOrderSet.encodeOrder(
+            //             userId,
+            //             _minBuyAmounts[i],
+            //             _sellAmounts[i]
+            //         ),
+            //         _prevSellOrders[i]
+            //     )
+            // ) {
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
                 totalBiddingTokens[auctionId] = totalBiddingTokens[auctionId].add(sumOfSellAmounts);
                 emit NewSellOrder(
@@ -2944,7 +2952,7 @@ contract AnnexBatchAuction is Ownable {
                     _minBuyAmounts[i],
                     _sellAmounts[i]
                 );
-            }
+            // }
         }
 
         auctionData[auctionId].biddingToken.safeTransferFrom(
