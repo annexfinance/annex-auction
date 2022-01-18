@@ -381,16 +381,20 @@ describe("AnnexBatchAuction", async () => {
           [user_1, user_2],
           hre,
         );
+    
       await setPrequistes(annexAuction, annexToken,  user_1, user_3);
       const auctionId: BigNumber = await createAuctionWithDefaultsAndReturnId(
         annexAuction,
         {
+        
           auctioningToken,
           biddingToken,
+        
         },
       );
-      await expect(() =>
-        annexAuction.placeSellOrders(
+      
+       await expect(() =>
+          annexAuction.placeSellOrders(
           auctionId,
           [ethers.utils.parseEther("1").sub(1)],
           [ethers.utils.parseEther("1")],
@@ -402,15 +406,17 @@ describe("AnnexBatchAuction", async () => {
         [user_1],
         [ethers.utils.parseEther("-1")],
       );
+
       await expect(() =>
-        annexAuction.placeSellOrders(
+          annexAuction.placeSellOrders(
           auctionId,
-          [ethers.utils.parseEther("1").sub(1)],
-          [ethers.utils.parseEther("1")],
+          [ethers.utils.parseEther("2").sub(2)],
+          [ethers.utils.parseEther("2")],
           [queueStartElement],
           "0x",
         ),
-      ).to.changeTokenBalances(biddingToken, [user_1], [BigNumber.from(0)]);
+      ).to.changeTokenBalances(biddingToken, [user_1], [ethers.utils.parseEther("-2")])
+  
     });
     it("places a new order and checks that tokens were transferred", async () => {
       const { auctioningToken, biddingToken, annexToken } =
