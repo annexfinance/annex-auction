@@ -2538,7 +2538,6 @@ contract AnnexBatchAuction is Ownable {
         uint96 _auctionedSellAmount;
         uint96 _minBuyAmount;
         bool isAtomicClosureAllowed;
-        // uint8 router;
         bytes accessManagerContractData;
         AuctionAbout about;
     }
@@ -2583,14 +2582,6 @@ contract AnnexBatchAuction is Ownable {
     mapping(uint256 => bytes32) public clearingPriceOrders; // clearing price orders
     // auctionId => starting date
     mapping(uint256 => uint256) public startingDate; // starting date
-    // auctionId => IPancakeswapV2Pair (liquidity pool)
-    //address of pancakeswap liquidity pools of pairs auctioningToken-biddingToken
-    // mapping(uint256 => address) public liquidityPools;
-    // mapping(uint256 => uint256) public poolLiquidities;
-    // auctionId => pancakeswapV2Router address
-    // mapping(uint256 => address) public pancakeswapV2Router;
-    // address for PancakeswapV2Router02
-    // address[] public routers;
 
     mapping(uint256 => uint256) public totalBiddingTokens;
 
@@ -2666,12 +2657,6 @@ contract AnnexBatchAuction is Ownable {
         uint96 buyAmount,
         uint96 sellAmount
     );
-    // event ClaimedLPFromOrder(
-    //     uint256 indexed auctionId,
-    //     uint64 userId,
-    //     uint256 sumBiddingTokenAmount,
-    //     uint256 lps
-    // );
 
     event NewUser(uint64 indexed userId, address indexed userAddress);
     event NewAuction(
@@ -2693,15 +2678,6 @@ contract AnnexBatchAuction is Ownable {
         bytes32 clearingPriceOrder
     );
     event UserRegistration(address indexed user, uint64 userId);
-    // event AddRouters(address[] indexed routers);
-    // event AddLiquidity(uint256 indexed auctionId, uint256 liquidity);
-
-    // event CalculatedLP(
-    //     uint256 indexed auctionId,
-    //     uint256 biddingTokenAmount,
-    //     uint256 totalBiddingTokenAmount,
-    //     uint256 totalLP
-    // );
 
     event Bidder(
         uint256 indexed auctionId,
@@ -2773,7 +2749,6 @@ contract AnnexBatchAuction is Ownable {
             auction.orderCancellationEndDate <= auction.auctionEndDate,
             "ERROR_TIME_PERIOD"
         );
-        // require(auction.auctionStartDate > block.timestamp && auction.auctionStartDate < auction.auctionEndDate , "INVALID_AUCTION_START");
         require(auction.auctionEndDate > block.timestamp, "INVALID_AUCTION_END");
         auctionCounter = auctionCounter.add(1);
         sellOrders[auctionCounter].initializeEmptyList();
@@ -2800,7 +2775,6 @@ contract AnnexBatchAuction is Ownable {
                 false,
                 auction.isAtomicClosureAllowed
             );
-            // pancakeswapV2Router[auctionCounter] = routers[auction.router];
 
             startingDate[auctionCounter] = auction.auctionStartDate;
             auctionAccessManager[auctionCounter] = auction
@@ -2934,16 +2908,7 @@ contract AnnexBatchAuction is Ownable {
                     ),
                     _prevSellOrders[i]
                 ),"Order Already Exists");
-            // if (
-            //     sellOrders[auctionId].insert(
-            //         IterableOrderedOrderSet.encodeOrder(
-            //             userId,
-            //             _minBuyAmounts[i],
-            //             _sellAmounts[i]
-            //         ),
-            //         _prevSellOrders[i]
-            //     )
-            // ) {
+
                 sumOfSellAmounts = sumOfSellAmounts.add(_sellAmounts[i]);
                 totalBiddingTokens[auctionId] = totalBiddingTokens[auctionId].add(sumOfSellAmounts);
                 emit NewSellOrder(
@@ -2952,7 +2917,6 @@ contract AnnexBatchAuction is Ownable {
                     _minBuyAmounts[i],
                     _sellAmounts[i]
                 );
-            // }
         }
 
         auctionData[auctionId].biddingToken.safeTransferFrom(
@@ -3306,27 +3270,6 @@ contract AnnexBatchAuction is Ownable {
         // here we will calculate user lp tokens using his bidding tokens
         // if minimum funding threshold is not reached then we will simply
         //send back his bidding tokens otherwise we will send his lp tokens.
-        if (minFundingThresholdNotReached) {
-        //     sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
-        // }
-        // if (!minFundingThresholdNotReached) {
-        //     if (rSumBiddingTokenAmount > 0) {
-        //         sendOutTokens(auctionId, 0, rSumBiddingTokenAmount, userId); //[3]
-        //     }
-        //     if (sumBiddingTokenAmount > 0) {
-        //         lpTokens = getLPAmount(auctionId, sumBiddingTokenAmount);
-        //         IPancakeswapV2Pair(liquidityPools[auctionId]).transfer(
-        //             registeredUsers.getAddressAt(userId),
-        //             lpTokens
-        //         );
-        //         emit ClaimedLPFromOrder(
-        //             auctionId,
-        //             userId,
-        //             sumBiddingTokenAmount,
-        //             lpTokens
-        //         );
-        //     }
-        }
     }
 
     function processFeesAndAuctioneerFunds(
@@ -3354,36 +3297,21 @@ contract AnnexBatchAuction is Ownable {
                 uint96 priceNumerator,
                 uint96 priceDenominator
             ) = clearingPriceOrders[auctionId].decodeOrder();
-            // fillVolumeOfAuctioneerOrder is the amount of tokens that is filled
-            // fullAuctionedAmount is the amount of tokens that is auctioned by auctioneer
-            // unsettledAuctionTokens = fullAuctionedAmount - fillVolumeOfAuctioneerOrder
             // remaining auctioning tokens which are not sold
             uint256 unsettledAuctionTokens = fullAuctionedAmount.sub(
                 fillVolumeOfAuctioneerOrder
             );
-            // auctioningTokenAmount = unsettledAuctionTokens + ( ( feeAmount * unsettledAuctionTokens ) / fullAuctionedAmount)
-            // unsettled auctioning tokens which will be sent back to the auctioneer
+ 
             uint256 auctioningTokenAmount = unsettledAuctionTokens.add(
                 feeAmount.mul(unsettledAuctionTokens).div(fullAuctionedAmount)
             );
-            // biddingTokenAmount = (fillVolumeOfAuctioneerOrder * priceDenominator) / priceNumerator
-            // biddingTokenAmount is the amount of tokens which has been collected against sold auctioning tokens
             uint256 biddingTokenAmount = fillVolumeOfAuctioneerOrder
             .mul(priceDenominator)
             .div(priceNumerator);
 
             // instead of send bidding tokens to the auctioneer account we will add these bidding tokens
             // to the pool with total auctioned amount of tokens.
-            // uint256 liquidity = addLiquidity(
-            //     auctionId,
-            //     fillVolumeOfAuctioneerOrder, // just add the sold amount of auctioning tokens to the pool
-            //     biddingTokenAmount
-            // );
-            // poolLiquidities[auctionId] = liquidity;
-            // emit AddLiquidity(auctionId, liquidity);
-            // sendOutTokens(auctionId, auctioningTokenAmount, 0, auctioneerId); //[5]
 
-            // (feeAmount * fillVolumeOfAuctioneerOrder) / fullAuctionedAmount
             sendOutTokens(
                 auctionId,
                 auctioningTokenAmount,
@@ -3495,56 +3423,6 @@ contract AnnexBatchAuction is Ownable {
     function setDocumentAddress(address _document) external onlyOwner {
         documents = IDocuments(_document);
     }
-
-    // function setRouters(address[] memory _routers) external onlyOwner {
-    //     for (uint8 i = 0; i < _routers.length; i++) {
-    //         routers.push(_routers[i]);
-    //     }
-    //     emit AddRouters(_routers);
-    // }
-
-
-    // function getAuctionInfo(uint256 auctionId)
-    //     external
-    //     view
-    //     atStageFinished(auctionId)
-    //     returns (
-    //         uint256 auctioningToken,
-    //         uint256 biddingToken,
-    //         uint112 reserve0,
-    //         uint112 reserve1
-    //     )
-    // {
-    //     auctioningToken = auctionData[auctionId].auctioningToken.balanceOf(
-    //         address(this)
-    //     );
-    //     biddingToken = auctionData[auctionId].biddingToken.balanceOf(
-    //         address(this)
-    //     );
-    //     (reserve0, reserve1, ) = IPancakeswapV2Pair(liquidityPools[auctionId])
-    //     .getReserves();
-    // }
-
-    // Every successful bid will be the part of lp token price
-    // If a bidder will cancel his order it will not effect the
-    // lp token price.
-    // function getLpPrice(uint256 auctionId)
-    //     external
-    //     view
-    //     atStageFinished(auctionId)
-    //     returns (uint96 averagePrice, uint256 counter)
-    // {
-    //     (averagePrice, counter) = sellOrders[auctionId].average();
-    // }
-
-    // function userAuctionStatus(uint256 auctionId, address user)
-    //     external
-    //     view
-    //     returns (bool isAuctionSuccess, uint96 purchased)
-    // {
-    //     isAuctionSuccess = auctionData[auctionId].minFundingThresholdNotReached;
-
-    // }
 
     //--------------------------------------------------------
     // Documents

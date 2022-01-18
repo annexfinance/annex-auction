@@ -740,8 +740,6 @@ contract AnnexFixedSwap is ReentrancyGuard, Ownable {
     bytes32 internal constant StakeContract         = bytes32("StakeContract");
 
     struct AuctionReq {
-        // auction name
-        // string name;
         // address of sell token
         address _auctioningToken;
         // address of buy token
@@ -764,8 +762,6 @@ contract AnnexFixedSwap is ReentrancyGuard, Ownable {
     }
 
     struct Auction {
-        // auction name
-        // string name;
         // creator of the auction
         address payable creator;
         // address of sell token
@@ -840,24 +836,6 @@ contract AnnexFixedSwap is ReentrancyGuard, Ownable {
         uint256 indexed auctionId,
         string[6] social
     );
-
-    // function initialize() public initializer {
-    //     super.__Ownable_init();
-    //     super.__ReentrancyGuard_init();
-
-    //     config[TxFeeRatio] = 0.005 ether; // 0.5%
-    //     config[MinValueOfBotHolder] = 60 ether;
-
-    //     config[BotToken] = uint(0xA9B1Eb5908CfC3cdf91F9B8B3a74108598009096); // AUCTION
-    //     config[StakeContract] = uint(0x98945BC69A554F8b129b09aC8AfDc2cc2431c48E);
-    // }
-
-    // function initialize_bsc() public {
-    //     initialize();
-
-    //     config[BotToken] = uint(0x1188d953aFC697C031851169EEf640F23ac8529C); // AUCTION
-    //     config[StakeContract] = uint(0x1dd665ba1591756aa87157F082F175bDcA9fB91a);
-    // }
 
     function initiateAuction(AuctionReq memory auctionReq, address[] memory whitelist_) external nonReentrant {
 
